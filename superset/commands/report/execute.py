@@ -460,14 +460,18 @@ class BaseReportState:
             for screenshot in screenshots:
                 if imge := screenshot.get_screenshot(user=user):
                     imges.append(imge)
-            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
+            elapsed_seconds = (
+                datetime.now(tz=timezone.utc) - start_time
+            ).total_seconds()
             logger.info(
                 "Screenshot capture took %.2fs - execution_id: %s",
                 elapsed_seconds,
                 self._execution_id,
             )
         except SoftTimeLimitExceeded as ex:
-            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
+            elapsed_seconds = (
+                datetime.now(tz=timezone.utc) - start_time
+            ).total_seconds()
             logger.warning(
                 "Screenshot timeout after %.2fs - execution_id: %s",
                 elapsed_seconds,
@@ -475,7 +479,9 @@ class BaseReportState:
             )
             raise ReportScheduleScreenshotTimeout() from ex
         except Exception as ex:
-            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
+            elapsed_seconds = (
+                datetime.now(tz=timezone.utc) - start_time
+            ).total_seconds()
             logger.error(
                 "Screenshot failed after %.2fs - execution_id: %s",
                 elapsed_seconds,
@@ -514,7 +520,9 @@ class BaseReportState:
 
         try:
             csv_data = get_chart_csv_data(chart_url=url, auth_cookies=auth_cookies)
-            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
+            elapsed_seconds = (
+                datetime.now(tz=timezone.utc) - start_time
+            ).total_seconds()
             logger.info(
                 "CSV data generation from %s as user %s took %.2fs - execution_id: %s",
                 url,
@@ -523,7 +531,9 @@ class BaseReportState:
                 self._execution_id,
             )
         except SoftTimeLimitExceeded as ex:
-            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
+            elapsed_seconds = (
+                datetime.now(tz=timezone.utc) - start_time
+            ).total_seconds()
             logger.warning(
                 "CSV generation timeout after %.2fs - execution_id: %s",
                 elapsed_seconds,
@@ -531,7 +541,9 @@ class BaseReportState:
             )
             raise ReportScheduleCsvTimeout() from ex
         except Exception as ex:
-            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
+            elapsed_seconds = (
+                datetime.now(tz=timezone.utc) - start_time
+            ).total_seconds()
             logger.exception(
                 "CSV generation failed after %.2fs - execution_id: %s",
                 elapsed_seconds,
@@ -564,7 +576,9 @@ class BaseReportState:
 
         try:
             dataframe = get_chart_dataframe(url, auth_cookies)
-            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
+            elapsed_seconds = (
+                datetime.now(tz=timezone.utc) - start_time
+            ).total_seconds()
             logger.info(
                 "DataFrame generation from %s as user %s took %.2fs - execution_id: %s",
                 url,
@@ -573,7 +587,9 @@ class BaseReportState:
                 self._execution_id,
             )
         except SoftTimeLimitExceeded as ex:
-            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
+            elapsed_seconds = (
+                datetime.now(tz=timezone.utc) - start_time
+            ).total_seconds()
             logger.warning(
                 "DataFrame generation timeout after %.2fs - execution_id: %s",
                 elapsed_seconds,
@@ -581,7 +597,9 @@ class BaseReportState:
             )
             raise ReportScheduleDataFrameTimeout() from ex
         except Exception as ex:
-            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
+            elapsed_seconds = (
+                datetime.now(tz=timezone.utc) - start_time
+            ).total_seconds()
             logger.error(
                 "DataFrame generation failed after %.2fs - execution_id: %s",
                 elapsed_seconds,
@@ -974,7 +992,10 @@ class ReportWorkingState(BaseReportState):
                 self._report_schedule
             )
             elapsed_seconds = (
-                (datetime.now(tz=timezone.utc) - last_working.end_dttm.replace(tzinfo=timezone.utc)).total_seconds()
+                (
+                    datetime.now(tz=timezone.utc)
+                    - last_working.end_dttm.replace(tzinfo=timezone.utc)
+                ).total_seconds()
                 if last_working
                 else None
             )
@@ -1135,7 +1156,9 @@ class AsyncExecuteReportScheduleCommand(BaseCommand):
                     self._execution_id, self._model, self._scheduled_dttm
                 ).run()
 
-            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
+            elapsed_seconds = (
+                datetime.now(tz=timezone.utc) - start_time
+            ).total_seconds()
             logger.info(
                 "Report execution as user %s completed in %.2fs - execution_id: %s",
                 username,
