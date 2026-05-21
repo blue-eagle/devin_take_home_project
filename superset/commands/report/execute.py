@@ -16,7 +16,7 @@
 # under the License.
 import logging
 from collections.abc import Sequence
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional, Union
 from uuid import UUID
 
@@ -98,7 +98,7 @@ class BaseReportState:
     ) -> None:
         self._report_schedule = report_schedule
         self._scheduled_dttm = scheduled_dttm
-        self._start_dttm = datetime.utcnow()
+        self._start_dttm = datetime.now(tz=timezone.utc)
         self._execution_id = execution_id
         self._filter_warnings: list[str] = []
 
@@ -128,7 +128,7 @@ class BaseReportState:
             self._report_schedule.last_value_row_json = None
 
         self._report_schedule.last_state = state
-        self._report_schedule.last_eval_dttm = datetime.utcnow()
+        self._report_schedule.last_eval_dttm = datetime.now(tz=timezone.utc)
 
     def update_report_schedule_slack_v2(self) -> None:
         """
@@ -185,7 +185,7 @@ class BaseReportState:
             log = ReportExecutionLog(
                 scheduled_dttm=self._scheduled_dttm,
                 start_dttm=self._start_dttm,
-                end_dttm=datetime.utcnow(),
+                end_dttm=datetime.now(tz=timezone.utc),
                 value=self._report_schedule.last_value,
                 value_row_json=self._report_schedule.last_value_row_json,
                 state=self._report_schedule.last_state,
@@ -413,7 +413,7 @@ class BaseReportState:
         Get chart or dashboard screenshots
         :raises: ReportScheduleScreenshotFailedError
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(tz=timezone.utc)
 
         _, username = get_executor(
             executors=app.config["ALERT_REPORTS_EXECUTORS"],
@@ -460,14 +460,14 @@ class BaseReportState:
             for screenshot in screenshots:
                 if imge := screenshot.get_screenshot(user=user):
                     imges.append(imge)
-            elapsed_seconds = (datetime.utcnow() - start_time).total_seconds()
+            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
             logger.info(
                 "Screenshot capture took %.2fs - execution_id: %s",
                 elapsed_seconds,
                 self._execution_id,
             )
         except SoftTimeLimitExceeded as ex:
-            elapsed_seconds = (datetime.utcnow() - start_time).total_seconds()
+            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
             logger.warning(
                 "Screenshot timeout after %.2fs - execution_id: %s",
                 elapsed_seconds,
@@ -475,7 +475,7 @@ class BaseReportState:
             )
             raise ReportScheduleScreenshotTimeout() from ex
         except Exception as ex:
-            elapsed_seconds = (datetime.utcnow() - start_time).total_seconds()
+            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
             logger.error(
                 "Screenshot failed after %.2fs - execution_id: %s",
                 elapsed_seconds,
@@ -499,7 +499,7 @@ class BaseReportState:
         return pdf
 
     def _get_csv_data(self) -> bytes:
-        start_time = datetime.utcnow()
+        start_time = datetime.now(tz=timezone.utc)
         url = self._get_url(result_format=ChartDataResultFormat.CSV)
         _, username = get_executor(
             executors=app.config["ALERT_REPORTS_EXECUTORS"],
@@ -514,7 +514,7 @@ class BaseReportState:
 
         try:
             csv_data = get_chart_csv_data(chart_url=url, auth_cookies=auth_cookies)
-            elapsed_seconds = (datetime.utcnow() - start_time).total_seconds()
+            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
             logger.info(
                 "CSV data generation from %s as user %s took %.2fs - execution_id: %s",
                 url,
@@ -523,7 +523,7 @@ class BaseReportState:
                 self._execution_id,
             )
         except SoftTimeLimitExceeded as ex:
-            elapsed_seconds = (datetime.utcnow() - start_time).total_seconds()
+            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
             logger.warning(
                 "CSV generation timeout after %.2fs - execution_id: %s",
                 elapsed_seconds,
@@ -531,7 +531,7 @@ class BaseReportState:
             )
             raise ReportScheduleCsvTimeout() from ex
         except Exception as ex:
-            elapsed_seconds = (datetime.utcnow() - start_time).total_seconds()
+            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
             logger.exception(
                 "CSV generation failed after %.2fs - execution_id: %s",
                 elapsed_seconds,
@@ -548,7 +548,7 @@ class BaseReportState:
         """
         Return data as a Pandas dataframe, to embed in notifications as a table.
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(tz=timezone.utc)
 
         url = self._get_url(result_format=ChartDataResultFormat.JSON)
         _, username = get_executor(
@@ -564,7 +564,7 @@ class BaseReportState:
 
         try:
             dataframe = get_chart_dataframe(url, auth_cookies)
-            elapsed_seconds = (datetime.utcnow() - start_time).total_seconds()
+            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
             logger.info(
                 "DataFrame generation from %s as user %s took %.2fs - execution_id: %s",
                 url,
@@ -573,7 +573,7 @@ class BaseReportState:
                 self._execution_id,
             )
         except SoftTimeLimitExceeded as ex:
-            elapsed_seconds = (datetime.utcnow() - start_time).total_seconds()
+            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
             logger.warning(
                 "DataFrame generation timeout after %.2fs - execution_id: %s",
                 elapsed_seconds,
@@ -581,7 +581,7 @@ class BaseReportState:
             )
             raise ReportScheduleDataFrameTimeout() from ex
         except Exception as ex:
-            elapsed_seconds = (datetime.utcnow() - start_time).total_seconds()
+            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
             logger.error(
                 "DataFrame generation failed after %.2fs - execution_id: %s",
                 elapsed_seconds,
@@ -824,9 +824,9 @@ class BaseReportState:
         return (
             last_success is not None
             and self._report_schedule.grace_period
-            and datetime.utcnow()
+            and datetime.now(tz=timezone.utc)
             - timedelta(seconds=self._report_schedule.grace_period)
-            < last_success.end_dttm
+            < last_success.end_dttm.replace(tzinfo=timezone.utc)
         )
 
     def is_in_error_grace_period(self) -> bool:
@@ -841,9 +841,9 @@ class BaseReportState:
         return (
             last_success is not None
             and self._report_schedule.grace_period
-            and datetime.utcnow()
+            and datetime.now(tz=timezone.utc)
             - timedelta(seconds=self._report_schedule.grace_period)
-            < last_success.end_dttm
+            < last_success.end_dttm.replace(tzinfo=timezone.utc)
         )
 
     def is_on_working_timeout(self) -> bool:
@@ -858,9 +858,9 @@ class BaseReportState:
         return (
             self._report_schedule.working_timeout is not None
             and self._report_schedule.last_eval_dttm is not None
-            and datetime.utcnow()
+            and datetime.now(tz=timezone.utc)
             - timedelta(seconds=self._report_schedule.working_timeout)
-            > last_working.end_dttm
+            > last_working.end_dttm.replace(tzinfo=timezone.utc)
         )
 
     def next(self) -> None:
@@ -974,7 +974,7 @@ class ReportWorkingState(BaseReportState):
                 self._report_schedule
             )
             elapsed_seconds = (
-                (datetime.utcnow() - last_working.end_dttm).total_seconds()
+                (datetime.now(tz=timezone.utc) - last_working.end_dttm.replace(tzinfo=timezone.utc)).total_seconds()
                 if last_working
                 else None
             )
@@ -1129,13 +1129,13 @@ class AsyncExecuteReportScheduleCommand(BaseCommand):
             )
             user = security_manager.find_user(username)
 
-            start_time = datetime.utcnow()
+            start_time = datetime.now(tz=timezone.utc)
             with override_user(user):
                 ReportScheduleStateMachine(
                     self._execution_id, self._model, self._scheduled_dttm
                 ).run()
 
-            elapsed_seconds = (datetime.utcnow() - start_time).total_seconds()
+            elapsed_seconds = (datetime.now(tz=timezone.utc) - start_time).total_seconds()
             logger.info(
                 "Report execution as user %s completed in %.2fs - execution_id: %s",
                 username,
