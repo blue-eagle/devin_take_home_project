@@ -19,9 +19,12 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, cast
+from typing import Any, cast, TYPE_CHECKING
 
-from sqlalchemy import Subquery, union_all
+from sqlalchemy import union_all
+
+if TYPE_CHECKING:
+    from sqlalchemy.sql.expression import Subquery
 
 from superset.commands.base import BaseCommand
 from superset.connectors.sqla.models import SqlaTable
