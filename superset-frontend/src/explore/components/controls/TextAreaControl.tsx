@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Component } from 'react';
+import { useCallback, useEffect, useRef, useMemo } from 'react';
 import { debounce } from 'lodash';
 import {
   Input,
@@ -26,7 +26,7 @@ import {
   ModalTrigger,
 } from '@superset-ui/core/components';
 import { t } from '@apache-superset/core/translation';
-import { withTheme } from '@apache-superset/core/theme';
+import { useTheme } from '@apache-superset/core/theme';
 
 import 'ace-builds/src-min-noconflict/mode-handlebars';
 
@@ -36,12 +36,6 @@ interface HotkeyConfig {
   name: string;
   key: string;
   func: () => void;
-}
-
-interface ThemeType {
-  colorBorder: string;
-  colorBgMask: string;
-  sizeUnit: number;
 }
 
 interface TextAreaControlProps {
@@ -74,96 +68,64 @@ interface TextAreaControlProps {
   tooltipOptions?: Record<string, unknown>;
   hotkeys?: HotkeyConfig[];
   debounceDelay?: number | null;
-  theme?: ThemeType;
   'aria-required'?: boolean;
   value?: string;
   [key: string]: unknown;
 }
 
-const defaultProps = {
-  onChange: () => {},
-  height: 250,
-  minLines: 3,
-  maxLines: 10,
-  offerEditInModal: true,
-  readOnly: false,
-  resize: null,
-  textAreaStyles: {},
-  tooltipOptions: {},
-  hotkeys: [],
-  debounceDelay: null,
-};
+export default function TextAreaControl({
+  onChange = () => {},
+  height = 250,
+  minLines: minLinesProp = 3,
+  maxLines: maxLinesProp = 10,
+  offerEditInModal = true,
+  readOnly = false,
+  resize = null,
+  textAreaStyles = {},
+  tooltipOptions = {},
+  hotkeys = [],
+  debounceDelay = null,
+  name,
+  language,
+  initialValue,
+  aboveEditorSection,
+  value,
+  'aria-required': ariaRequired,
+  ...rest
+}: TextAreaControlProps) {
+  const theme = useTheme();
 
-class TextAreaControl extends Component<TextAreaControlProps> {
-  static defaultProps = defaultProps;
+  const debouncedOnChangeRef = useRef<
+    ReturnType<typeof debounce<(value: string) => void>> | undefined
+  >(undefined);
 
-  debouncedOnChange:
-    | ReturnType<typeof debounce<(value: string) => void>>
-    | undefined;
-
-  constructor(props: TextAreaControlProps) {
-    super(props);
-    if (props.debounceDelay && props.onChange) {
-      this.debouncedOnChange = debounce(props.onChange, props.debounceDelay);
-    }
-  }
-
-  componentDidUpdate(prevProps: TextAreaControlProps) {
-    if (
-      this.props.onChange !== prevProps.onChange &&
-      this.props.debounceDelay &&
-      this.props.onChange
-    ) {
-      if (this.debouncedOnChange) {
-        this.debouncedOnChange.cancel();
+  useEffect(() => {
+    if (debounceDelay && onChange) {
+      if (debouncedOnChangeRef.current) {
+        debouncedOnChangeRef.current.cancel();
       }
-      this.debouncedOnChange = debounce(
-        this.props.onChange,
-        this.props.debounceDelay,
-      );
+      debouncedOnChangeRef.current = debounce(onChange, debounceDelay);
     }
-  }
+    return () => {
+      if (debouncedOnChangeRef.current) {
+        debouncedOnChangeRef.current.flush();
+      }
+    };
+  }, [onChange, debounceDelay]);
 
-  handleChange(value: string | { target: { value: string } }) {
-    const finalValue = typeof value === 'object' ? value.target.value : value;
-    if (this.debouncedOnChange) {
-      this.debouncedOnChange(finalValue);
-    } else {
-      this.props.onChange?.(finalValue);
-    }
-  }
+  const handleChange = useCallback(
+    (val: string | { target: { value: string } }) => {
+      const finalValue = typeof val === 'object' ? val.target.value : val;
+      if (debouncedOnChangeRef.current) {
+        debouncedOnChangeRef.current(finalValue);
+      } else {
+        onChange(finalValue);
+      }
+    },
+    [onChange],
+  );
 
-  componentWillUnmount() {
-    if (this.debouncedOnChange) {
-      this.debouncedOnChange.flush();
-    }
-  }
-
-  renderEditor(inModal = false) {
-    // Exclude props that shouldn't be passed to TextAreaEditor:
-    // - theme: TextAreaEditor expects theme as a string, not the theme object from withTheme HOC
-    // - height: ReactAce expects string, we pass number (height is controlled via minLines/maxLines)
-    // - other control-specific props and explicitly-set props to avoid duplicate/conflicting assignments
-    const {
-      theme,
-      height,
-      offerEditInModal,
-      aboveEditorSection,
-      resize,
-      textAreaStyles,
-      tooltipOptions,
-      hotkeys,
-      debounceDelay,
-      language,
-      initialValue,
-      readOnly,
-      name,
-      onChange,
-      value,
-      minLines: minLinesProp,
-      maxLines: maxLinesProp,
-      ...editorProps
-    } = this.props;
+  const renderEditor = (inModal = false) => {
     const minLines = inModal ? 40 : minLinesProp || 12;
     if (language) {
       const style: React.CSSProperties = {
@@ -210,8 +172,7 @@ class TextAreaControl extends Component<TextAreaControlProps> {
             defaultValue={initialValue ?? value}
             readOnly={readOnly}
             key={name}
-            {...editorProps}
-            onChange={this.handleChange.bind(this)}
+            onChange={handleChange}
           />
         </div>
       );
@@ -226,55 +187,58 @@ class TextAreaControl extends Component<TextAreaControlProps> {
       <div>
         <Input.TextArea
           placeholder={t('textarea')}
-          onChange={this.handleChange.bind(this)}
-          defaultValue={this.props.initialValue}
-          disabled={this.props.readOnly}
-          style={{ height: this.props.height }}
-          aria-required={this.props['aria-required']}
+          onChange={handleChange}
+          defaultValue={initialValue}
+          disabled={readOnly}
+          style={{ height }}
+          aria-required={ariaRequired}
         />
       </div>
     );
-    if (this.props.tooltipOptions) {
-      return <Tooltip {...this.props.tooltipOptions}>{textArea}</Tooltip>;
+    if (tooltipOptions) {
+      return <Tooltip {...tooltipOptions}>{textArea}</Tooltip>;
     }
     return textArea;
-  }
+  };
 
-  renderModalBody() {
-    return (
-      <>
-        <div>{this.props.aboveEditorSection}</div>
-        {this.renderEditor(true)}
-      </>
-    );
-  }
+  const renderModalBody = () => (
+    <>
+      <div>{aboveEditorSection}</div>
+      {renderEditor(true)}
+    </>
+  );
 
-  render() {
-    const controlHeader = <ControlHeader {...this.props} />;
-    return (
-      <div>
-        {controlHeader}
-        {this.renderEditor()}
-        {this.props.offerEditInModal && (
-          <ModalTrigger
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            modalTitle={controlHeader as any}
-            triggerNode={
-              <Button
-                buttonSize="small"
-                style={{ marginTop: this.props.theme?.sizeUnit ?? 4 }}
-              >
-                {t('Edit %s in modal', this.props.language)}
-              </Button>
-            }
-            modalBody={this.renderModalBody()}
-            responsive
-          />
-        )}
-      </div>
-    );
-  }
+  const controlHeader = (
+    <ControlHeader
+      {...rest}
+      onChange={onChange}
+      name={name}
+      language={language}
+      initialValue={initialValue}
+      value={value}
+    />
+  );
+
+  return (
+    <div>
+      {controlHeader}
+      {renderEditor()}
+      {offerEditInModal && (
+        <ModalTrigger
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          modalTitle={controlHeader as any}
+          triggerNode={
+            <Button
+              buttonSize="small"
+              style={{ marginTop: theme?.sizeUnit ?? 4 }}
+            >
+              {t('Edit %s in modal', language)}
+            </Button>
+          }
+          modalBody={renderModalBody()}
+          responsive
+        />
+      )}
+    </div>
+  );
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default withTheme(TextAreaControl as any);

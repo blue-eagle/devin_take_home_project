@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PureComponent, type ReactNode } from 'react';
+import React, { useState, useCallback, useEffect, type ReactNode } from 'react';
 import { isEqualArray } from '@superset-ui/core';
 import { t } from '@apache-superset/core/translation';
 import { css } from '@apache-superset/core/theme';
@@ -69,26 +69,6 @@ export interface SelectControlProps {
   warning?: string;
   danger?: string;
   sortComparator?: (a: SelectOption, b: SelectOption) => number;
-}
-
-const defaultProps = {
-  autoFocus: false,
-  choices: [],
-  clearable: true,
-  description: null,
-  disabled: false,
-  freeForm: false,
-  isLoading: false,
-  label: null,
-  multi: false,
-  onChange: () => {},
-  onFocus: () => {},
-  showHeader: true,
-  valueKey: 'value',
-};
-
-interface SelectControlState {
-  options: SelectOption[];
 }
 
 const numberComparator = (a: SelectOption, b: SelectOption): number =>
@@ -149,7 +129,6 @@ export const innerGetOptions = (props: SelectControlProps): SelectOption[] => {
         : ((o.label || o[valueKey]) as string),
     }));
   } else if (choices) {
-    // Accepts different formats of input
     options = choices.map(c => {
       if (Array.isArray(c)) {
         const [value, label] = c.length > 1 ? c : [c[0], c[0]];
@@ -158,108 +137,107 @@ export const innerGetOptions = (props: SelectControlProps): SelectOption[] => {
           label: String(label),
         };
       }
-      // This branch handles object-like choices, but choices are typed as tuples
       return { value: c as unknown as string | number, label: String(c) };
     });
   }
   return options;
 };
 
-export default class SelectControl extends PureComponent<
-  SelectControlProps,
-  SelectControlState
-> {
-  static defaultProps = defaultProps;
+const SelectControl: React.FC<SelectControlProps> = React.memo(
+  ({
+    ariaLabel,
+    autoFocus = false,
+    choices = [],
+    clearable = true,
+    description = null,
+    disabled = false,
+    freeForm = false,
+    isLoading = false,
+    label = null,
+    multi = false,
+    isMulti,
+    name,
+    onChange = () => {},
+    onFocus = () => {},
+    onSelect,
+    onDeselect,
+    showHeader = true,
+    valueKey = 'value',
+    value,
+    default: defaultValue,
+    optionRenderer,
+    options: optionsProp,
+    placeholder,
+    filterOption,
+    tokenSeparators,
+    notFoundContent,
+    mode,
+    renderTrigger,
+    rightNode,
+    leftNode,
+    validationErrors,
+    onClick,
+    hovered,
+    tooltipOnClick,
+    warning,
+    danger,
+    sortComparator,
+  }) => {
+    const [options, setOptions] = useState<SelectOption[]>(() =>
+      innerGetOptions({
+        choices,
+        optionRenderer,
+        valueKey,
+        options: optionsProp,
+        name,
+      }),
+    );
 
-  constructor(props: SelectControlProps) {
-    super(props);
-    this.state = {
-      options: this.getOptions(props),
-    };
-    this.onChange = this.onChange.bind(this);
-    this.handleFilterOptions = this.handleFilterOptions.bind(this);
-  }
-
-  componentDidUpdate(prevProps: SelectControlProps) {
-    if (
-      !isEqualArray(this.props.choices, prevProps.choices) ||
-      !isEqualArray(this.props.options, prevProps.options)
-    ) {
-      const options = this.getOptions(this.props);
-      this.setState({ options });
-    }
-  }
-
-  // Beware: This is acting like an on-click instead of an on-change
-  // (firing every time user chooses vs firing only if a new option is chosen).
-  onChange(val: SelectValue | SelectOption | SelectOption[]) {
-    // will eventually call `exploreReducer`: SET_FIELD_VALUE
-    const { valueKey = 'value' } = this.props;
-    let onChangeVal: SelectValue = val as SelectValue;
-
-    if (Array.isArray(val)) {
-      const values = val.map(v =>
-        typeof v === 'object' &&
-        v !== null &&
-        (v as SelectOption)[valueKey] !== undefined
-          ? (v as SelectOption)[valueKey]
-          : v,
+    useEffect(() => {
+      setOptions(
+        innerGetOptions({
+          choices,
+          optionRenderer,
+          valueKey,
+          options: optionsProp,
+          name,
+        }),
       );
-      onChangeVal = values as (string | number)[];
-    }
-    if (
-      typeof val === 'object' &&
-      val !== null &&
-      !Array.isArray(val) &&
-      (val as SelectOption)[valueKey] !== undefined
-    ) {
-      onChangeVal = (val as SelectOption)[valueKey] as string | number;
-    }
-    this.props.onChange?.(onChangeVal, []);
-  }
+    }, [choices, optionsProp, optionRenderer, valueKey, name]);
 
-  getOptions(props: SelectControlProps) {
-    return innerGetOptions(props);
-  }
+    const handleChange = useCallback(
+      (val: SelectValue | SelectOption | SelectOption[]) => {
+        let onChangeVal: SelectValue = val as SelectValue;
 
-  handleFilterOptions(text: string, option: SelectOption) {
-    const { filterOption } = this.props;
-    return filterOption?.({ data: option }, text) ?? true;
-  }
+        if (Array.isArray(val)) {
+          const values = val.map(v =>
+            typeof v === 'object' &&
+            v !== null &&
+            (v as SelectOption)[valueKey] !== undefined
+              ? (v as SelectOption)[valueKey]
+              : v,
+          );
+          onChangeVal = values as (string | number)[];
+        }
+        if (
+          typeof val === 'object' &&
+          val !== null &&
+          !Array.isArray(val) &&
+          (val as SelectOption)[valueKey] !== undefined
+        ) {
+          onChangeVal = (val as SelectOption)[valueKey] as string | number;
+        }
+        onChange(onChangeVal, []);
+      },
+      [onChange, valueKey],
+    );
 
-  render() {
-    const {
-      ariaLabel,
-      autoFocus,
-      clearable,
-      disabled,
-      filterOption,
-      freeForm,
-      isLoading,
-      isMulti,
-      label,
-      multi,
-      name,
-      notFoundContent,
-      onFocus,
-      onSelect,
-      onDeselect,
-      placeholder,
-      showHeader,
-      tokenSeparators,
-      value,
-      // ControlHeader props
-      description,
-      renderTrigger,
-      rightNode,
-      leftNode,
-      validationErrors,
-      onClick,
-      hovered,
-      tooltipOnClick,
-      warning,
-      danger,
-    } = this.props;
+    const handleFilterOptions = useCallback(
+      (text: string, option: SelectOption) => {
+        return filterOption?.({ data: option }, text) ?? true;
+      },
+      [filterOption],
+    );
 
     const headerProps = {
       name,
@@ -278,14 +256,9 @@ export default class SelectControl extends PureComponent<
 
     const getValue = () => {
       const currentValue =
-        value ??
-        (this.props.default !== undefined ? this.props.default : undefined);
+        value ?? (defaultValue !== undefined ? defaultValue : undefined);
 
-      // safety check - the value is intended to be undefined but null was used
-      if (
-        currentValue === null &&
-        !this.state.options.some(o => o.value === null)
-      ) {
+      if (currentValue === null && !options.some(o => o.value === null)) {
         return undefined;
       }
       return currentValue;
@@ -300,23 +273,23 @@ export default class SelectControl extends PureComponent<
       disabled,
       filterOption:
         filterOption && typeof filterOption === 'function'
-          ? this.handleFilterOptions
+          ? handleFilterOptions
           : true,
       header: showHeader && <ControlHeader {...headerProps} />,
       loading: isLoading,
-      mode: this.props.mode || (isMulti || multi ? 'multiple' : 'single'),
+      mode: mode || (isMulti || multi ? 'multiple' : 'single'),
       name: `select-${name}`,
-      onChange: this.onChange,
+      onChange: handleChange,
       onFocus,
       onSelect,
       onDeselect,
-      options: this.state.options,
+      options,
       placeholder,
       sortComparator: getSortComparator(
-        this.props.choices,
-        this.props.options,
-        this.props.valueKey,
-        this.props.sortComparator,
+        choices,
+        optionsProp,
+        valueKey,
+        sortComparator,
       ),
       value: getValue(),
       tokenSeparators,
@@ -341,5 +314,7 @@ export default class SelectControl extends PureComponent<
         <Select {...(selectProps as any)} />
       </div>
     );
-  }
-}
+  },
+);
+
+export default SelectControl;
