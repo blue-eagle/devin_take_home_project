@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PureComponent, type ReactNode } from 'react';
-import { isEqualArray } from '@superset-ui/core';
+import React, { useState, useCallback, useEffect, type ReactNode } from 'react';
 import { t } from '@apache-superset/core/translation';
 import { css } from '@apache-superset/core/theme';
 import { Select } from '@superset-ui/core/components';
@@ -69,26 +68,6 @@ export interface SelectControlProps {
   warning?: string;
   danger?: string;
   sortComparator?: (a: SelectOption, b: SelectOption) => number;
-}
-
-const defaultProps = {
-  autoFocus: false,
-  choices: [],
-  clearable: true,
-  description: null,
-  disabled: false,
-  freeForm: false,
-  isLoading: false,
-  label: null,
-  multi: false,
-  onChange: () => {},
-  onFocus: () => {},
-  showHeader: true,
-  valueKey: 'value',
-};
-
-interface SelectControlState {
-  options: SelectOption[];
 }
 
 const numberComparator = (a: SelectOption, b: SelectOption): number =>
@@ -149,7 +128,6 @@ export const innerGetOptions = (props: SelectControlProps): SelectOption[] => {
         : ((o.label || o[valueKey]) as string),
     }));
   } else if (choices) {
-    // Accepts different formats of input
     options = choices.map(c => {
       if (Array.isArray(c)) {
         const [value, label] = c.length > 1 ? c : [c[0], c[0]];
@@ -158,188 +136,182 @@ export const innerGetOptions = (props: SelectControlProps): SelectOption[] => {
           label: String(label),
         };
       }
-      // This branch handles object-like choices, but choices are typed as tuples
       return { value: c as unknown as string | number, label: String(c) };
     });
   }
   return options;
 };
 
-export default class SelectControl extends PureComponent<
-  SelectControlProps,
-  SelectControlState
-> {
-  static defaultProps = defaultProps;
-
-  constructor(props: SelectControlProps) {
-    super(props);
-    this.state = {
-      options: this.getOptions(props),
-    };
-    this.onChange = this.onChange.bind(this);
-    this.handleFilterOptions = this.handleFilterOptions.bind(this);
-  }
-
-  componentDidUpdate(prevProps: SelectControlProps) {
-    if (
-      !isEqualArray(this.props.choices, prevProps.choices) ||
-      !isEqualArray(this.props.options, prevProps.options)
-    ) {
-      const options = this.getOptions(this.props);
-      this.setState({ options });
-    }
-  }
-
-  // Beware: This is acting like an on-click instead of an on-change
-  // (firing every time user chooses vs firing only if a new option is chosen).
-  onChange(val: SelectValue | SelectOption | SelectOption[]) {
-    // will eventually call `exploreReducer`: SET_FIELD_VALUE
-    const { valueKey = 'value' } = this.props;
-    let onChangeVal: SelectValue = val as SelectValue;
-
-    if (Array.isArray(val)) {
-      const values = val.map(v =>
-        typeof v === 'object' &&
-        v !== null &&
-        (v as SelectOption)[valueKey] !== undefined
-          ? (v as SelectOption)[valueKey]
-          : v,
-      );
-      onChangeVal = values as (string | number)[];
-    }
-    if (
-      typeof val === 'object' &&
-      val !== null &&
-      !Array.isArray(val) &&
-      (val as SelectOption)[valueKey] !== undefined
-    ) {
-      onChangeVal = (val as SelectOption)[valueKey] as string | number;
-    }
-    this.props.onChange?.(onChangeVal, []);
-  }
-
-  getOptions(props: SelectControlProps) {
-    return innerGetOptions(props);
-  }
-
-  handleFilterOptions(text: string, option: SelectOption) {
-    const { filterOption } = this.props;
-    return filterOption?.({ data: option }, text) ?? true;
-  }
-
-  render() {
-    const {
-      ariaLabel,
-      autoFocus,
-      clearable,
-      disabled,
-      filterOption,
-      freeForm,
-      isLoading,
-      isMulti,
-      label,
-      multi,
+const SelectControl = React.memo(function SelectControl({
+  ariaLabel,
+  autoFocus = false,
+  choices = [],
+  clearable = true,
+  description = null,
+  disabled = false,
+  freeForm = false,
+  isLoading = false,
+  isMulti,
+  label,
+  mode,
+  multi = false,
+  name,
+  notFoundContent,
+  onChange = () => {},
+  onFocus = () => {},
+  onSelect,
+  onDeselect,
+  placeholder,
+  showHeader = true,
+  tokenSeparators,
+  value,
+  valueKey = 'value',
+  filterOption,
+  optionRenderer,
+  options: optionsProp,
+  renderTrigger,
+  rightNode,
+  leftNode,
+  validationErrors,
+  onClick,
+  hovered,
+  tooltipOnClick,
+  warning,
+  danger,
+  sortComparator,
+  ...restProps
+}: SelectControlProps) {
+  const [options, setOptions] = useState<SelectOption[]>(() =>
+    innerGetOptions({
+      choices,
+      optionRenderer,
+      valueKey,
+      options: optionsProp,
       name,
-      notFoundContent,
-      onFocus,
-      onSelect,
-      onDeselect,
-      placeholder,
-      showHeader,
-      tokenSeparators,
-      value,
-      // ControlHeader props
-      description,
-      renderTrigger,
-      rightNode,
-      leftNode,
-      validationErrors,
-      onClick,
-      hovered,
-      tooltipOnClick,
-      warning,
-      danger,
-    } = this.props;
+    }),
+  );
 
-    const headerProps = {
-      name,
-      label,
-      description,
-      renderTrigger,
-      rightNode,
-      leftNode,
-      validationErrors,
-      onClick,
-      hovered,
-      tooltipOnClick,
-      warning,
-      danger,
-    };
-
-    const getValue = () => {
-      const currentValue =
-        value ??
-        (this.props.default !== undefined ? this.props.default : undefined);
-
-      // safety check - the value is intended to be undefined but null was used
-      if (
-        currentValue === null &&
-        !this.state.options.some(o => o.value === null)
-      ) {
-        return undefined;
-      }
-      return currentValue;
-    };
-
-    const selectProps = {
-      allowNewOptions: freeForm,
-      autoFocus,
-      ariaLabel:
-        ariaLabel || (typeof label === 'string' ? label : t('Select ...')),
-      allowClear: clearable,
-      disabled,
-      filterOption:
-        filterOption && typeof filterOption === 'function'
-          ? this.handleFilterOptions
-          : true,
-      header: showHeader && <ControlHeader {...headerProps} />,
-      loading: isLoading,
-      mode: this.props.mode || (isMulti || multi ? 'multiple' : 'single'),
-      name: `select-${name}`,
-      onChange: this.onChange,
-      onFocus,
-      onSelect,
-      onDeselect,
-      options: this.state.options,
-      placeholder,
-      sortComparator: getSortComparator(
-        this.props.choices,
-        this.props.options,
-        this.props.valueKey,
-        this.props.sortComparator,
-      ),
-      value: getValue(),
-      tokenSeparators,
-      notFoundContent,
-    };
-
-    return (
-      <div
-        css={theme => css`
-          .type-label {
-            margin-right: ${theme.sizeUnit * 2}px;
-          }
-          .Select__multi-value__label > span,
-          .Select__option > span,
-          .Select__single-value > span {
-            display: flex;
-            align-items: center;
-          }
-        `}
-      >
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        <Select {...(selectProps as any)} />
-      </div>
+  useEffect(() => {
+    setOptions(
+      innerGetOptions({
+        choices,
+        optionRenderer,
+        valueKey,
+        options: optionsProp,
+        name,
+      }),
     );
-  }
-}
+  }, [choices, optionsProp]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleChange = useCallback(
+    (val: SelectValue | SelectOption | SelectOption[]) => {
+      let onChangeVal: SelectValue = val as SelectValue;
+
+      if (Array.isArray(val)) {
+        const values = val.map(v =>
+          typeof v === 'object' &&
+          v !== null &&
+          (v as SelectOption)[valueKey] !== undefined
+            ? (v as SelectOption)[valueKey]
+            : v,
+        );
+        onChangeVal = values as (string | number)[];
+      }
+      if (
+        typeof val === 'object' &&
+        val !== null &&
+        !Array.isArray(val) &&
+        (val as SelectOption)[valueKey] !== undefined
+      ) {
+        onChangeVal = (val as SelectOption)[valueKey] as string | number;
+      }
+      onChange?.(onChangeVal, []);
+    },
+    [onChange, valueKey],
+  );
+
+  const handleFilterOptions = useCallback(
+    (text: string, option: SelectOption) =>
+      filterOption?.({ data: option }, text) ?? true,
+    [filterOption],
+  );
+
+  const headerProps = {
+    name,
+    label,
+    description,
+    renderTrigger,
+    rightNode,
+    leftNode,
+    validationErrors,
+    onClick,
+    hovered,
+    tooltipOnClick,
+    warning,
+    danger,
+  };
+
+  const getValue = () => {
+    const currentValue =
+      value ??
+      (restProps.default !== undefined ? restProps.default : undefined);
+
+    if (currentValue === null && !options.some(o => o.value === null)) {
+      return undefined;
+    }
+    return currentValue;
+  };
+
+  const selectProps = {
+    allowNewOptions: freeForm,
+    autoFocus,
+    ariaLabel:
+      ariaLabel || (typeof label === 'string' ? label : t('Select ...')),
+    allowClear: clearable,
+    disabled,
+    filterOption:
+      filterOption && typeof filterOption === 'function'
+        ? handleFilterOptions
+        : true,
+    header: showHeader && <ControlHeader {...headerProps} />,
+    loading: isLoading,
+    mode: mode || (isMulti || multi ? 'multiple' : 'single'),
+    name: `select-${name}`,
+    onChange: handleChange,
+    onFocus,
+    onSelect,
+    onDeselect,
+    options,
+    placeholder,
+    sortComparator: getSortComparator(
+      choices,
+      optionsProp,
+      valueKey,
+      sortComparator,
+    ),
+    value: getValue(),
+    tokenSeparators,
+    notFoundContent,
+  };
+
+  return (
+    <div
+      css={theme => css`
+        .type-label {
+          margin-right: ${theme.sizeUnit * 2}px;
+        }
+        .Select__multi-value__label > span,
+        .Select__option > span,
+        .Select__single-value > span {
+          display: flex;
+          align-items: center;
+        }
+      `}
+    >
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <Select {...(selectProps as any)} />
+    </div>
+  );
+});
+
+export default SelectControl;

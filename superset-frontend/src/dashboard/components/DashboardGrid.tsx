@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PureComponent, Fragment } from 'react';
+import React, { useState, useCallback, useRef, Fragment } from 'react';
 import { withTheme } from '@emotion/react';
 import classNames from 'classnames';
 import { addAlpha } from '@superset-ui/core';
@@ -49,10 +49,6 @@ export interface DashboardGridProps {
   width: number;
   dashboardId?: number;
   theme: SupersetTheme;
-}
-
-interface DashboardGridState {
-  isResizing: boolean;
 }
 
 interface DropProps {
@@ -131,110 +127,101 @@ const GridColumnGuide = styled.div`
   `};
 `;
 
-class DashboardGrid extends PureComponent<
-  DashboardGridProps,
-  DashboardGridState
-> {
-  grid: HTMLDivElement | null;
+const DashboardGrid: React.FC<DashboardGridProps> = React.memo(
+  ({
+    depth,
+    editMode,
+    canEdit,
+    gridComponent,
+    handleComponentDrop,
+    isComponentVisible,
+    resizeComponent,
+    setDirectPathToChild,
+    setEditMode,
+    width,
+    dashboardId,
+    theme,
+  }) => {
+    const [isResizing, setIsResizing] = useState(false);
+    const gridRef = useRef<HTMLDivElement | null>(null);
 
-  constructor(props: DashboardGridProps) {
-    super(props);
-    this.state = {
-      isResizing: false,
-    };
-    this.grid = null;
-    this.handleResizeStart = this.handleResizeStart.bind(this);
-    this.handleResize = this.handleResize.bind(this);
-    this.handleResizeStop = this.handleResizeStop.bind(this);
-    this.handleTopDropTargetDrop = this.handleTopDropTargetDrop.bind(this);
-    this.getRowGuidePosition = this.getRowGuidePosition.bind(this);
-    this.setGridRef = this.setGridRef.bind(this);
-    this.handleChangeTab = this.handleChangeTab.bind(this);
-  }
+    const getRowGuidePosition = useCallback(
+      (resizeRef: HTMLElement | null): number | null => {
+        if (resizeRef && gridRef.current) {
+          return (
+            resizeRef.getBoundingClientRect().bottom -
+            gridRef.current.getBoundingClientRect().top -
+            2
+          );
+        }
+        return null;
+      },
+      [],
+    );
 
-  getRowGuidePosition(resizeRef: HTMLElement | null): number | null {
-    if (resizeRef && this.grid) {
-      return (
-        resizeRef.getBoundingClientRect().bottom -
-        this.grid.getBoundingClientRect().top -
-        2
-      );
-    }
-    return null;
-  }
+    const setGridRef = useCallback((ref: HTMLDivElement | null) => {
+      gridRef.current = ref;
+    }, []);
 
-  setGridRef(ref: HTMLDivElement | null): void {
-    this.grid = ref;
-  }
+    const handleResizeStart = useCallback(() => {
+      setIsResizing(true);
+    }, []);
 
-  handleResizeStart(): void {
-    this.setState(() => ({
-      isResizing: true,
-    }));
-  }
+    const handleResize = useCallback(
+      (
+        _event: MouseEvent | TouchEvent,
+        _direction: string,
+        _elementRef: HTMLElement,
+        _delta: { width: number; height: number },
+      ) => {
+        // no-op: resize position is tracked via getRowGuidePosition
+      },
+      [],
+    );
 
-  handleResize(
-    _event: MouseEvent | TouchEvent,
-    _direction: string,
-    _elementRef: HTMLElement,
-    _delta: { width: number; height: number },
-  ): void {
-    // no-op: resize position is tracked via getRowGuidePosition
-  }
+    const handleResizeStop = useCallback(
+      (
+        _event: MouseEvent | TouchEvent,
+        _direction: string,
+        _elementRef: HTMLElement,
+        delta: { width: number; height: number },
+        id: string,
+      ) => {
+        resizeComponent({
+          id,
+          width: delta.width,
+          height: delta.height,
+        });
+        setIsResizing(false);
+      },
+      [resizeComponent],
+    );
 
-  handleResizeStop(
-    _event: MouseEvent | TouchEvent,
-    _direction: string,
-    _elementRef: HTMLElement,
-    delta: { width: number; height: number },
-    id: string,
-  ): void {
-    this.props.resizeComponent({
-      id,
-      width: delta.width,
-      height: delta.height,
-    });
+    const handleTopDropTargetDrop = useCallback(
+      (dropResult: DropResult) => {
+        if (dropResult?.destination) {
+          handleComponentDrop({
+            ...dropResult,
+            destination: {
+              ...dropResult.destination,
+              index: 0,
+            },
+          });
+        }
+      },
+      [handleComponentDrop],
+    );
 
-    this.setState(() => ({
-      isResizing: false,
-    }));
-  }
+    const handleChangeTab = useCallback(
+      ({ pathToTabIndex }: { pathToTabIndex: string[] }) => {
+        setDirectPathToChild(pathToTabIndex);
+      },
+      [setDirectPathToChild],
+    );
 
-  handleTopDropTargetDrop(dropResult: DropResult): void {
-    if (dropResult?.destination) {
-      this.props.handleComponentDrop({
-        ...dropResult,
-        destination: {
-          ...dropResult.destination,
-          // force appending as the first child if top drop target
-          index: 0,
-        },
-      });
-    }
-  }
-
-  handleChangeTab({ pathToTabIndex }: { pathToTabIndex: string[] }): void {
-    this.props.setDirectPathToChild(pathToTabIndex);
-  }
-
-  render() {
-    const {
-      gridComponent,
-      handleComponentDrop,
-      depth,
-      width,
-      isComponentVisible,
-      editMode,
-      canEdit,
-      setEditMode,
-      dashboardId,
-      theme,
-    } = this.props;
     const columnPlusGutterWidth =
       (width + GRID_GUTTER_SIZE) / GRID_COLUMN_COUNT;
-
     const columnWidth = columnPlusGutterWidth - GRID_GUTTER_SIZE;
-    const { isResizing } = this.state;
 
     const shouldDisplayEmptyState = gridComponent?.children?.length === 0;
     const shouldDisplayTopLevelTabEmptyState =
@@ -310,13 +297,12 @@ class DashboardGrid extends PureComponent<
               : dashboardEmptyState}
           </DashboardEmptyStateContainer>
         )}
-        <div className="dashboard-grid" ref={this.setGridRef}>
+        <div className="dashboard-grid" ref={setGridRef}>
           <GridContent
             className="grid-content"
             data-test="grid-content"
             editMode={editMode}
           >
-            {/* make the area above components droppable */}
             {editMode && (
               <Droppable
                 component={gridComponent}
@@ -324,7 +310,7 @@ class DashboardGrid extends PureComponent<
                 parentComponent={null}
                 index={0}
                 orientation="column"
-                onDrop={this.handleTopDropTargetDrop}
+                onDrop={handleTopDropTargetDrop}
                 className={classNames({
                   'empty-droptarget': true,
                   'empty-droptarget--full':
@@ -346,12 +332,11 @@ class DashboardGrid extends PureComponent<
                   availableColumnCount={GRID_COLUMN_COUNT}
                   columnWidth={columnWidth}
                   isComponentVisible={isComponentVisible}
-                  onResizeStart={this.handleResizeStart}
-                  onResize={this.handleResize}
-                  onResizeStop={this.handleResizeStop}
-                  onChangeTab={this.handleChangeTab}
+                  onResizeStart={handleResizeStart}
+                  onResize={handleResize}
+                  onResizeStop={handleResizeStop}
+                  onChangeTab={handleChangeTab}
                 />
-                {/* make the area below components droppable */}
                 {editMode && (
                   <Droppable
                     component={gridComponent}
@@ -385,7 +370,7 @@ class DashboardGrid extends PureComponent<
         </div>
       </>
     );
-  }
-}
+  },
+);
 
 export default withTheme(DashboardGrid);

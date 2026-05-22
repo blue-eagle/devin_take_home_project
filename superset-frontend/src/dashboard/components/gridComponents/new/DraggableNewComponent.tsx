@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PureComponent } from 'react';
+import React, { useMemo } from 'react';
 import cx from 'classnames';
 import { css, styled } from '@apache-superset/core/theme';
 import { DragDroppable } from 'src/dashboard/components/dnd/DragDroppable';
@@ -62,37 +62,41 @@ const NewComponentPlaceholder = styled.div`
   `}
 `;
 
-export default class DraggableNewComponent extends PureComponent<DraggableNewComponentProps> {
-  static defaultProps = {
-    className: null,
-    IconComponent: undefined,
-  };
+const parentComponent = {
+  id: NEW_COMPONENTS_SOURCE_ID,
+  type: NEW_COMPONENT_SOURCE_TYPE,
+};
 
-  render() {
-    const { label, id, type, className, meta, IconComponent } = this.props;
+const DraggableNewComponent = React.memo(function DraggableNewComponent({
+  label,
+  id,
+  type,
+  className,
+  meta,
+  IconComponent,
+}: DraggableNewComponentProps) {
+  const component = useMemo(() => ({ type, id, meta }), [type, id, meta]);
 
-    return (
-      <DragDroppable
-        component={{ type, id, meta }}
-        parentComponent={{
-          id: NEW_COMPONENTS_SOURCE_ID,
-          type: NEW_COMPONENT_SOURCE_TYPE,
-        }}
-        index={0}
-        depth={0}
-        editMode
-      >
-        {({ dragSourceRef }: { dragSourceRef: ConnectDragSource }) => (
-          <NewComponent ref={dragSourceRef} data-test="new-component">
-            <NewComponentPlaceholder
-              className={cx('new-component-placeholder', className)}
-            >
-              {IconComponent && <IconComponent iconSize="xl" />}
-            </NewComponentPlaceholder>
-            {label}
-          </NewComponent>
-        )}
-      </DragDroppable>
-    );
-  }
-}
+  return (
+    <DragDroppable
+      component={component}
+      parentComponent={parentComponent}
+      index={0}
+      depth={0}
+      editMode
+    >
+      {({ dragSourceRef }: { dragSourceRef: ConnectDragSource }) => (
+        <NewComponent ref={dragSourceRef} data-test="new-component">
+          <NewComponentPlaceholder
+            className={cx('new-component-placeholder', className)}
+          >
+            {IconComponent && <IconComponent iconSize="xl" />}
+          </NewComponentPlaceholder>
+          {label}
+        </NewComponent>
+      )}
+    </DragDroppable>
+  );
+});
+
+export default DraggableNewComponent;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PureComponent, ReactNode } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, type ReactNode } from 'react';
 import rison from 'rison';
 import { t } from '@apache-superset/core/translation';
 import { isDefined, JsonResponse, SupersetClient } from '@superset-ui/core';
@@ -177,126 +177,127 @@ const StyledStepDescription = styled.div`
   `}
 `;
 
-export class ChartCreation extends PureComponent<
-  ChartCreationProps,
-  ChartCreationState
-> {
-  constructor(props: ChartCreationProps) {
-    super(props);
-    const hasDatasetParam = new URLSearchParams(window.location.search).has(
-      'dataset',
+export const ChartCreation: React.FC<ChartCreationProps> = React.memo(
+  ({ user, addSuccessToast, theme, history }) => {
+    const [datasource, setDatasource] = useState<
+      { label: string | ReactNode; value: string } | undefined
+    >();
+    const [vizType, setVizType] = useState<string | null>(null);
+    const [loading, setLoading] = useState(() => {
+      const hasDatasetParam = new URLSearchParams(window.location.search).has(
+        'dataset',
+      );
+      return hasDatasetParam;
+    });
+
+    const canCreateDataset = useMemo(
+      () => findPermission('can_write', 'Dataset', user.roles),
+      [user.roles],
     );
-    this.state = {
-      vizType: null,
-      canCreateDataset: findPermission(
-        'can_write',
-        'Dataset',
-        props.user.roles,
-      ),
-      loading: hasDatasetParam,
-    };
 
-    this.changeDatasource = this.changeDatasource.bind(this);
-    this.changeVizType = this.changeVizType.bind(this);
-    this.gotoSlice = this.gotoSlice.bind(this);
-    this.loadDatasources = this.loadDatasources.bind(this);
-    this.onVizTypeDoubleClick = this.onVizTypeDoubleClick.bind(this);
-  }
-
-  componentDidMount() {
-    const params = new URLSearchParams(window.location.search).get('dataset');
-    if (params) {
-      this.loadDatasources(params, 0, 1, true)
-        .then(r => {
-          const datasource = r.data[0];
-          this.setState({ datasource, loading: false });
-        })
-        .catch(() => {
-          this.setState({ loading: false });
+    const loadDatasources = useCallback(
+      (
+        search: string,
+        page: number,
+        pageSize: number,
+        exactMatch = false,
+      ) => {
+        const query = rison.encode({
+          columns: [
+            'id',
+            'table_name',
+            'datasource_type',
+            'database.database_name',
+            'schema',
+          ],
+          filters: [
+            {
+              col: 'table_name',
+              opr: exactMatch ? 'eq' : 'ct',
+              value: search,
+            },
+          ],
+          page,
+          page_size: pageSize,
+          order_column: 'table_name',
+          order_direction: 'asc',
         });
-      this.props.addSuccessToast(t('The dataset has been saved'));
-    }
-  }
+        return SupersetClient.get({
+          endpoint: `/api/v1/dataset/?q=${query}`,
+        }).then((response: JsonResponse) => {
+          const list: {
+            id: number;
+            label: string | ReactNode;
+            value: string;
+            table_name: string;
+          }[] = response.json.result.map((item: Dataset) => ({
+            id: item.id,
+            value: `${item.id}__${item.datasource_type}`,
+            label: DatasetSelectLabel(item),
+            table_name: item.table_name,
+          }));
+          return {
+            data: list,
+            totalCount: response.json.count,
+          };
+        });
+      },
+      [],
+    );
 
-  exploreUrl() {
-    const dashboardId = getUrlParam(URL_PARAMS.dashboardId);
-    let url = `/explore/?viz_type=${this.state.vizType}&datasource=${this.state.datasource?.value}`;
-    if (isDefined(dashboardId)) {
-      url += `&dashboard_id=${dashboardId}`;
-    }
-    return url;
-  }
+    useEffect(() => {
+      const params = new URLSearchParams(window.location.search).get(
+        'dataset',
+      );
+      if (params) {
+        loadDatasources(params, 0, 1, true)
+          .then(r => {
+            const ds = r.data[0];
+            setDatasource(ds);
+            setLoading(false);
+          })
+          .catch(() => {
+            setLoading(false);
+          });
+        addSuccessToast(t('The dataset has been saved'));
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  gotoSlice() {
-    this.props.history.push(this.exploreUrl());
-  }
+    const exploreUrl = useCallback(() => {
+      const dashboardId = getUrlParam(URL_PARAMS.dashboardId);
+      let url = `/explore/?viz_type=${vizType}&datasource=${datasource?.value}`;
+      if (isDefined(dashboardId)) {
+        url += `&dashboard_id=${dashboardId}`;
+      }
+      return url;
+    }, [vizType, datasource]);
 
-  changeDatasource(datasource: { label: string | ReactNode; value: string }) {
-    this.setState({ datasource });
-  }
+    const gotoSlice = useCallback(() => {
+      history.push(exploreUrl());
+    }, [history, exploreUrl]);
 
-  changeVizType(vizType: string | null) {
-    this.setState({ vizType });
-  }
+    const changeDatasource = useCallback(
+      (ds: { label: string | ReactNode; value: string }) => {
+        setDatasource(ds);
+      },
+      [],
+    );
 
-  isBtnDisabled() {
-    return !(this.state.datasource?.value && this.state.vizType);
-  }
+    const changeVizType = useCallback((vt: string | null) => {
+      setVizType(vt);
+    }, []);
 
-  onVizTypeDoubleClick() {
-    if (!this.isBtnDisabled()) {
-      this.gotoSlice();
-    }
-  }
+    const isButtonDisabled = !(datasource?.value && vizType);
 
-  loadDatasources(
-    search: string,
-    page: number,
-    pageSize: number,
-    exactMatch = false,
-  ) {
-    const query = rison.encode({
-      columns: [
-        'id',
-        'table_name',
-        'datasource_type',
-        'database.database_name',
-        'schema',
-      ],
-      filters: [
-        { col: 'table_name', opr: exactMatch ? 'eq' : 'ct', value: search },
-      ],
-      page,
-      page_size: pageSize,
-      order_column: 'table_name',
-      order_direction: 'asc',
-    });
-    return SupersetClient.get({
-      endpoint: `/api/v1/dataset/?q=${query}`,
-    }).then((response: JsonResponse) => {
-      const list: {
-        id: number;
-        label: string | ReactNode;
-        value: string;
-        table_name: string;
-      }[] = response.json.result.map((item: Dataset) => ({
-        id: item.id,
-        value: `${item.id}__${item.datasource_type}`,
-        label: DatasetSelectLabel(item),
-        table_name: item.table_name,
-      }));
-      return {
-        data: list,
-        totalCount: response.json.count,
-      };
-    });
-  }
+    const onVizTypeDoubleClick = useCallback(() => {
+      if (datasource?.value && vizType) {
+        gotoSlice();
+      }
+    }, [datasource, vizType, gotoSlice]);
 
-  render() {
-    const { theme } = this.props;
-    const isButtonDisabled = this.isBtnDisabled();
     const VIEW_INSTRUCTIONS_TEXT = t('view instructions');
-    const datasetHelpText = this.state.canCreateDataset ? (
+    const datasetHelpText = canCreateDataset ? (
       <span data-test="dataset-write">
         <Link to="/dataset/add/" data-test="add-chart-new-dataset">
           {t('Add a dataset')}
@@ -327,7 +328,7 @@ export class ChartCreation extends PureComponent<
       </span>
     );
 
-    if (this.state.loading) {
+    if (loading) {
       return <Loading />;
     }
 
@@ -341,19 +342,19 @@ export class ChartCreation extends PureComponent<
                 {t('Choose a %s', datasetLabelLower())}
               </StyledStepTitle>
             }
-            status={this.state.datasource?.value ? 'finish' : 'process'}
+            status={datasource?.value ? 'finish' : 'process'}
             description={
               <StyledStepDescription className="dataset">
                 <AsyncSelect
                   autoFocus
                   ariaLabel={datasetLabel()}
                   name="select-datasource"
-                  onChange={this.changeDatasource}
-                  options={this.loadDatasources}
+                  onChange={changeDatasource}
+                  options={loadDatasources}
                   optionFilterProps={['id', 'table_name']}
                   placeholder={t('Choose a %s', datasetLabelLower())}
                   showSearch
-                  value={this.state.datasource}
+                  value={datasource}
                 />
                 {datasetHelpText}
               </StyledStepDescription>
@@ -361,15 +362,15 @@ export class ChartCreation extends PureComponent<
           />
           <Steps.Step
             title={<StyledStepTitle>{t('Choose chart type')}</StyledStepTitle>}
-            status={this.state.vizType ? 'finish' : 'process'}
+            status={vizType ? 'finish' : 'process'}
             description={
               <StyledStepDescription>
                 <VizTypeGallery
                   denyList={denyList}
                   className="viz-gallery"
-                  onChange={this.changeVizType}
-                  onDoubleClick={this.onVizTypeDoubleClick}
-                  selectedViz={this.state.vizType}
+                  onChange={changeVizType}
+                  onDoubleClick={onVizTypeDoubleClick}
+                  selectedViz={vizType}
                 />
               </StyledStepDescription>
             }
@@ -387,14 +388,14 @@ export class ChartCreation extends PureComponent<
           <Button
             buttonStyle="primary"
             disabled={isButtonDisabled}
-            onClick={this.gotoSlice}
+            onClick={gotoSlice}
           >
             {t('Create new chart')}
           </Button>
         </div>
       </StyledContainer>
     );
-  }
-}
+  },
+);
 
 export default withRouter(withToasts(withTheme(ChartCreation)));

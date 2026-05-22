@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PureComponent, ReactNode } from 'react';
+import React, { ReactNode, useState, useCallback } from 'react';
 import { OptionSortType } from 'src/explore/types';
 import AdhocFilterEditPopover from 'src/explore/components/controls/FilterControl/AdhocFilterEditPopover';
 import AdhocFilter from 'src/explore/components/controls/FilterControl/AdhocFilter';
@@ -40,65 +40,58 @@ interface AdhocFilterPopoverTriggerProps {
   children?: ReactNode;
 }
 
-interface AdhocFilterPopoverTriggerState {
-  popoverVisible: boolean;
-}
+const AdhocFilterPopoverTrigger = React.memo(
+  function AdhocFilterPopoverTrigger({
+    sections,
+    operators,
+    adhocFilter,
+    options,
+    datasource,
+    onFilterEdit,
+    partitionColumn,
+    isControlledComponent,
+    visible: controlledVisible,
+    togglePopover: controlledTogglePopover,
+    closePopover: controlledClosePopover,
+    requireSave,
+    children,
+  }: AdhocFilterPopoverTriggerProps) {
+    const [popoverVisible, setPopoverVisible] = useState(false);
 
-class AdhocFilterPopoverTrigger extends PureComponent<
-  AdhocFilterPopoverTriggerProps,
-  AdhocFilterPopoverTriggerState
-> {
-  constructor(props: AdhocFilterPopoverTriggerProps) {
-    super(props);
-    this.onPopoverResize = this.onPopoverResize.bind(this);
-    this.closePopover = this.closePopover.bind(this);
-    this.togglePopover = this.togglePopover.bind(this);
-    this.state = {
-      popoverVisible: false,
-    };
-  }
+    const onPopoverResize = useCallback(() => {
+      // force re-render is not needed in functional components
+      // as state changes trigger re-renders
+    }, []);
 
-  onPopoverResize() {
-    this.forceUpdate();
-  }
+    const internalClosePopover = useCallback(() => {
+      setPopoverVisible(false);
+    }, []);
 
-  closePopover() {
-    this.togglePopover(false);
-  }
+    const internalTogglePopover = useCallback((visible: boolean) => {
+      setPopoverVisible(visible);
+    }, []);
 
-  togglePopover(visible: boolean) {
-    this.setState({
-      popoverVisible: visible,
-    });
-  }
+    const visible = isControlledComponent ? controlledVisible : popoverVisible;
+    const togglePopover = isControlledComponent
+      ? controlledTogglePopover
+      : internalTogglePopover;
+    const closePopover = isControlledComponent
+      ? controlledClosePopover
+      : internalClosePopover;
 
-  render() {
-    const { adhocFilter, isControlledComponent } = this.props;
-
-    const { visible, togglePopover, closePopover } = isControlledComponent
-      ? {
-          visible: this.props.visible,
-          togglePopover: this.props.togglePopover,
-          closePopover: this.props.closePopover,
-        }
-      : {
-          visible: this.state.popoverVisible,
-          togglePopover: this.togglePopover,
-          closePopover: this.closePopover,
-        };
     const overlayContent = (
       <ExplorePopoverContent>
         <AdhocFilterEditPopover
           adhocFilter={adhocFilter}
-          options={this.props.options}
-          datasource={this.props.datasource}
-          partitionColumn={this.props.partitionColumn}
-          onResize={this.onPopoverResize}
+          options={options}
+          datasource={datasource}
+          partitionColumn={partitionColumn}
+          onResize={onPopoverResize}
           onClose={closePopover ?? (() => {})}
-          sections={this.props.sections}
-          operators={this.props.operators}
-          onChange={this.props.onFilterEdit}
-          requireSave={this.props.requireSave}
+          sections={sections}
+          operators={operators}
+          onChange={onFilterEdit}
+          requireSave={requireSave}
         />
       </ExplorePopoverContent>
     );
@@ -112,10 +105,10 @@ class AdhocFilterPopoverTrigger extends PureComponent<
         onOpenChange={togglePopover}
         destroyOnHidden
       >
-        {this.props.children}
+        {children}
       </ControlPopover>
     );
-  }
-}
+  },
+);
 
 export default AdhocFilterPopoverTrigger;

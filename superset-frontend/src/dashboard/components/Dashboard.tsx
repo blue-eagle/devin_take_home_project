@@ -16,7 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PureComponent, ReactNode } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  type ReactNode,
+} from 'react';
 import { t } from '@apache-superset/core/translation';
 import { JsonObject } from '@superset-ui/core';
 
@@ -85,216 +91,77 @@ export interface DashboardProps {
   children?: ReactNode;
 }
 
-interface VisibilityEventData {
-  start_offset: number;
-  ts: number;
+function onBeforeUnload(hasChanged: boolean): void {
+  if (hasChanged) {
+    window.addEventListener('beforeunload', unload);
+  } else {
+    window.removeEventListener('beforeunload', unload);
+  }
 }
 
-class Dashboard extends PureComponent<DashboardProps> {
-  static contextType = PluginContext;
+function unload(): string {
+  const message = t('You have unsaved changes.');
+  (window.event as BeforeUnloadEvent).returnValue = message;
+  return message;
+}
 
-  // Use type assertion when accessing context instead of declare field
-  // to avoid babel transformation issues in Jest
+const Dashboard: React.FC<DashboardProps> = React.memo(
+  ({
+    actions,
+    dashboardId,
+    editMode,
+    isPublished,
+    hasUnsavedChanges,
+    slices,
+    activeFilters,
+    chartConfiguration,
+    datasources,
+    ownDataCharts,
+    layout,
+    impressionId,
+    timeout = 60,
+    userId = '',
+    children,
+  }) => {
+    const context = useContext(PluginContext) as PluginContextType;
+    const appliedFiltersRef = useRef<ActiveFilters>(activeFilters ?? {});
+    const appliedOwnDataChartsRef = useRef<JsonObject>(ownDataCharts ?? {});
+    const visibilityEventDataRef = useRef({ start_offset: 0, ts: 0 });
+    const prevLayoutRef = useRef(layout);
+    const prevDashboardIdRef = useRef(dashboardId);
 
-  static defaultProps = {
-    timeout: 60,
-    userId: '',
-  };
-
-  appliedFilters: ActiveFilters;
-
-  appliedOwnDataCharts: JsonObject;
-
-  visibilityEventData: VisibilityEventData;
-
-  static onBeforeUnload(hasChanged: boolean): void {
-    if (hasChanged) {
-      window.addEventListener('beforeunload', Dashboard.unload);
-    } else {
-      window.removeEventListener('beforeunload', Dashboard.unload);
-    }
-  }
-
-  static unload(): string {
-    const message = t('You have unsaved changes.');
-    // Gecko + IE: returnValue is typed as boolean but historically accepts string
-    (window.event as BeforeUnloadEvent).returnValue = message;
-    return message; // Gecko + Webkit, Safari, Chrome etc.
-  }
-
-  constructor(props: DashboardProps) {
-    super(props);
-    this.appliedFilters = props.activeFilters ?? {};
-    this.appliedOwnDataCharts = props.ownDataCharts ?? {};
-    this.visibilityEventData = { start_offset: 0, ts: 0 };
-    this.onVisibilityChange = this.onVisibilityChange.bind(this);
-  }
-
-  componentDidMount(): void {
-    const bootstrapData = getBootstrapData();
-    const { editMode, isPublished, layout } = this.props;
-    const eventData: Record<string, unknown> = {
-      is_soft_navigation: Logger.timeOriginOffset > 0,
-      is_edit_mode: editMode,
-      mount_duration: Logger.getTimestamp(),
-      is_empty: isDashboardEmpty(layout),
-      is_published: isPublished,
-      bootstrap_data_length: JSON.stringify(bootstrapData).length,
-    };
-    const directLinkComponentId = getLocationHash();
-    if (directLinkComponentId) {
-      eventData.target_id = directLinkComponentId;
-    }
-    this.props.actions.logEvent(LOG_ACTIONS_MOUNT_DASHBOARD, eventData);
-
-    // Handle browser tab visibility change
-    if (document.visibilityState === 'hidden') {
-      this.visibilityEventData = {
-        start_offset: Logger.getTimestamp(),
-        ts: new Date().getTime(),
-      };
-    }
-    window.addEventListener('visibilitychange', this.onVisibilityChange);
-    this.applyCharts();
-  }
-
-  componentDidUpdate(prevProps: DashboardProps): void {
-    this.applyCharts();
-    const currentChartIds = getChartIdsFromLayout(prevProps.layout);
-    const nextChartIds = getChartIdsFromLayout(this.props.layout);
-
-    if (prevProps.dashboardId !== this.props.dashboardId) {
-      // single-page-app navigation check
-      return;
-    }
-
-    if (currentChartIds.length < nextChartIds.length) {
-      const newChartIds = nextChartIds.filter(
-        key => currentChartIds.indexOf(key) === -1,
-      );
-      newChartIds.forEach(newChartId =>
-        this.props.actions.addSliceToDashboard(
-          newChartId,
-          getLayoutComponentFromChartId(this.props.layout, newChartId),
-        ),
-      );
-    } else if (currentChartIds.length > nextChartIds.length) {
-      // remove chart
-      const removedChartIds = currentChartIds.filter(
-        key => nextChartIds.indexOf(key) === -1,
-      );
-      removedChartIds.forEach(removedChartId =>
-        this.props.actions.removeSliceFromDashboard(removedChartId),
-      );
-    }
-  }
-
-  applyCharts(): void {
-    const {
-      activeFilters,
-      ownDataCharts,
-      chartConfiguration,
-      hasUnsavedChanges,
-      editMode,
-    } = this.props;
-    const { appliedFilters, appliedOwnDataCharts } = this;
-    if (!chartConfiguration) {
-      // For a first loading we need to wait for cross filters charts data loaded to get all active filters
-      // for correct comparing  of filters to avoid unnecessary requests
-      return;
-    }
-
-    if (
-      !editMode &&
-      (!areObjectsEqual(appliedOwnDataCharts, ownDataCharts, {
-        ignoreUndefined: true,
-      }) ||
-        !areObjectsEqual(appliedFilters, activeFilters, {
-          ignoreUndefined: true,
-        }))
-    ) {
-      this.applyFilters();
-    }
-
-    if (hasUnsavedChanges) {
-      Dashboard.onBeforeUnload(true);
-    } else {
-      Dashboard.onBeforeUnload(false);
-    }
-  }
-
-  componentWillUnmount(): void {
-    window.removeEventListener('visibilitychange', this.onVisibilityChange);
-    this.props.actions.clearDataMaskState();
-    this.props.actions.clearAllChartStates();
-  }
-
-  onVisibilityChange(): void {
-    if (document.visibilityState === 'hidden') {
-      // from visible to hidden
-      this.visibilityEventData = {
-        start_offset: Logger.getTimestamp(),
-        ts: new Date().getTime(),
-      };
-    } else if (document.visibilityState === 'visible') {
-      // from hidden to visible
-      const logStart = this.visibilityEventData.start_offset;
-      this.props.actions.logEvent(LOG_ACTIONS_HIDE_BROWSER_TAB, {
-        ...this.visibilityEventData,
-        duration: Logger.getTimestamp() - logStart,
-      });
-    }
-  }
-
-  applyFilters(): void {
-    const { appliedFilters } = this;
-    const { activeFilters, ownDataCharts, slices } = this.props;
-
-    // refresh charts if a filter was removed, added, or changed
-
-    const currFilterKeys = Object.keys(activeFilters);
-    const appliedFilterKeys = Object.keys(appliedFilters);
-
-    const allKeys = new Set(currFilterKeys.concat(appliedFilterKeys));
-    const affectedChartIds: (string | number)[] = getAffectedOwnDataCharts(
-      ownDataCharts,
-      this.appliedOwnDataCharts,
+    const refreshCharts = useCallback(
+      (ids: (string | number)[]) => {
+        ids.forEach(id => {
+          actions.triggerQuery(true, id);
+        });
+      },
+      [actions],
     );
 
-    [...allKeys].forEach(filterKey => {
-      if (
-        !currFilterKeys.includes(filterKey) &&
-        appliedFilterKeys.includes(filterKey)
-      ) {
-        // filterKey is removed?
-        affectedChartIds.push(
-          ...getRelatedCharts(
-            filterKey,
-            appliedFilters[filterKey] as unknown as RelatedChartsFilter,
-            slices,
-          ),
-        );
-      } else if (!appliedFilterKeys.includes(filterKey)) {
-        // filterKey is newly added?
-        affectedChartIds.push(
-          ...getRelatedCharts(
-            filterKey,
-            activeFilters[filterKey] as unknown as RelatedChartsFilter,
-            slices,
-          ),
-        );
-      } else {
-        // if filterKey changes value,
-        // update charts in its scope
+    const applyFilters = useCallback(() => {
+      const appliedFilters = appliedFiltersRef.current;
+      const currFilterKeys = Object.keys(activeFilters);
+      const appliedFilterKeys = Object.keys(appliedFilters);
+      const allKeys = new Set(currFilterKeys.concat(appliedFilterKeys));
+      const affectedChartIds: (string | number)[] = getAffectedOwnDataCharts(
+        ownDataCharts,
+        appliedOwnDataChartsRef.current,
+      );
+
+      [...allKeys].forEach(filterKey => {
         if (
-          !areObjectsEqual(
-            appliedFilters[filterKey].values,
-            activeFilters[filterKey].values,
-            {
-              ignoreUndefined: true,
-            },
-          )
+          !currFilterKeys.includes(filterKey) &&
+          appliedFilterKeys.includes(filterKey)
         ) {
+          affectedChartIds.push(
+            ...getRelatedCharts(
+              filterKey,
+              appliedFilters[filterKey] as unknown as RelatedChartsFilter,
+              slices,
+            ),
+          );
+        } else if (!appliedFilterKeys.includes(filterKey)) {
           affectedChartIds.push(
             ...getRelatedCharts(
               filterKey,
@@ -302,43 +169,163 @@ class Dashboard extends PureComponent<DashboardProps> {
               slices,
             ),
           );
+        } else {
+          if (
+            !areObjectsEqual(
+              appliedFilters[filterKey].values,
+              activeFilters[filterKey].values,
+              { ignoreUndefined: true },
+            )
+          ) {
+            affectedChartIds.push(
+              ...getRelatedCharts(
+                filterKey,
+                activeFilters[filterKey] as unknown as RelatedChartsFilter,
+                slices,
+              ),
+            );
+          }
+          if (
+            !areObjectsEqual(
+              appliedFilters[filterKey].scope,
+              activeFilters[filterKey].scope,
+            )
+          ) {
+            const chartsInScope = (
+              activeFilters[filterKey].scope || []
+            ).concat(appliedFilters[filterKey].scope || []);
+            affectedChartIds.push(...chartsInScope);
+          }
         }
+      });
 
-        // if filterKey changes scope,
-        // update all charts in its scope
-        if (
-          !areObjectsEqual(
-            appliedFilters[filterKey].scope,
-            activeFilters[filterKey].scope,
-          )
-        ) {
-          const chartsInScope = (activeFilters[filterKey].scope || []).concat(
-            appliedFilters[filterKey].scope || [],
-          );
-          affectedChartIds.push(...chartsInScope);
-        }
+      refreshCharts([...new Set(affectedChartIds)]);
+      appliedFiltersRef.current = activeFilters;
+      appliedOwnDataChartsRef.current = ownDataCharts;
+    }, [activeFilters, ownDataCharts, slices, refreshCharts]);
+
+    const applyCharts = useCallback(() => {
+      if (!chartConfiguration) {
+        return;
       }
+      if (
+        !editMode &&
+        (!areObjectsEqual(
+          appliedOwnDataChartsRef.current,
+          ownDataCharts,
+          { ignoreUndefined: true },
+        ) ||
+          !areObjectsEqual(appliedFiltersRef.current, activeFilters, {
+            ignoreUndefined: true,
+          }))
+      ) {
+        applyFilters();
+      }
+      if (hasUnsavedChanges) {
+        onBeforeUnload(true);
+      } else {
+        onBeforeUnload(false);
+      }
+    }, [
+      chartConfiguration,
+      editMode,
+      ownDataCharts,
+      activeFilters,
+      hasUnsavedChanges,
+      applyFilters,
+    ]);
+
+    const onVisibilityChange = useCallback(() => {
+      if (document.visibilityState === 'hidden') {
+        visibilityEventDataRef.current = {
+          start_offset: Logger.getTimestamp(),
+          ts: new Date().getTime(),
+        };
+      } else if (document.visibilityState === 'visible') {
+        const logStart = visibilityEventDataRef.current.start_offset;
+        actions.logEvent(LOG_ACTIONS_HIDE_BROWSER_TAB, {
+          ...visibilityEventDataRef.current,
+          duration: Logger.getTimestamp() - logStart,
+        });
+      }
+    }, [actions]);
+
+    // componentDidMount
+    useEffect(() => {
+      const bootstrapData = getBootstrapData();
+      const eventData: Record<string, unknown> = {
+        is_soft_navigation: Logger.timeOriginOffset > 0,
+        is_edit_mode: editMode,
+        mount_duration: Logger.getTimestamp(),
+        is_empty: isDashboardEmpty(layout),
+        is_published: isPublished,
+        bootstrap_data_length: JSON.stringify(bootstrapData).length,
+      };
+      const directLinkComponentId = getLocationHash();
+      if (directLinkComponentId) {
+        eventData.target_id = directLinkComponentId;
+      }
+      actions.logEvent(LOG_ACTIONS_MOUNT_DASHBOARD, eventData);
+
+      if (document.visibilityState === 'hidden') {
+        visibilityEventDataRef.current = {
+          start_offset: Logger.getTimestamp(),
+          ts: new Date().getTime(),
+        };
+      }
+      window.addEventListener('visibilitychange', onVisibilityChange);
+
+      applyCharts();
+
+      return () => {
+        window.removeEventListener('visibilitychange', onVisibilityChange);
+        actions.clearDataMaskState();
+        actions.clearAllChartStates();
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // componentDidUpdate - handle layout changes
+    useEffect(() => {
+      applyCharts();
+
+      const currentChartIds = getChartIdsFromLayout(prevLayoutRef.current);
+      const nextChartIds = getChartIdsFromLayout(layout);
+
+      if (prevDashboardIdRef.current !== dashboardId) {
+        prevDashboardIdRef.current = dashboardId;
+        prevLayoutRef.current = layout;
+        return;
+      }
+
+      if (currentChartIds.length < nextChartIds.length) {
+        const newChartIds = nextChartIds.filter(
+          key => currentChartIds.indexOf(key) === -1,
+        );
+        newChartIds.forEach(newChartId =>
+          actions.addSliceToDashboard(
+            newChartId,
+            getLayoutComponentFromChartId(layout, newChartId),
+          ),
+        );
+      } else if (currentChartIds.length > nextChartIds.length) {
+        const removedChartIds = currentChartIds.filter(
+          key => nextChartIds.indexOf(key) === -1,
+        );
+        removedChartIds.forEach(removedChartId =>
+          actions.removeSliceFromDashboard(removedChartId),
+        );
+      }
+
+      prevLayoutRef.current = layout;
+      prevDashboardIdRef.current = dashboardId;
     });
 
-    // remove dup in affectedChartIds
-    this.refreshCharts([...new Set(affectedChartIds)]);
-    this.appliedFilters = activeFilters;
-    this.appliedOwnDataCharts = ownDataCharts;
-  }
-
-  refreshCharts(ids: (string | number)[]): void {
-    ids.forEach(id => {
-      this.props.actions.triggerQuery(true, id);
-    });
-  }
-
-  render(): ReactNode {
-    const context = this.context as PluginContextType;
     if (context.loading) {
       return <Loading />;
     }
-    return this.props.children;
-  }
-}
+    return <>{children}</>;
+  },
+);
 
 export default Dashboard;
