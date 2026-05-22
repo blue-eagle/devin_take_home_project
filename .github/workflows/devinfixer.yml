@@ -1,0 +1,100 @@
+name: devinfixer — auto-remediate issues via Devin
+
+on:
+  issues:
+    types: [opened, reopened, labeled, edited]
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.issue.title, '[devin:auto]')
+    steps:
+      - name: Check for existing PR by branch pattern
+        id: check_pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          prs=$(gh api "repos/${REPO}/pulls?state=open&per_page=100" \
+            --jq ".[] | select(.head.ref | test(\"issue-${ISSUE_NUM}(?:-|$)\")) | .html_url")
+          if [ -n "$prs" ]; then
+            echo "pr_exists=true" >> "$GITHUB_OUTPUT"
+            echo "pr_url=$(echo "$prs" | head -1)" >> "$GITHUB_OUTPUT"
+            echo "::notice::PR already exists for issue #${ISSUE_NUM}: ${prs}"
+          else
+            echo "pr_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip — PR already exists
+        if: steps.check_pr.outputs.pr_exists == 'true'
+        run: |
+          echo "Skipping dispatch — PR already exists: ${{ steps.check_pr.outputs.pr_url }}"
+
+      - name: Dispatch Devin session
+        if: steps.check_pr.outputs.pr_exists == 'false'
+        id: dispatch
+        env:
+          DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
+          DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          REPO: ${{ github.repository }}
+        run: |
+          PROMPT=$(cat <<'EOF'
+          You are an automated code-remediation agent.
+
+          **Repository:** https://github.com/REPO_PLACEHOLDER
+          **Issue:** ISSUE_URL_PLACEHOLDER
+          **Issue number:** #ISSUE_NUM_PLACEHOLDER
+          **Title:** ISSUE_TITLE_PLACEHOLDER
+
+          Instructions:
+          1. Read the issue description carefully
+          2. Clone the repository and create a branch named `devin/issue-ISSUE_NUM_PLACEHOLDER-<short-slug>`
+          3. Implement the fix described in the issue
+          4. Run any relevant linters/tests
+          5. Open a PR that references the issue (include "Fixes #ISSUE_NUM_PLACEHOLDER" in the PR body)
+          6. Follow the repo's AGENTS.md coding standards
+          EOF
+          )
+
+          # Replace placeholders using env vars (not ${{ }} interpolation)
+          PROMPT="${PROMPT//REPO_PLACEHOLDER/$REPO}"
+          PROMPT="${PROMPT//ISSUE_URL_PLACEHOLDER/$ISSUE_URL}"
+          PROMPT="${PROMPT//ISSUE_NUM_PLACEHOLDER/$ISSUE_NUM}"
+          PROMPT="${PROMPT//ISSUE_TITLE_PLACEHOLDER/$ISSUE_TITLE}"
+
+          RESPONSE=$(curl -s -X POST \
+            "https://api.devin.ai/v3/organizations/${DEVIN_ORG_ID}/sessions" \
+            -H "Authorization: Bearer ${DEVIN_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg prompt "$PROMPT" '{prompt: $prompt}')")
+
+          SESSION_URL=$(echo "$RESPONSE" | jq -r '.url // empty')
+          SESSION_ID=$(echo "$RESPONSE" | jq -r '.session_id // empty')
+
+          if [ -z "$SESSION_URL" ]; then
+            echo "::error::Failed to create Devin session: $RESPONSE"
+            exit 1
+          fi
+
+          echo "session_url=$SESSION_URL" >> "$GITHUB_OUTPUT"
+          echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
+          echo "::notice::Devin session created: ${SESSION_URL}"
+
+      - name: Comment on issue with session link
+        if: steps.check_pr.outputs.pr_exists == 'false' && steps.dispatch.outputs.session_url
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh issue comment "$ISSUE_NUM" \
+            --repo "$REPO" \
+            --body "**devinfixer** dispatched a Devin session to remediate this issue.
+
+          **Session:** ${{ steps.dispatch.outputs.session_url }}
+
+          A PR will be opened once the session completes."
