@@ -17,7 +17,7 @@
  * under the License.
  */
 import { connect } from 'react-redux';
-import { PureComponent } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { t } from '@apache-superset/core/translation';
 import {
   HandlerFunction,
@@ -25,7 +25,7 @@ import {
   Payload,
   QueryFormData,
 } from '@superset-ui/core';
-import { SupersetTheme, withTheme } from '@apache-superset/core/theme';
+import { SupersetTheme, useTheme, withTheme } from '@apache-superset/core/theme';
 import {
   AsyncEsmComponent,
   List,
@@ -44,7 +44,6 @@ import ControlPopover, {
 
 const AnnotationLayer = AsyncEsmComponent(
   () => import('./AnnotationLayer'),
-  // size of overlay inner content
   () => <div style={{ width: 450, height: 368 }} />,
 );
 
@@ -75,96 +74,94 @@ export interface Props {
   theme: SupersetTheme;
 }
 
-export interface PopoverState {
-  popoverVisible: Record<number | string, boolean>;
-  addedAnnotationIndex: number | null;
-}
+function AnnotationLayerControl({
+  colorScheme,
+  annotationError = {},
+  annotationQuery = {},
+  vizType = '',
+  validationErrors,
+  name,
+  actions,
+  value = [],
+  onChange = () => {},
+  refreshAnnotationData,
+  theme,
+}: Props) {
+  const [popoverVisible, setPopoverVisible] = useState<Record<number | string, boolean>>({});
+  const [addedAnnotationIndex, setAddedAnnotationIndex] = useState<number | null>(null);
 
-const defaultProps = {
-  vizType: '',
-  value: [],
-  annotationError: {},
-  annotationQuery: {},
-  onChange: () => {},
-};
-class AnnotationLayerControl extends PureComponent<Props, PopoverState> {
-  static defaultProps = defaultProps;
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      popoverVisible: {},
-      addedAnnotationIndex: null,
-    };
-    this.addAnnotationLayer = this.addAnnotationLayer.bind(this);
-    this.removeAnnotationLayer = this.removeAnnotationLayer.bind(this);
-    this.handleVisibleChange = this.handleVisibleChange.bind(this);
-  }
-
-  componentDidMount() {
-    // preload the AnnotationLayer component and dependent libraries i.e. mathjs
+  useEffect(() => {
     AnnotationLayer.preload();
-  }
+  }, []);
 
-  componentDidUpdate(prevProps: Props) {
-    const { name, annotationError, validationErrors, value } = this.props;
+  const prevAnnotationError = useRef(annotationError);
+  const prevValidationErrors = useRef(validationErrors);
+  const prevValue = useRef(value);
+
+  useEffect(() => {
     if (
       (Object.keys(annotationError).length && !validationErrors.length) ||
       (!Object.keys(annotationError).length && validationErrors.length)
     ) {
       if (
-        annotationError !== prevProps.annotationError ||
-        validationErrors !== prevProps.validationErrors ||
-        value !== prevProps.value
+        annotationError !== prevAnnotationError.current ||
+        validationErrors !== prevValidationErrors.current ||
+        value !== prevValue.current
       ) {
-        this.props.actions.setControlValue(
+        actions.setControlValue(
           name,
           value,
           Object.keys(annotationError),
         );
       }
     }
-  }
+    prevAnnotationError.current = annotationError;
+    prevValidationErrors.current = validationErrors;
+    prevValue.current = value;
+  }, [annotationError, validationErrors, value, actions, name]);
 
-  addAnnotationLayer = (
-    originalAnnotation: Annotation | null,
-    newAnnotation: Annotation,
-  ) => {
-    let annotations = this.props.value;
-    if (originalAnnotation && annotations.includes(originalAnnotation)) {
-      annotations = annotations.map(anno =>
-        anno === originalAnnotation ? newAnnotation : anno,
-      );
-    } else {
-      annotations = [...annotations, newAnnotation];
-      this.setState({ addedAnnotationIndex: annotations.length - 1 });
-    }
+  const addAnnotationLayer = useCallback(
+    (originalAnnotation: Annotation | null, newAnnotation: Annotation) => {
+      let annotations = value;
+      if (originalAnnotation && annotations.includes(originalAnnotation)) {
+        annotations = annotations.map(anno =>
+          anno === originalAnnotation ? newAnnotation : anno,
+        );
+      } else {
+        annotations = [...annotations, newAnnotation];
+        setAddedAnnotationIndex(annotations.length - 1);
+      }
 
-    this.props.refreshAnnotationData({
-      annotation: newAnnotation,
-      force: true,
-    });
+      refreshAnnotationData({
+        annotation: newAnnotation,
+        force: true,
+      });
 
-    this.props.onChange(annotations);
-  };
+      onChange(annotations);
+    },
+    [value, refreshAnnotationData, onChange],
+  );
 
-  handleVisibleChange = (visible: boolean, popoverKey: number | string) => {
-    this.setState(prevState => ({
-      popoverVisible: { ...prevState.popoverVisible, [popoverKey]: visible },
-    }));
-  };
+  const handleVisibleChange = useCallback(
+    (visible: boolean, popoverKey: number | string) => {
+      setPopoverVisible(prev => ({ ...prev, [popoverKey]: visible }));
+    },
+    [],
+  );
 
-  removeAnnotationLayer(annotation: Annotation | null) {
-    const annotations = this.props.value.filter(anno => anno !== annotation);
-    // So scrollbar doesnt get stuck on hidden
-    const element = getSectionContainerElement();
-    if (element) {
-      element.style.setProperty('overflow-y', 'auto', 'important');
-    }
-    this.props.onChange(annotations);
-  }
+  const removeAnnotationLayer = useCallback(
+    (annotation: Annotation | null) => {
+      const annotations = value.filter(anno => anno !== annotation);
+      const element = getSectionContainerElement();
+      if (element) {
+        element.style.setProperty('overflow-y', 'auto', 'important');
+      }
+      onChange(annotations);
+    },
+    [value, onChange],
+  );
 
-  renderPopover = (
+  const renderPopover = (
     popoverKey: number | string,
     annotation: Annotation | null,
     error: string,
@@ -176,23 +173,22 @@ class AnnotationLayerControl extends PureComponent<Props, PopoverState> {
         <AnnotationLayer
           {...(annotation || {})}
           error={error}
-          colorScheme={this.props.colorScheme}
-          vizType={this.props.vizType}
+          colorScheme={colorScheme}
+          vizType={vizType}
           addAnnotationLayer={(newAnnotation: Annotation) =>
-            this.addAnnotationLayer(annotation, newAnnotation)
+            addAnnotationLayer(annotation, newAnnotation)
           }
-          removeAnnotationLayer={() => this.removeAnnotationLayer(annotation)}
+          removeAnnotationLayer={() => removeAnnotationLayer(annotation)}
           close={() => {
-            this.handleVisibleChange(false, popoverKey);
-            this.setState({ addedAnnotationIndex: null });
+            handleVisibleChange(false, popoverKey);
+            setAddedAnnotationIndex(null);
           }}
         />
       </div>
     );
   };
 
-  renderInfo(anno: Annotation) {
-    const { annotationError, annotationQuery, theme } = this.props;
+  const renderInfo = (anno: Annotation) => {
     if (annotationQuery[anno.name]) {
       return <Icons.SyncOutlined iconColor={theme.colorPrimary} iconSize="m" />;
     }
@@ -209,75 +205,60 @@ class AnnotationLayerControl extends PureComponent<Props, PopoverState> {
       return <span style={{ color: theme.colorError }}> {t('Hidden')} </span>;
     }
     return '';
-  }
+  };
 
-  render() {
-    const { addedAnnotationIndex } = this.state;
-    const addedAnnotation =
-      addedAnnotationIndex !== null
-        ? this.props.value[addedAnnotationIndex]
-        : null;
-    const annotations = this.props.value.map((anno, i) => (
-      <ControlPopover
-        key={i}
-        trigger="click"
-        title={t('Edit annotation layer')}
-        css={theme => ({
-          '&:hover': {
-            cursor: 'pointer',
-            backgroundColor: theme.colorFillContentHover,
-          },
-        })}
-        content={this.renderPopover(
-          i,
-          anno,
-          this.props.annotationError[anno.name],
-        )}
-        open={this.state.popoverVisible[i]}
-        onOpenChange={visible => this.handleVisibleChange(visible, i)}
-      >
-        <CustomListItem selectable>
-          <span>{anno.name}</span>
-          <span style={{ float: 'right' }}>{this.renderInfo(anno)}</span>
-        </CustomListItem>
-      </ControlPopover>
-    ));
-    const addLayerPopoverKey = 'add';
+  const addedAnnotation =
+    addedAnnotationIndex !== null ? value[addedAnnotationIndex] : null;
+  const annotations = value.map((anno, i) => (
+    <ControlPopover
+      key={i}
+      trigger="click"
+      title={t('Edit annotation layer')}
+      css={thm => ({
+        '&:hover': {
+          cursor: 'pointer',
+          backgroundColor: thm.colorFillContentHover,
+        },
+      })}
+      content={renderPopover(i, anno, annotationError[anno.name])}
+      open={popoverVisible[i]}
+      onOpenChange={(visible: boolean) => handleVisibleChange(visible, i)}
+    >
+      <CustomListItem selectable>
+        <span>{anno.name}</span>
+        <span style={{ float: 'right' }}>{renderInfo(anno)}</span>
+      </CustomListItem>
+    </ControlPopover>
+  ));
+  const addLayerPopoverKey = 'add';
 
-    return (
-      <div>
-        <List bordered css={theme => ({ borderRadius: theme.borderRadius })}>
-          {annotations}
-          <ControlPopover
-            trigger="click"
-            content={this.renderPopover(
-              addLayerPopoverKey,
-              addedAnnotation,
-              '',
-            )}
-            title={t('Add annotation layer')}
-            open={this.state.popoverVisible[addLayerPopoverKey]}
-            destroyOnHidden
-            onOpenChange={visible =>
-              this.handleVisibleChange(visible, addLayerPopoverKey)
-            }
-          >
-            <CustomListItem selectable>
-              <Icons.PlusOutlined
-                iconSize="m"
-                data-test="add-annotation-layer-button"
-              />
-              {t('Add annotation layer')}
-            </CustomListItem>
-          </ControlPopover>
-        </List>
-      </div>
-    );
-  }
+  return (
+    <div>
+      <List bordered css={thm => ({ borderRadius: thm.borderRadius })}>
+        {annotations}
+        <ControlPopover
+          trigger="click"
+          content={renderPopover(addLayerPopoverKey, addedAnnotation, '')}
+          title={t('Add annotation layer')}
+          open={popoverVisible[addLayerPopoverKey]}
+          destroyOnHidden
+          onOpenChange={(visible: boolean) =>
+            handleVisibleChange(visible, addLayerPopoverKey)
+          }
+        >
+          <CustomListItem selectable>
+            <Icons.PlusOutlined
+              iconSize="m"
+              data-test="add-annotation-layer-button"
+            />
+            {t('Add annotation layer')}
+          </CustomListItem>
+        </ControlPopover>
+      </List>
+    </div>
+  );
 }
 
-// Tried to hook this up through stores/control.jsx instead of using redux
-// directly, could not figure out how to get access to the color_scheme
 function mapStateToProps({
   charts,
   explore,
@@ -305,8 +286,6 @@ function mapDispatchToProps(
   dispatch: ThunkDispatch<any, undefined, AnyAction>,
 ) {
   return {
-    // Note: There's a type mismatch between the local Annotation interface
-    // and RunAnnotationQueryParams. This cast preserves existing runtime behavior.
     refreshAnnotationData: (annotation: Annotation) =>
       dispatch(
         runAnnotationQuery(
