@@ -146,18 +146,20 @@ class ScreenshotCachePayload:
 
     def is_error_cache_ttl_expired(self) -> bool:
         error_cache_ttl = app.config["THUMBNAIL_ERROR_CACHE_TTL"]
-        return (
-            datetime.now(tz=timezone.utc) - datetime.fromisoformat(self.get_timestamp())
-        ).total_seconds() > error_cache_ttl
+        ts = datetime.fromisoformat(self.get_timestamp())
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        return (datetime.now(tz=timezone.utc) - ts).total_seconds() > error_cache_ttl
 
     def is_computing_stale(self) -> bool:
         """Check if a COMPUTING status is stale (task likely failed or stuck)."""
         # Use the same TTL as error cache - if computing takes longer than this,
         # it's likely stuck and should be retried
         computing_ttl = app.config["THUMBNAIL_ERROR_CACHE_TTL"]
-        return (
-            datetime.now(tz=timezone.utc) - datetime.fromisoformat(self.get_timestamp())
-        ).total_seconds() >= computing_ttl
+        ts = datetime.fromisoformat(self.get_timestamp())
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        return (datetime.now(tz=timezone.utc) - ts).total_seconds() >= computing_ttl
 
     def should_trigger_task(self, force: bool = False) -> bool:
         return (

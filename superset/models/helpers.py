@@ -631,6 +631,8 @@ class AuditMixinNullable(AuditMixin):
 
     def _format_time_humanized(self, timestamp: datetime) -> str:
         locale = str(get_locale())
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=timezone.utc)
         time_diff = datetime.now(tz=timezone.utc) - timestamp
         # Skip activation for 'en' locale as it's humanize's default locale
         if locale == "en":

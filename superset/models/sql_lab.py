@@ -532,11 +532,17 @@ class SavedQuery(
 
     @property
     def last_run_humanized(self) -> str:
-        return naturaltime(datetime.now(tz=timezone.utc) - self.changed_on)
+        changed_on = self.changed_on
+        if changed_on.tzinfo is None:
+            changed_on = changed_on.replace(tzinfo=timezone.utc)
+        return naturaltime(datetime.now(tz=timezone.utc) - changed_on)
 
     @property
     def _last_run_delta_humanized(self) -> str:
-        return naturaltime(datetime.now(tz=timezone.utc) - self.changed_on)
+        changed_on = self.changed_on
+        if changed_on.tzinfo is None:
+            changed_on = changed_on.replace(tzinfo=timezone.utc)
+        return naturaltime(datetime.now(tz=timezone.utc) - changed_on)
 
     @renders("changed_on")
     def last_run_delta_humanized(self) -> str:

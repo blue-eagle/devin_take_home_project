@@ -903,6 +903,8 @@ def _humanize_timestamp(dt: datetime | None) -> str | None:
     """Convert a datetime to a humanized string like '2 hours ago'."""
     if dt is None:
         return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
     return humanize.naturaltime(datetime.now(tz=timezone.utc) - dt)
 
 
