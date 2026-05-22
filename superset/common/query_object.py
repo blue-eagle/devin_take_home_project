@@ -54,8 +54,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# TODO: Type Metrics dictionary with TypedDict when it becomes a vanilla python type
-#  https://github.com/python/mypy/issues/5288
+# Metrics dictionary is untyped; TypedDict cannot express this cleanly yet.
+# See https://github.com/python/mypy/issues/5288
 
 
 class DeprecatedField(NamedTuple):
@@ -433,9 +433,8 @@ class QueryObject:  # pylint: disable=too-many-instance-attributes
         cache_dict: dict[str, Any] = dict(self.to_dict())
         cache_dict.update(extra)
 
-        # TODO: the below KVs can all be cleaned up and moved to `to_dict()` at some
-        #  predetermined point in time when orgs are aware that the previously
-        #  cached results will be invalidated.
+        # These overrides exist to preserve cache-key compatibility;
+        #  moving them to `to_dict()` would invalidate existing caches.
         if not self.apply_fetch_values_predicate:
             del cache_dict["apply_fetch_values_predicate"]
         if self.datasource:

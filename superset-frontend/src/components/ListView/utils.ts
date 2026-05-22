@@ -153,7 +153,7 @@ export function convertFiltersRison(
     const filter: FilterValue = {
       id,
       value: filterObj[id],
-      // operator: filterObj[id][1], // TODO: can probably get rid of this
+
     };
 
     refs[id] = filter;

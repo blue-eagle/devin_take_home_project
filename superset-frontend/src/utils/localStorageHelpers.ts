@@ -27,8 +27,7 @@ export enum LocalStorageKeys {
    * Do not follow the patterns here for key names. Keys should instead be namespaced to avoid
    * collisions.
    *
-   * TODO: Update all local storage keys to follow the new pattern. This is a breaking change,
-   * and therefore should be done in a major release.
+   * Key names below use legacy patterns; namespace new keys to avoid collisions.
    */
   Database = 'db',
   ChartSplitSizes = 'chart_split_sizes',

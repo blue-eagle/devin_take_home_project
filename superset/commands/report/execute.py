@@ -939,7 +939,6 @@ class ReportNotTriggeredErrorState(BaseReportState):
                 # Re-raise the original exception, not the logging failure
                 raise first_ex from logging_ex
 
-            # TODO (dpgaspar) convert this logic to a new state eg: ERROR_ON_GRACE
             if not self.is_in_error_grace_period():
                 second_error_message = REPORT_SCHEDULE_ERROR_NOTIFICATION_MARKER
                 try:

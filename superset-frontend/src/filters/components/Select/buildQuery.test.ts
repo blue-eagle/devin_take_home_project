@@ -24,7 +24,7 @@ import {
 } from './types';
 import { getSelectExtraFormData } from '../../utils';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('Select buildQuery', () => {
   const formData: PluginFilterSelectQueryFormData = {
     datasource: '5__table',

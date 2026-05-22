@@ -471,12 +471,10 @@ def error_msg_from_exception(ex: Exception) -> str:
     to make sense of the exception object and construct a human readable
     sentence.
 
-    TODO(bkyryliuk): parse the Presto error message from the connection
-                     created via create_engine.
-    engine = create_engine('presto://localhost:3506/silver') -
-      gives an e.message as the str(dict)
-    presto.connect('localhost', port=3506, catalog='silver') - as a dict.
-    The latter version is parsed correctly by this function.
+    Presto error messages have two shapes depending on the connection method:
+    ``create_engine`` returns ``e.message`` as ``str(dict)``, while
+    ``presto.connect`` returns a plain ``dict``.
+    The latter is parsed correctly by this function.
     """
     msg = ""
     if hasattr(ex, "message"):
@@ -1824,7 +1822,6 @@ def extract_column_dtype(col: ColumnMetadata) -> GenericDataType:
     if hasattr(col, "is_numeric") and col.is_numeric:
         return GenericDataType.NUMERIC
 
-    # TODO: add check for boolean data type when proper support is added
     return GenericDataType.STRING
 
 

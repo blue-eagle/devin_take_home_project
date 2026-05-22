@@ -75,8 +75,6 @@ class ExportDatabasesCommand(ExportModelsCommand):
         # this preserves key order, which is important
         payload = {replacements.get(key, key): value for key, value in payload.items()}
 
-        # TODO (betodealmeida): move this logic to export_to_dict once this
-        # becomes the default export endpoint
         if payload.get("extra"):
             extra = payload["extra"] = parse_extra(payload["extra"])
 

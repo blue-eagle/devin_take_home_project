@@ -281,7 +281,6 @@ class Explorable(Protocol):
         :return: List of metric metadata objects
         """
 
-    # TODO: rename to dimensions
     @property
     def columns(self) -> list[ColumnMetadata]:
         """
@@ -297,7 +296,6 @@ class Explorable(Protocol):
         :return: List of column metadata objects
         """
 
-    # TODO: remove and use columns instead
     @property
     def column_names(self) -> list[str]:
         """

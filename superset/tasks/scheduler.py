@@ -168,7 +168,7 @@ def prune_query(
     stats_logger: BaseStatsLogger = current_app.config["STATS_LOGGER"]
     stats_logger.incr("prune_query")
 
-    # TODO: Deprecated: Remove support for passing retention period via options in 6.0
+    # Deprecated: options-based retention_period_days is removed in 6.0; use kwargs.
     if retention_period_days is None:
         retention_period_days = prune_query.request.properties.get(
             "retention_period_days"
@@ -194,7 +194,7 @@ def prune_logs(
     stats_logger: BaseStatsLogger = current_app.config["STATS_LOGGER"]
     stats_logger.incr("prune_logs")
 
-    # TODO: Deprecated: Remove support for passing retention period via options in 6.0
+    # Deprecated: options-based retention_period_days is removed in 6.0; use kwargs.
     if retention_period_days is None:
         retention_period_days = prune_logs.request.properties.get(
             "retention_period_days"
@@ -220,7 +220,7 @@ def prune_tasks(
     stats_logger: BaseStatsLogger = current_app.config["STATS_LOGGER"]
     stats_logger.incr("prune_tasks")
 
-    # TODO: Deprecated: Remove support for passing retention period via options in 6.0
+    # Deprecated: options-based retention_period_days is removed in 6.0; use kwargs.
     if retention_period_days is None:
         retention_period_days = prune_tasks.request.properties.get(
             "retention_period_days"

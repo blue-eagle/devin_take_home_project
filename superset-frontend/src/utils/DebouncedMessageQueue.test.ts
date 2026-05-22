@@ -19,7 +19,7 @@
 
 import DebouncedMessageQueue from './DebouncedMessageQueue';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('DebouncedMessageQueue', () => {
   test('should create a queue with default options', () => {
     const queue = new DebouncedMessageQueue();

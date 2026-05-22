@@ -254,8 +254,8 @@ const FilterValue: FC<FilterValueProps> = ({
       setHasDepsFilterValue(false);
     }
 
-    // TODO: We should try to improve our useEffect hooks to depend more on
-    // granular information instead of big objects that require deep comparison.
+    // Uses deep comparison because the hook depends on large objects
+    // rather than granular values.
     const customizer = (
       objValue: Partial<QueryFormData>,
       othValue: Partial<QueryFormData>,

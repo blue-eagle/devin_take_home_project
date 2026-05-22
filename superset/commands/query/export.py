@@ -74,7 +74,7 @@ class ExportSavedQueriesCommand(ExportModelsCommand):
             lambda: ExportSavedQueriesCommand._file_content(model),
         )
 
-        if export_related:  # TODO: Maybe we can use database export command here?
+        if export_related:
             # include database as well
             database_slug = secure_filename(model.database.database_name)
             file_name = f"databases/{database_slug}.yaml"
@@ -85,8 +85,6 @@ class ExportSavedQueriesCommand(ExportModelsCommand):
                 include_defaults=True,
                 export_uuids=True,
             )
-            # TODO (betodealmeida): move this logic to export_to_dict once this
-            # becomes the default export endpoint
             if "extra" in payload:
                 try:
                     payload["extra"] = json.loads(payload["extra"])

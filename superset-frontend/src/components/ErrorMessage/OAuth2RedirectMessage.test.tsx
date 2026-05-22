@@ -107,7 +107,7 @@ const setup = (overrides = {}) => (
   </Provider>
 );
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('OAuth2RedirectMessage Component', () => {
   test('renders without crashing and displays the correct initial UI elements', () => {
     const { getByText } = render(setup());

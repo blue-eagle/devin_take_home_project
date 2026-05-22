@@ -29,7 +29,7 @@ const defaultProps = {
 const renderCollapsibleControl = (props = {}) =>
   render(<CollapsibleControl {...defaultProps} {...props} />);
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('CollapsibleControl', () => {
   test('renders title correctly', () => {
     const { getByRole } = renderCollapsibleControl();

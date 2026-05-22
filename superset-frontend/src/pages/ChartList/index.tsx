@@ -223,7 +223,7 @@ function ChartList(props: ChartListProps) {
     setSSHTunnelPrivateKeyPasswordFields,
   ] = useState<string[]>([]);
 
-  // TODO: Fix usage of localStorage keying on the user id
+  // Uses user-id-keyed localStorage; see dangerouslyGetItemDoNotUse.
   const userSettings = useMemo(
     () =>
       dangerouslyGetItemDoNotUse(userId?.toString(), null) as {

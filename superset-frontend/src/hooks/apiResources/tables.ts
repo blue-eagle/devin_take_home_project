@@ -106,7 +106,7 @@ const tableApi = api.injectEndpoints({
       providesTags: ['Tables'],
       query: ({ dbId, catalog, schema, forceRefresh }) => ({
         endpoint: `/api/v1/database/${dbId ?? 'undefined'}/tables/`,
-        // TODO: Would be nice to add pagination in a follow-up. Needs endpoint changes.
+        // Pagination is not supported by this endpoint yet.
         urlParams: {
           force: forceRefresh,
           schema_name: schema ? encodeURIComponent(schema) : '',

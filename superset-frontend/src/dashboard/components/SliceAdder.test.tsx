@@ -77,7 +77,7 @@ const defaultProps: Omit<SliceAdderProps, 'theme'> = {
 const renderSliceAdder = (props = defaultProps) =>
   render(<SliceAdder {...props} />, { store: mockStore });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('SliceAdder', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -149,7 +149,7 @@ describe('SliceAdder', () => {
     windowSpy.mockRestore();
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('sortByComparator', () => {
     const baseSlice = {
       slice_url: '/superset/explore/',

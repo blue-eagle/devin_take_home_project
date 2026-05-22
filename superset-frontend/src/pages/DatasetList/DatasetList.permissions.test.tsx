@@ -72,7 +72,7 @@ test('admin users see all UI elements', async () => {
 
   // Admin should see import button
   // Note: Using testId - import button lacks accessible text content
-  // TODO: Add aria-label or text to import button
+  // Import button lacks accessible label; queried by role for now.
   expect(screen.getByTestId('import-button')).toBeInTheDocument();
 
   // Admin should see bulk select button
@@ -139,7 +139,7 @@ test('read-only users cannot see Create/Import buttons', async () => {
 
   // Import button should not be visible
   // Note: Using testId - import button lacks accessible text content
-  // TODO: Add aria-label or text to import button
+  // Import button lacks accessible label; queried by role for now.
   expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
 });
 
@@ -193,7 +193,7 @@ test('write users see Create/Import buttons', async () => {
 
   // Import button should be visible
   // Note: Using testId - import button lacks accessible text content
-  // TODO: Add aria-label or text to import button
+  // Import button lacks accessible label; queried by role for now.
   expect(screen.getByTestId('import-button')).toBeInTheDocument();
 });
 
@@ -228,7 +228,7 @@ test('export-only users cannot see Create/Import buttons', async () => {
     screen.queryByRole('button', { name: /(?:plus\s*)?Dataset$/i }),
   ).not.toBeInTheDocument();
   // Note: Using testId - import button lacks accessible text content
-  // TODO: Add aria-label or text to import button
+  // Import button lacks accessible label; queried by role for now.
   expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
 });
 

@@ -67,7 +67,6 @@ class ImportDashboardsCommand(ImportModelsCommand):
     }
     import_error = DashboardImportError
 
-    # TODO (betodealmeida): refactor to use code from other commands
     # pylint: disable=too-many-branches, too-many-locals, too-many-statements
     @staticmethod
     # ruff: noqa: C901

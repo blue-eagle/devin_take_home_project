@@ -19,9 +19,9 @@
 
 import { customTimeRangeEncode } from 'src/explore/components/controls/DateFilterControl/utils';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('Custom TimeRange', () => {
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('customTimeRangeEncode', () => {
     test('1) specific : specific', () => {
       expect(

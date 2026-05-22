@@ -20,7 +20,7 @@
 import { alterForComparison, formatValueHandler, getRowsFromDiffs } from '.';
 import { RowType } from '../types';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('alterForComparison', () => {
   test('returns null for undefined value', () => {
     expect(alterForComparison(undefined)).toBeNull();
@@ -53,7 +53,7 @@ describe('alterForComparison', () => {
   });
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('formatValueHandler', () => {
   const controlsMap = {
     b: { type: 'BoundsControl', label: 'Bounds' },
@@ -287,7 +287,7 @@ describe('formatValueHandler', () => {
   });
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('getRowsFromDiffs', () => {
   test('returns formatted rows for diffs', () => {
     const diffs = {

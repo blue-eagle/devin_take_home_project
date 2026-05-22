@@ -27,7 +27,7 @@ import Separator from '../explore/controlPanels/Separator';
 export default function setupPlugins() {
   new MainPreset().register();
 
-  // TODO: Remove these shims once the control panel configs are moved into the plugin package.
+  // Shim: control panel config lives here until moved into the plugin package.
   getChartControlPanelRegistry().registerValue('separator', Separator);
 
   // Register chart state converters for stateful charts

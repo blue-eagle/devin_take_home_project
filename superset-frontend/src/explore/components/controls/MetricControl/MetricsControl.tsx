@@ -84,7 +84,6 @@ function coerceAdhocMetrics(value: any) {
 
 const emptySavedMetric = { metric_name: '', expression: '' };
 
-// TODO: use typeguards to distinguish saved metrics from adhoc metrics
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getMetricsMatchingCurrentDataset = (
   value: any,

@@ -132,7 +132,6 @@ class SqlLabRestApi(BaseSupersetApi):
               $ref: '#/components/responses/500'
         """
         user_id = utils.get_user_id()
-        # TODO: Replace with a command class once fully migrated to SPA
         result = bootstrap_sqllab_data(user_id)
 
         return json_success(
@@ -414,7 +413,6 @@ class SqlLabRestApi(BaseSupersetApi):
     ) -> Response:
         """Create a streaming CSV response for large SQL Lab result sets."""
         # Execute streaming command
-        # TODO: Make chunk size configurable via SUPERSET_CONFIG
         chunk_size = 1024
         command = StreamingSqlResultExportCommand(client_id, chunk_size)
         command.validate()

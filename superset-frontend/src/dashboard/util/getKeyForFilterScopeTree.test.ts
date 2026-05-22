@@ -18,7 +18,7 @@
  */
 import getKeyForFilterScopeTree from './getKeyForFilterScopeTree';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('getKeyForFilterScopeTree', () => {
   test('should return stringified activeFilterField array when activeFilterField is provided', () => {
     const props = {

@@ -26,7 +26,7 @@ beforeAll(() => {
   setupAGGridModules();
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('SamplesPane', () => {
   fetchMock.post(
     'end:/datasource/samples?force=false&datasource_type=table&datasource_id=34&per_page=100&page=1',

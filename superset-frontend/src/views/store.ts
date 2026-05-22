@@ -109,10 +109,8 @@ const getMiddleware: ConfigureStoreOptions['middleware'] =
         }).concat(listenerMiddleware.middleware, logger, api.middleware)
       : [listenerMiddleware.middleware, thunk, logger, api.middleware];
 
-// TODO: This reducer is a combination of the Dashboard and Explore reducers.
-// The correct way of handling this is to unify the actions and reducers from both
-// modules in shared files. This involves a big refactor to unify the parameter types
-// and move files around. We should tackle this in a specific PR.
+// Combined reducer merges Dashboard and Explore datasource reducers.
+// Unifying their actions and types into shared files requires a larger refactor.
 const CombinedDatasourceReducers = (
   datasources: DatasourcesState | undefined | { [key: string]: Dataset },
   action: DatasourcesActionPayload | AnyDatasourcesAction | HydrateExplore,

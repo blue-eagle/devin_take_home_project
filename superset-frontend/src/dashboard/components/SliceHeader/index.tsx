@@ -186,7 +186,6 @@ const SliceHeader = forwardRef<HTMLDivElement, SliceHeaderProps>(
     const dashboardPageId = useContext(DashboardPageIdContext);
     const [headerTooltip, setHeaderTooltip] = useState<ReactNode | null>(null);
     const headerRef = useRef<HTMLDivElement>(null);
-    // TODO: change to indicator field after it will be implemented
     const crossFilterValue = useSelector<RootState, any>(
       state => state.dataMask[slice?.slice_id]?.filterState?.value,
     );

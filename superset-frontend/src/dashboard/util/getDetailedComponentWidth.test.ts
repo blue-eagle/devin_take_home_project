@@ -32,7 +32,7 @@ const getDetailedComponentWidth = getDetailedComponentWidthOriginal as (
   minimumWidth: number | undefined;
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('getDetailedComponentWidth', () => {
   test('should return an object with width, minimumWidth, and occupiedWidth', () => {
     expect(
@@ -42,7 +42,7 @@ describe('getDetailedComponentWidth', () => {
     );
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('width', () => {
     test('should be undefined if the component is not resizable and has no defined width', () => {
       const empty = {
@@ -143,7 +143,7 @@ describe('getDetailedComponentWidth', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('occupiedWidth', () => {
     test('should reflect the sum of child widths for row components', () => {
       expect(
@@ -170,7 +170,7 @@ describe('getDetailedComponentWidth', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('minimumWidth', () => {
     test('should equal GRID_MIN_COLUMN_COUNT for resizable components', () => {
       expect(

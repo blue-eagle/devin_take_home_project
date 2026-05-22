@@ -55,7 +55,7 @@ export const useDashboard = (idOrSlug: string | number) => {
     useApiV1Resource<Dashboard>(`/api/v1/dashboard/${idOrSlug}?q=${q}`),
     dashboard => ({
       ...dashboard,
-      // TODO: load these at the API level
+      // JSON fields are parsed client-side; the API returns raw strings.
       metadata:
         (dashboard.json_metadata && JSON.parse(dashboard.json_metadata)) || {},
       position_data:

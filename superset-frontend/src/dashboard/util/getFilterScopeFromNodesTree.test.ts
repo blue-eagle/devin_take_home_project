@@ -18,7 +18,7 @@
  */
 import getFilterScopeFromNodesTree from 'src/dashboard/util/getFilterScopeFromNodesTree';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('getFilterScopeFromNodesTree', () => {
   test('should return empty scope', () => {
     const nodes: Parameters<typeof getFilterScopeFromNodesTree>[0]['nodes'] =
@@ -72,7 +72,7 @@ describe('getFilterScopeFromNodesTree', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('should return scope for tabbed dashboard', () => {
     // this is a commonly used layout for dashboard:
     // - Tab 1

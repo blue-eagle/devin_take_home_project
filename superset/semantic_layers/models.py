@@ -181,8 +181,6 @@ class SemanticLayer(AuditMixinNullable, Model):
         """
         Return semantic layer implementation.
         """
-        # TODO (betodealmeida):
-        # return extension_manager.get_contribution("semanticLayers", self.type)
         class_ = registry[self.type]
         return class_.from_configuration(json.loads(self.configuration))
 

@@ -108,7 +108,7 @@ const SqlEditorTabHeader: FC<Props> = ({ queryEditor }) => {
   );
 
   function renameTab() {
-    // TODO: Replace native prompt with a proper modal dialog
+    // Uses native prompt; replace with a modal dialog for better UX.
     // eslint-disable-next-line no-alert
     const newTitle = prompt(t('Enter a new title for the tab'));
     if (newTitle) {

@@ -163,7 +163,8 @@ class ReportScheduleDAO(BaseDAO[ReportSchedule]):
         :param attributes: The attributes associated with the object to create
         """
 
-        # TODO(john-bodley): Determine why we need special handling for recipients.
+        # Recipients require explicit reconstruction so that each
+        # ReportRecipients row is bound to the parent schedule.
         if not item:
             item = ReportSchedule()
 
@@ -195,7 +196,8 @@ class ReportScheduleDAO(BaseDAO[ReportSchedule]):
         :param attributes: The attributes associated with the object to update
         """
 
-        # TODO(john-bodley): Determine why we need special handling for recipients.
+        # Recipients require explicit reconstruction so that each
+        # ReportRecipients row is bound to the parent schedule.
         if not item:
             item = ReportSchedule()
 

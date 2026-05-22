@@ -3114,10 +3114,6 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
             if self.is_admin() or self.is_owner(dashboard):
                 return
 
-            # TODO: Once a better sharing flow is in place, we should move the
-            # dashboard.published check here so that it's applied to both
-            # regular RBAC and DASHBOARD_RBAC
-
             # DASHBOARD_RBAC logic - Manage dashboard access through roles.
             # Only applicable in case the dashboard has roles set.
             if is_feature_enabled("DASHBOARD_RBAC") and dashboard.roles:
@@ -3418,7 +3414,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
 
         for resource in resources:
             if resource["type"] == GuestTokenResourceType.DASHBOARD.value:
-                # TODO (embedded): remove this check once uuids are rolled out
+                # Supports both integer IDs and UUIDs during migration
                 dashboard = Dashboard.get(str(resource["id"]))
                 if not dashboard:
                     embedded = EmbeddedDashboardDAO.find_by_id(str(resource["id"]))
@@ -3529,7 +3525,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
             r for r in user.resources if r["type"] == GuestTokenResourceType.DASHBOARD
         ]
 
-        # TODO (embedded): remove this check once uuids are rolled out
+        # Supports both integer IDs and UUIDs during migration
         for resource in dashboards:
             if str(resource["id"]) == str(dashboard.id):
                 return True

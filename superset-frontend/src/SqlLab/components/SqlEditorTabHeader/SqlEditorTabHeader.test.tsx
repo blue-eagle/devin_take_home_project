@@ -55,7 +55,7 @@ const setup = (queryEditor: QueryEditor, store?: Store) =>
     ...(store && { store }),
   });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('SqlEditorTabHeader', () => {
   test('renders name', () => {
     const { queryByText } = setup(defaultQueryEditor, mockStore(initialState));
@@ -106,7 +106,7 @@ describe('SqlEditorTabHeader', () => {
     expect(queryByText(extraQueryEditor2.name)).not.toBeInTheDocument();
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('with dropdown menus', () => {
     let store = mockStore();
     beforeEach(async () => {

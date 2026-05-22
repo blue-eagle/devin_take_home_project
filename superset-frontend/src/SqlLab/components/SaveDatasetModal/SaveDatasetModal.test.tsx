@@ -79,7 +79,7 @@ jest.mock('src/utils/cachedSupersetGet', () => ({
   clearDatasetCache: jest.fn(),
 }));
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('SaveDatasetModal', () => {
   test('renders a "Save as new" field', () => {
     renderModal();

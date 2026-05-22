@@ -29,7 +29,7 @@ const mockFormData = {
   viz_type: 'table',
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('EmbedCodeButton', () => {
   test('renders', () => {
     expect(isValidElement(<EmbedCodeContent />)).toBe(true);

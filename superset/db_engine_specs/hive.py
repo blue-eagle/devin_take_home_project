@@ -486,8 +486,7 @@ class HiveEngineSpec(PrestoEngineSpec):
         table: Table,
         **kwargs: Any,
     ) -> str:
-        # TODO(bogdan): implement`
-        pass
+        pass  # not implemented for Hive
 
     @classmethod
     def _latest_partition_from_df(cls, df: pd.DataFrame) -> list[str] | None:

@@ -123,8 +123,6 @@ class ExportDashboardsCommand(ExportModelsCommand):
             include_defaults=True,
             export_uuids=True,
         )
-        # TODO (betodealmeida): move this logic to export_to_dict once this
-        #  becomes the default export endpoint
         for key, new_name in JSON_KEYS.items():
             value: Optional[str] = payload.pop(key, None)
             if value:
@@ -229,8 +227,6 @@ class ExportDashboardsCommand(ExportModelsCommand):
             include_defaults=True,
             export_uuids=True,
         )
-        # TODO (betodealmeida): move this logic to export_to_dict once this
-        #  becomes the default export endpoint
         for key, new_name in JSON_KEYS.items():
             value: Optional[str] = payload.pop(key, None)
             if value:

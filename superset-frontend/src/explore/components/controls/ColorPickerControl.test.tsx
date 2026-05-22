@@ -28,7 +28,7 @@ const defaultProps = {
   onChange: jest.fn(),
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('ColorPickerControl', () => {
   beforeAll(() => {
     getCategoricalSchemeRegistry()

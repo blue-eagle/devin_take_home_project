@@ -23,7 +23,7 @@ import {
 } from 'src/dashboard/util/constants';
 import type { DashboardLayout } from 'src/dashboard/types';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('findFirstParentContainer', () => {
   const mockGridLayout = {
     DASHBOARD_VERSION_KEY: 'v2',

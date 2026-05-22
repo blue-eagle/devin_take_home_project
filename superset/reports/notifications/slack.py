@@ -53,7 +53,7 @@ from superset.utils.slack import (
 logger = logging.getLogger(__name__)
 
 
-# TODO: Deprecated: Remove this class in Superset 6.0.0
+# Deprecated: scheduled for removal in Superset 6.0.0
 class SlackNotification(SlackMixin, BaseNotification):  # pylint: disable=too-few-public-methods
     """
     Sends a slack notification for a report recipient

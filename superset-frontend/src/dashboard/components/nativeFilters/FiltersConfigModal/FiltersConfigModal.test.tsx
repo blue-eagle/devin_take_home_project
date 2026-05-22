@@ -428,19 +428,19 @@ test('filters are draggable', async () => {
 });
 
 /*
-  TODO
-    adds a new value filter type with all fields filled
-    adds a new numerical range filter type with all fields filled
-    adds a new time range filter type with all fields filled
-    adds a new time column filter type with all fields filled
-    adds a new time grain filter type with all fields filled
-    collapsible controls opens by default when it is checked
-    advanced section opens by default when it has an option checked
-    disables the default value when default to first item is checked
-    changes the default value options when the column changes
-    switches to configuration tab when validation fails
-    displays cancel message when there are pending operations
-    do not displays cancel message when there are no pending operations
+  Test cases not yet implemented:
+    - adds a new value filter type with all fields filled
+    - adds a new numerical range filter type with all fields filled
+    - adds a new time range filter type with all fields filled
+    - adds a new time column filter type with all fields filled
+    - adds a new time grain filter type with all fields filled
+    - collapsible controls opens by default when it is checked
+    - advanced section opens by default when it has an option checked
+    - disables the default value when default to first item is checked
+    - changes the default value options when the column changes
+    - switches to configuration tab when validation fails
+    - displays cancel message when there are pending operations
+    - do not displays cancel message when there are no pending operations
 */
 
 test('deletes a filter', async () => {

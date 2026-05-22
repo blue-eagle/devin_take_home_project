@@ -25,7 +25,7 @@ import {
 import { HYDRATE_EXPLORE, HydrateExplore } from '../actions/hydrateExplore';
 
 export default function datasourcesReducer(
-  // TODO: change type to include other datasource types
+  // Typed as Dataset; extend to support other datasource types.
   datasources: { [key: string]: Dataset },
   action: AnyDatasourcesAction | HydrateExplore,
 ) {

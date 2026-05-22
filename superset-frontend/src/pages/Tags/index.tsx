@@ -103,7 +103,7 @@ function TagList(props: TagListProps) {
     addDangerToast,
   );
 
-  // TODO: Fix usage of localStorage keying on the user id
+  // Uses user-id-keyed localStorage; see dangerouslyGetItemDoNotUse.
   const userKey = dangerouslyGetItemDoNotUse(userId?.toString(), null);
 
   const canDelete = hasPerm('can_write');

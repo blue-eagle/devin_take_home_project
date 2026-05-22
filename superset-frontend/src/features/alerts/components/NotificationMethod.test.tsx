@@ -62,7 +62,7 @@ const mockSettingSlackV2: NotificationSetting = {
   ],
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('NotificationMethod', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -519,7 +519,7 @@ describe('NotificationMethod', () => {
     ).toBeInTheDocument();
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('RefreshLabel functionality', () => {
     test('should call updateSlackOptions with force true when RefreshLabel is clicked', async () => {
       // Set feature flag so that SlackV2 branch renders RefreshLabel

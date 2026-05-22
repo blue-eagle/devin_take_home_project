@@ -55,7 +55,7 @@ jest.mock('src/explore/exploreUtils/getParsedExploreURLParams', () => ({
   getParsedExploreURLParams: jest.fn(),
 }));
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('ChartPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -187,7 +187,7 @@ describe('ChartPage', () => {
     expect(getByText(expectedChartName)).toBeInTheDocument();
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('with dashboardContextFormData', () => {
     const dashboardPageId = 'mockPageId';
 

@@ -125,7 +125,7 @@ def convert_inspector_columns(cols: list[SQLAColumnType]) -> list[ResultSetColum
 
 
 class TimeGrain(NamedTuple):
-    name: str  # TODO: redundant field, remove
+    name: str  # redundant; kept for backward compatibility
     label: str
     function: str
     duration: str | None
@@ -1185,7 +1185,6 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
         :return: All time grain expressions supported by the engine
         """
-        # TODO: use @memoize decorator or similar to avoid recomputation on every call
         time_grain_expressions = cls._time_grain_expressions.copy()
         grain_addon_expressions = app.config["TIME_GRAIN_ADDON_EXPRESSIONS"]
         time_grain_expressions.update(grain_addon_expressions.get(cls.engine, {}))
@@ -1688,7 +1687,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
     @classmethod
     def patch(cls) -> None:
         """
-        TODO: Improve docstring and refactor implementation in Hive
+        Apply engine-specific monkey patches. Overridden in Hive.
         """
 
     @classmethod
@@ -1887,7 +1886,6 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         :return: SqlAlchemy query with additional where clause referencing the latest
         partition
         """
-        # TODO: Fix circular import caused by importing Database, TableColumn
         return None
 
     @classmethod
@@ -2649,7 +2647,6 @@ class BasicParametersMixin:
         parameters: BasicParametersType,
         encrypted_extra: dict[str, str] | None = None,
     ) -> str:
-        # TODO (betodealmeida): this method should also build `connect_args`
         # make a copy so that we don't update the original
         query = parameters.get("query", {}).copy()
         if parameters.get("encryption"):

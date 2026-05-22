@@ -55,7 +55,6 @@ def add_permissions(database: Database) -> None:
     """
     Add DAR for catalogs and schemas.
     """
-    # TODO: Migrate this to use the non-commiting add_pvm helper instead
     if database.db_engine_spec.supports_catalog:
         # Adding permissions to all catalogs (and all their schemas) can take a long
         # time (minutes, while importing a chart, eg). If the database does not

@@ -1022,7 +1022,7 @@ class SemanticLayerRestApi(BaseSupersetApi):
                 sl_q = sl_q.filter(SemanticLayer.name.ilike(f"%{name_filter}%"))
             sl_items = [("semantic_layer", obj) for obj in sl_q.all()]
 
-        # TODO: move sort + pagination to SQL before GA.
+        # Sort and pagination are applied in Python; move to SQL for performance.
         return db_items + sl_items  # type: ignore
 
     @staticmethod

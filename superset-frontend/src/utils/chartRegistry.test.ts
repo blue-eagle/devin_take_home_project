@@ -28,9 +28,9 @@ import { nativeFilterGate } from 'src/dashboard/components/nativeFilters/utils';
  * This tests the pure functions used in ChartList for filtering chart types.
  */
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('Chart Registry Utils', () => {
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Type filter option generation', () => {
     let registry: ReturnType<typeof getChartMetadataRegistry>;
 

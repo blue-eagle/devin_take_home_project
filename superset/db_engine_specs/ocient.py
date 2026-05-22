@@ -329,7 +329,6 @@ class OcientEngineSpec(BaseEngineSpec):
                 del OcientEngineSpec.query_id_mapping[cursor.superset_query_id]
             raise
 
-        # TODO: Unsure if we need to verify that we are receiving rows:
         if len(rows) > 0 and type(rows[0]).__name__ == "Row":
             # Peek at the schema to determine which column values, if any,
             # require sanitization.

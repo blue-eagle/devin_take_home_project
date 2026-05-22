@@ -44,7 +44,7 @@ import { GRID_BASE_UNIT, GRID_GUTTER_SIZE } from '../../../util/constants';
 
 const DEFAULT_HEADER_HEIGHT = 22;
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('ChartHolder', () => {
   let scrollViewBase: any;
 

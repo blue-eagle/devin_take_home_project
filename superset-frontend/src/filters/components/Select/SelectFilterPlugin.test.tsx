@@ -109,7 +109,7 @@ const buildSelectFilterProps = (overrides: SelectTestOverrides = {}) => {
   } as PluginFilterSelectProps;
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('SelectFilterPlugin', () => {
   const setDataMask = jest.fn();
   const getWrapper = (props = {}) =>

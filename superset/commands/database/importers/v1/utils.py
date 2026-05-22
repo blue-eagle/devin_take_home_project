@@ -74,7 +74,6 @@ def import_database(  # noqa: C901
             "schemas_allowed_for_csv_upload"
         )
 
-    # TODO (betodealmeida): move this logic to import_from_dict
     config["extra"] = json.dumps(config["extra"])
 
     # Convert masked_encrypted_extra → encrypted_extra before importing.
@@ -100,7 +99,6 @@ def import_database(  # noqa: C901
 
     # set SQLAlchemy URI via `set_sqlalchemy_uri` so that the password gets masked
     sqlalchemy_uri = config.pop("sqlalchemy_uri")
-    # TODO (betodealmeida): we should use the `CreateDatabaseCommand` for imports
     database: Database = Database.import_from_dict(config, recursive=False)
     database.set_sqlalchemy_uri(sqlalchemy_uri)
 

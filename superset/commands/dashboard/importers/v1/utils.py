@@ -272,7 +272,6 @@ def import_dashboard(  # noqa: C901
             "have permission to create dashboards"
         )
 
-    # TODO (betodealmeida): move this logic to import_from_dict
     config = config.copy()
 
     # removed in https://github.com/apache/superset/pull/23228

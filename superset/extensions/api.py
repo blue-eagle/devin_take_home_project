@@ -67,7 +67,6 @@ class ExtensionsRestApi(BaseApi):
         """
         return self.response(200, permissions=["can_read"])
 
-    # TODO: Support the q parameter
     @protect()
     @safe
     @expose("/", methods=("GET",))

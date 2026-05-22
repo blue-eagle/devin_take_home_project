@@ -47,7 +47,7 @@ const setup = (props: Partial<ExploreCtasResultsButtonProps>, store?: Store) =>
     },
   );
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('ExploreCtasResultsButton', () => {
   const postFormSpy = jest.spyOn(SupersetClientClass.prototype, 'postForm');
   postFormSpy.mockImplementation(jest.fn());

@@ -20,7 +20,7 @@
 import { tn } from '@apache-superset/core/translation';
 import { updateColumns } from '.';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('updateColumns', () => {
   let addSuccessToast: jest.Mock;
 

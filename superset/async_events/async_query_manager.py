@@ -90,7 +90,6 @@ def get_cache_backend(
     if cache_type == "RedisSentinelCache":
         return RedisSentinelCacheBackend.from_config(cache_config)
 
-    # TODO: Expand cache backend options.
     raise UnsupportedCacheBackendError("Unsupported cache backend configuration")
 
 

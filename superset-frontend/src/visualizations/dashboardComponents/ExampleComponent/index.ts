@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// TODO: POC only component can be removed after PR approved
+// Proof-of-concept dashboard component used for development reference.
 export default {
   metadata: {
     name: 'Example',

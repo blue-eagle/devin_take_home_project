@@ -677,7 +677,7 @@ class ChartDataProphetOptionsSchema(ChartDataPostProcessingOperationOptionsSchem
         required=True,
     )
     yearly_seasonality = fields.Raw(
-        # TODO: add correct union type once supported by Marshmallow
+        # Union type (bool | int | None) not expressible in Marshmallow <4
         metadata={
             "description": "Should yearly seasonality be applied. "
             "An integer value will specify Fourier order of seasonality, `None` will "
@@ -686,7 +686,7 @@ class ChartDataProphetOptionsSchema(ChartDataPostProcessingOperationOptionsSchem
         },
     )
     weekly_seasonality = fields.Raw(
-        # TODO: add correct union type once supported by Marshmallow
+        # Union type (bool | int | None) not expressible in Marshmallow <4
         metadata={
             "description": "Should weekly seasonality be applied. "
             "An integer value will specify Fourier order of seasonality, `None` will "
@@ -695,7 +695,7 @@ class ChartDataProphetOptionsSchema(ChartDataPostProcessingOperationOptionsSchem
         },
     )
     monthly_seasonality = fields.Raw(
-        # TODO: add correct union type once supported by Marshmallow
+        # Union type (bool | int | None) not expressible in Marshmallow <4
         metadata={
             "description": "Should monthly seasonality be applied. "
             "An integer value will specify Fourier order of seasonality, `None` will "
@@ -1758,9 +1758,8 @@ CHART_SCHEMAS = (
     DashboardFiltersResponseSchema,
     ChartDataResponseSchema,
     ChartDataAsyncResponseSchema,
-    # TODO: These should optimally be included in the QueryContext schema as an `anyOf`
-    #  in ChartDataPostProcessingOperation.options, but since `anyOf` is not
-    #  by Marshmallow<3, this is not currently possible.
+    # These should be in QueryContext as `anyOf` in
+    # ChartDataPostProcessingOperation.options, but Marshmallow <4 lacks `anyOf`.
     ChartDataAdhocMetricSchema,
     ChartDataAggregateOptionsSchema,
     ChartDataContributionOptionsSchema,

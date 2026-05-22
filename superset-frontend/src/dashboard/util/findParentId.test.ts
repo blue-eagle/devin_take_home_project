@@ -18,7 +18,7 @@
  */
 import findParentId from 'src/dashboard/util/findParentId';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('findParentId', () => {
   const layout = {
     a: {

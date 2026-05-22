@@ -38,7 +38,7 @@ const getDropPosition = getDropPositionOriginal as (
   ...args: any[]
 ) => string | null;
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('getDropPosition', () => {
   // helper to easily configure test
   function getMocks({
@@ -96,7 +96,7 @@ describe('getDropPosition', () => {
     return [monitorMock, ComponentMock];
   }
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('invalid child + invalid sibling', () => {
     test('should return DROP_FORBIDDEN', () => {
       const result = getDropPosition(
@@ -111,7 +111,7 @@ describe('getDropPosition', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('valid child + invalid sibling', () => {
     test('should return DROP_LEFT if component has NO children, and orientation is "row"', () => {
       // HEADER is a valid child + invalid sibling of ROOT > GRID
@@ -163,7 +163,7 @@ describe('getDropPosition', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('invalid child + valid sibling', () => {
     test('should return DROP_TOP if orientation="row" and clientOffset is closer to component top than bottom', () => {
       const result = getDropPosition(
@@ -233,7 +233,7 @@ describe('getDropPosition', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('child + valid sibling (row orientation)', () => {
     test('should return DROP_LEFT if component has NO children, and clientOffset is NOT near top/bottom sibling boundary', () => {
       const result = getDropPosition(
@@ -342,7 +342,7 @@ describe('getDropPosition', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('child + valid sibling (column orientation)', () => {
     test('should return DROP_TOP if component has NO children, and clientOffset is NOT near left/right sibling boundary', () => {
       const result = getDropPosition(

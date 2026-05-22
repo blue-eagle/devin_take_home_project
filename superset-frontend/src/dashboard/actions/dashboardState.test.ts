@@ -62,7 +62,7 @@ jest.mock('src/utils/navigationUtils', () => ({
 const mockIsFeatureEnabled = isFeatureEnabled as jest.Mock;
 const mockNavigateTo = navigateTo as jest.Mock;
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('dashboardState actions', () => {
   const mockState = {
     dashboardState: {
@@ -121,7 +121,7 @@ describe('dashboardState actions', () => {
     return { getState, dispatch, state };
   }
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('saveDashboardRequest', () => {
     test('should dispatch UPDATE_COMPONENTS_PARENTS_LIST action', () => {
       const { getState, dispatch } = setup({
@@ -165,7 +165,7 @@ describe('dashboardState actions', () => {
       ).toStrictEqual(mockParentsList);
     });
 
-    // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+    // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
     describe('FeatureFlag.CONFIRM_DASHBOARD_DIFF', () => {
       beforeEach(() => {
         mockIsFeatureEnabled.mockImplementation(

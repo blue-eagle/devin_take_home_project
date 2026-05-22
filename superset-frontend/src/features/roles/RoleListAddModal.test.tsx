@@ -41,7 +41,7 @@ jest.mock('src/components/MessageToasts/withToasts', () => ({
   useToasts: () => mockToasts,
 }));
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('RoleListAddModal', () => {
   const mockProps = {
     show: true,

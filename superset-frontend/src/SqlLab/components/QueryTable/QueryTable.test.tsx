@@ -35,7 +35,7 @@ const queryWithResults = {
   resultsKey: 'test-results-key-123',
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('QueryTable', () => {
   test('is valid', () => {
     expect(isValidElement(<QueryTable displayLimit={100} />)).toBe(true);
