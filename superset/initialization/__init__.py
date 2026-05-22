@@ -19,7 +19,6 @@ from __future__ import annotations
 import contextlib
 import logging
 import os
-import sys
 from typing import Any, Callable, TYPE_CHECKING
 
 import wtforms_json
@@ -640,13 +639,13 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
             bottom_banner = 80 * "-" + "\n" + 80 * "-"
             logger.warning(top_banner)
             logger.warning(
-                "A Default SECRET_KEY was detected, please use superset_config.py "
-                "to override it.\n"
-                "Use a strong complex alphanumeric string and use a tool to help"
-                " you generate \n"
-                "a sufficiently random sequence, ex: openssl rand -base64 42 \n"
-                "For more info, see: https://superset.apache.org/docs/"
-                "configuration/configuring-superset#specifying-a-secret_key"
+                "INSECURE DEFAULT SECRET_KEY DETECTED. "
+                "The default key is publicly known and allows session forgery, "
+                "CSRF bypass, and JWT token forging. "
+                "Set the SUPERSET_SECRET_KEY environment variable or override "
+                "SECRET_KEY in superset_config.py. "
+                "Generate a sufficiently random key with: "
+                "openssl rand -base64 42"
             )
             logger.warning(bottom_banner)
 
@@ -660,8 +659,12 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
                 log_default_secret_key_warning()
                 return
             log_default_secret_key_warning()
-            logger.error("Refusing to start due to insecure SECRET_KEY")
-            sys.exit(1)
+            raise RuntimeError(
+                "SUPERSET_SECRET_KEY must be set for production deployments. "
+                "Refusing to start with the default SECRET_KEY due to security risk. "
+                "See https://superset.apache.org/docs/configuration/"
+                "configuring-superset#specifying-a-secret_key"
+            )
 
     def configure_session(self) -> None:
         if self.config["SESSION_SERVER_SIDE"]:
