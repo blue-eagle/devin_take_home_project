@@ -474,7 +474,8 @@ polyline = "2"
 # --------------------------------------------------------------
 
 # TODO REMOVE THESE DEPS FROM CODEBASE
-paramiko = "3"  # GPL
+paramiko = "5"  # LGPL
+pyarrow = ">=23"  # Apache-2.0
 pyxlsb = "1"  # GPL
 
 [tool.uv.sources]
