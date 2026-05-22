@@ -21,7 +21,7 @@ import { useCallback, useMemo, useState, useEffect } from 'react';
 import { t } from '@apache-superset/core/translation';
 import { SupersetClient } from '@superset-ui/core';
 import { Alert } from '@apache-superset/core/components';
-import { styled } from '@apache-superset/core/theme';
+import { css, useTheme } from '@apache-superset/core/theme';
 import {
   Tag,
   DeleteModal,
@@ -64,21 +64,6 @@ import {
 
 const PAGE_SIZE = 25;
 
-const FlexRowContainer = styled.div`
-  align-items: center;
-  display: flex;
-  gap: ${({ theme }) => theme.sizeUnit}px;
-
-  .ant-tag {
-    margin-left: ${({ theme }) => theme.sizeUnit * 2}px;
-  }
-`;
-
-const IconTag = styled(Tag)`
-  display: inline-flex;
-  align-items: center;
-`;
-
 const CONFIRM_OVERWRITE_MESSAGE = t(
   'You are importing one or more themes that already exist. ' +
     'Overwriting might cause you to lose some of your work. Are you ' +
@@ -100,6 +85,7 @@ function ThemesList({
   addSuccessToast,
   user,
 }: ThemesListProps) {
+  const theme = useTheme();
   const {
     state: {
       loading,
@@ -372,7 +358,17 @@ function ThemesList({
             original.id === appliedThemeId;
 
           return (
-            <FlexRowContainer>
+            <div
+              css={css`
+                align-items: center;
+                display: flex;
+                gap: ${theme.sizeUnit}px;
+
+                .ant-tag {
+                  margin-left: ${theme.sizeUnit * 2}px;
+                }
+              `}
+            >
               {original.theme_name}
               {isCurrentTheme && (
                 <Tooltip
@@ -388,19 +384,33 @@ function ThemesList({
               )}
               {original.is_system_default && (
                 <Tooltip title={t('This is the default light theme')}>
-                  <IconTag color="warning" icon={<Icons.SunOutlined />}>
+                  <Tag
+                    color="warning"
+                    icon={<Icons.SunOutlined />}
+                    css={css`
+                      display: inline-flex;
+                      align-items: center;
+                    `}
+                  >
                     {t('Default')}
-                  </IconTag>
+                  </Tag>
                 </Tooltip>
               )}
               {original.is_system_dark && (
                 <Tooltip title={t('This is the default dark theme')}>
-                  <IconTag color="default" icon={<Icons.MoonOutlined />}>
+                  <Tag
+                    color="default"
+                    icon={<Icons.MoonOutlined />}
+                    css={css`
+                      display: inline-flex;
+                      align-items: center;
+                    `}
+                  >
                     {t('Dark')}
-                  </IconTag>
+                  </Tag>
                 </Tooltip>
               )}
-            </FlexRowContainer>
+            </div>
           );
         },
         Header: t('Name'),

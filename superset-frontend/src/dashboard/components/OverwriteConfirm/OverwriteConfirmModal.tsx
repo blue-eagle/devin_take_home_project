@@ -28,68 +28,18 @@ import {
   setOverrideConfirm,
 } from 'src/dashboard/actions/dashboardState';
 import { t } from '@apache-superset/core/translation';
-import { styled } from '@apache-superset/core/theme';
+import { css, useTheme } from '@apache-superset/core/theme';
 import { SAVE_TYPE_OVERWRITE_CONFIRMED } from 'src/dashboard/util/constants';
 
 const STICKY_HEADER_TOP = 16;
 const STICKY_HEADER_HEIGHT = 32;
-
-const StyledTitle = styled.h2`
-  ${({ theme }) => `
-     color:  ${theme.colorText}
-   `}
-`;
-
-const StyledEditor = styled.div`
-  ${({ theme }) => `
-     table {
-       border: 1px ${theme.colorBorder} solid;
-     }
-     pre {
-       font-size: 11px;
-       padding: 0px;
-       background-color: transparent;
-       border: 0px;
-       line-height: 110%;
-     }
-   `}
-`;
-
-const StackableHeader = styled(Button)<{ top: number }>`
-  ${({ theme, top }) => `
-     position: sticky;
-     top: ${top}px;
-     background-color: ${theme.colorBgContainer};
-     margin: 0px;
-     padding: 8px 4px;
-     z-index: 1;
-     border: 0px;
-     border-radius: 0px;
-     width: 100%;
-     justify-content: flex-start;
-     border-bottom: 1px ${theme.colorSplit} solid;
-     &::before {
-       display: inline-block;
-       position: relative;
-       opacity: 1;
-       content: "\\00BB";
-     }
-   `}
-`;
-
-const StyledBottom = styled.div<{ inView: boolean }>`
-  ${({ inView }) => `
-     margin: 8px auto;
-     text-align: center;
-     opacity: ${inView ? 0 : 1};
-  `}
-`;
 
 type Props = {
   overwriteConfirmMetadata: DashboardState['overwriteConfirmMetadata'];
 };
 
 const OverrideConfirmModal = ({ overwriteConfirmMetadata }: Props) => {
+  const theme = useTheme();
   const [bottomRef, hasReviewed] = useInView({ triggerOnce: true });
   const dispatch = useDispatch();
   const onHide = useCallback(
@@ -159,21 +109,57 @@ const OverrideConfirmModal = ({ overwriteConfirmMetadata }: Props) => {
     >
       {overwriteConfirmMetadata && (
         <>
-          <StyledTitle>
+          <h2
+            css={css`
+              color: ${theme.colorText};
+            `}
+          >
             {t('Are you sure you intend to overwrite the following values?')}
-          </StyledTitle>
-          <StyledEditor>
+          </h2>
+          <div
+            css={css`
+              table {
+                border: 1px ${theme.colorBorder} solid;
+              }
+              pre {
+                font-size: 11px;
+                padding: 0px;
+                background-color: transparent;
+                border: 0px;
+                line-height: 110%;
+              }
+            `}
+          >
             {overwriteConfirmMetadata.overwriteConfirmItems.map(
               ({ keyPath, oldValue, newValue }, index) => (
                 <Fragment key={keyPath}>
                   <div ref={anchors[index]} />
-                  <StackableHeader
-                    top={index * STICKY_HEADER_HEIGHT - STICKY_HEADER_TOP}
+                  <Button
                     buttonStyle="secondary"
                     onClick={() => onAnchorClicked(index)}
+                    css={css`
+                      position: sticky;
+                      top: ${index * STICKY_HEADER_HEIGHT -
+                      STICKY_HEADER_TOP}px;
+                      background-color: ${theme.colorBgContainer};
+                      margin: 0px;
+                      padding: 8px 4px;
+                      z-index: 1;
+                      border: 0px;
+                      border-radius: 0px;
+                      width: 100%;
+                      justify-content: flex-start;
+                      border-bottom: 1px ${theme.colorSplit} solid;
+                      &::before {
+                        display: inline-block;
+                        position: relative;
+                        opacity: 1;
+                        content: '\\00BB';
+                      }
+                    `}
                   >
                     {keyPath}
-                  </StackableHeader>
+                  </Button>
                   <ReactDiffViewer
                     oldValue={oldValue}
                     newValue={newValue}
@@ -189,7 +175,14 @@ const OverrideConfirmModal = ({ overwriteConfirmMetadata }: Props) => {
                 </Fragment>
               ),
             )}
-            <StyledBottom ref={bottomRef} inView={hasReviewed}>
+            <div
+              ref={bottomRef}
+              css={css`
+                margin: 8px auto;
+                text-align: center;
+                opacity: ${hasReviewed ? 0 : 1};
+              `}
+            >
               {/* Add submit button at the bottom in case of intersection-observer fallback */}
               <Button
                 htmlType="button"
@@ -200,8 +193,8 @@ const OverrideConfirmModal = ({ overwriteConfirmMetadata }: Props) => {
               >
                 {t('Yes, overwrite changes')}
               </Button>
-            </StyledBottom>
-          </StyledEditor>
+            </div>
+          </div>
         </>
       )}
     </Modal>

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { t } from '@apache-superset/core/translation';
-import { styled, useTheme } from '@apache-superset/core/theme';
+import { css, useTheme } from '@apache-superset/core/theme';
 import {
   Modal,
   Button,
@@ -58,127 +58,6 @@ interface StreamingExportModalProps {
   onDownload?: () => void;
   progress: StreamingProgress;
 }
-
-const ModalContent = styled.div`
-  ${({ theme }) => `
-    padding: ${theme.sizeUnit * 4}px 0 ${theme.sizeUnit * 2}px;
-  `}
-`;
-
-const ProgressSection = styled.div`
-  ${({ theme }) => `
-    margin: ${theme.sizeUnit * 6}px 0;
-    position: relative;
-  `}
-`;
-
-const ProgressWrapper = styled.div`
-  ${({ theme }) => `
-    display: flex;
-    align-items: center;
-    gap: ${theme.sizeUnit * 3}px;
-  `}
-`;
-
-const StyledProgress = styled(Progress)`
-  flex: 1;
-`;
-
-const SuccessIcon = styled(Icons.CheckCircleFilled)`
-  ${({ theme }) => `
-    color: ${theme.colorSuccess};
-    font-size: ${theme.sizeUnit * 6}px;
-    flex-shrink: 0;
-  `}
-`;
-
-const ErrorIconWrapper = styled.div`
-  ${({ theme }) => `
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: ${theme.sizeUnit * 4}px;
-    height: ${theme.sizeUnit * 4}px;
-    background-color: ${theme.colorError};
-    border-radius: 50%;
-    flex-shrink: 0;
-  `}
-`;
-
-const ErrorIconStyled = styled(Icons.CloseOutlined)`
-  ${({ theme }) => `
-    color: ${theme.colorWhite};
-    font-size: ${theme.sizeUnit * 2.5}px;
-  `}
-`;
-
-const ActionButtons = styled.div`
-  ${({ theme }) => `
-    display: flex;
-    gap: ${theme.sizeUnit * 2}px;
-    justify-content: flex-end;
-  `}
-`;
-
-const CenteredText = styled(Text)`
-  ${({ theme }) => `
-    display: block;
-    text-align: center;
-    margin-top: ${theme.sizeUnit * 4}px;
-  `}
-`;
-
-const ErrorText = styled(CenteredText)`
-  ${({ theme }) => `
-    color: ${theme.colorError};
-  `}
-`;
-
-const CancelButton = styled(Button)`
-  ${({ theme }) => `
-    background-color: ${theme.colorSuccessBg};
-    color: ${theme.colorSuccess};
-    border-color: ${theme.colorSuccessBg};
-
-    &:hover {
-      background-color: ${theme.colorSuccessBg};
-      color: ${theme.colorSuccess};
-      border-color: ${theme.colorSuccess};
-    }
-
-    &:focus {
-      background-color: ${theme.colorSuccessBg};
-      color: ${theme.colorSuccess};
-      border-color: ${theme.colorSuccess};
-    }
-  `}
-`;
-
-const DownloadButton = styled(Button)`
-  ${({ theme }) => `
-    background-color: ${theme.colorSuccess};
-    border-color: ${theme.colorSuccess};
-    color: ${theme.colorWhite};
-
-    &:hover:not(:disabled) {
-      background-color: ${theme.colorSuccessActive};
-      border-color: ${theme.colorSuccessActive};
-      color: ${theme.colorWhite};
-    }
-
-    &:focus:not(:disabled) {
-      background-color: ${theme.colorSuccess};
-      border-color: ${theme.colorSuccess};
-      color: ${theme.colorWhite};
-    }
-
-    &:disabled {
-      background-color: ${theme.colorBgContainerDisabled};
-      border-color: ${theme.colorBgContainerDisabled};
-      color: ${theme.colorTextDisabled};
-    }
-  `}
-`;
 
 const triggerFileDownload = (url: string, filename: string) => {
   const link = document.createElement('a');
@@ -293,41 +172,179 @@ const ModalStateContent = ({
   };
 
   return (
-    <ModalContent>
-      <ProgressSection>
+    <div
+      css={css`
+        padding: ${theme.sizeUnit * 4}px 0 ${theme.sizeUnit * 2}px;
+      `}
+    >
+      <div
+        css={css`
+          margin: ${theme.sizeUnit * 6}px 0;
+          position: relative;
+        `}
+      >
         {hasIcon ? (
-          <ProgressWrapper>
-            <StyledProgress {...progressProps} />
+          <div
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: ${theme.sizeUnit * 3}px;
+            `}
+          >
+            <Progress
+              css={css`
+                flex: 1;
+              `}
+              {...progressProps}
+            />
             {isError && (
-              <ErrorIconWrapper>
-                <ErrorIconStyled />
-              </ErrorIconWrapper>
+              <div
+                css={css`
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  width: ${theme.sizeUnit * 4}px;
+                  height: ${theme.sizeUnit * 4}px;
+                  background-color: ${theme.colorError};
+                  border-radius: 50%;
+                  flex-shrink: 0;
+                `}
+              >
+                <Icons.CloseOutlined
+                  css={css`
+                    color: ${theme.colorWhite};
+                    font-size: ${theme.sizeUnit * 2.5}px;
+                  `}
+                />
+              </div>
             )}
-            {isCompleted && <SuccessIcon />}
-          </ProgressWrapper>
+            {isCompleted && (
+              <Icons.CheckCircleFilled
+                css={css`
+                  color: ${theme.colorSuccess};
+                  font-size: ${theme.sizeUnit * 6}px;
+                  flex-shrink: 0;
+                `}
+              />
+            )}
+          </div>
         ) : (
           <Progress {...progressProps} />
         )}
         {isError ? (
-          <ErrorText>{messageText}</ErrorText>
+          <Text
+            css={css`
+              display: block;
+              text-align: center;
+              margin-top: ${theme.sizeUnit * 4}px;
+              color: ${theme.colorError};
+            `}
+          >
+            {messageText}
+          </Text>
         ) : (
-          <CenteredText>{messageText}</CenteredText>
+          <Text
+            css={css`
+              display: block;
+              text-align: center;
+              margin-top: ${theme.sizeUnit * 4}px;
+            `}
+          >
+            {messageText}
+          </Text>
         )}
-      </ProgressSection>
-      <ActionButtons>
-        <CancelButton onClick={onCancel}>{buttonText}</CancelButton>
+      </div>
+      <div
+        css={css`
+          display: flex;
+          gap: ${theme.sizeUnit * 2}px;
+          justify-content: flex-end;
+        `}
+      >
+        <Button
+          onClick={onCancel}
+          css={css`
+            background-color: ${theme.colorSuccessBg};
+            color: ${theme.colorSuccess};
+            border-color: ${theme.colorSuccessBg};
+
+            &:hover {
+              background-color: ${theme.colorSuccessBg};
+              color: ${theme.colorSuccess};
+              border-color: ${theme.colorSuccess};
+            }
+
+            &:focus {
+              background-color: ${theme.colorSuccessBg};
+              color: ${theme.colorSuccess};
+              border-color: ${theme.colorSuccess};
+            }
+          `}
+        >
+          {buttonText}
+        </Button>
         {shouldShowRetry ? (
-          <DownloadButton onClick={onRetry}>{t('Retry')}</DownloadButton>
+          <Button
+            onClick={onRetry}
+            css={css`
+              background-color: ${theme.colorSuccess};
+              border-color: ${theme.colorSuccess};
+              color: ${theme.colorWhite};
+
+              &:hover:not(:disabled) {
+                background-color: ${theme.colorSuccessActive};
+                border-color: ${theme.colorSuccessActive};
+                color: ${theme.colorWhite};
+              }
+
+              &:focus:not(:disabled) {
+                background-color: ${theme.colorSuccess};
+                border-color: ${theme.colorSuccess};
+                color: ${theme.colorWhite};
+              }
+
+              &:disabled {
+                background-color: ${theme.colorBgContainerDisabled};
+                border-color: ${theme.colorBgContainerDisabled};
+                color: ${theme.colorTextDisabled};
+              }
+            `}
+          >
+            {t('Retry')}
+          </Button>
         ) : (
-          <DownloadButton
+          <Button
             onClick={onDownload}
             disabled={!isCompleted || !downloadUrl}
+            css={css`
+              background-color: ${theme.colorSuccess};
+              border-color: ${theme.colorSuccess};
+              color: ${theme.colorWhite};
+
+              &:hover:not(:disabled) {
+                background-color: ${theme.colorSuccessActive};
+                border-color: ${theme.colorSuccessActive};
+                color: ${theme.colorWhite};
+              }
+
+              &:focus:not(:disabled) {
+                background-color: ${theme.colorSuccess};
+                border-color: ${theme.colorSuccess};
+                color: ${theme.colorWhite};
+              }
+
+              &:disabled {
+                background-color: ${theme.colorBgContainerDisabled};
+                border-color: ${theme.colorBgContainerDisabled};
+                color: ${theme.colorTextDisabled};
+              }
+            `}
           >
             {t('Download')}
-          </DownloadButton>
+          </Button>
         )}
-      </ActionButtons>
-    </ModalContent>
+      </div>
+    </div>
   );
 };
 

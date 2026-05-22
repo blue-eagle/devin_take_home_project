@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { styled } from '@apache-superset/core/theme';
+import { css, useTheme } from '@apache-superset/core/theme';
 import { Link } from 'react-router-dom';
 import type { TagType } from 'src/types/TagType';
 import { Tag as AntdTag } from '@superset-ui/core/components/Tag';
@@ -25,13 +25,6 @@ import { Tooltip } from '@superset-ui/core/components/Tooltip';
 import type { TagProps } from 'antd/es';
 import type { CheckableTagProps } from 'antd/es/tag';
 import { useMemo } from 'react';
-
-const StyledTag = styled(AntdTag)`
-  ${({ theme }) => `
-  margin-top: ${theme.sizeUnit}px;
-  margin-bottom: ${theme.sizeUnit}px;
-  `};
-`;
 
 const MAX_DISPLAY_CHAR = 20;
 
@@ -46,6 +39,7 @@ const SupersetTag = ({
   children,
   ...rest
 }: TagType) => {
+  const theme = useTheme();
   const tagDisplay = useMemo(() => {
     if (!name) return null;
     const isLongTag = name.length > MAX_DISPLAY_CHAR;
@@ -60,23 +54,31 @@ const SupersetTag = ({
     <>
       {editable ? (
         <Tooltip title={toolTipTitle} key={toolTipTitle}>
-          <StyledTag
+          <AntdTag
             key={id}
             closable={editable}
             onClose={handleClose}
             closeIcon={editable}
+            css={css`
+              margin-top: ${theme.sizeUnit}px;
+              margin-bottom: ${theme.sizeUnit}px;
+            `}
             {...rest}
           >
             {children || tagDisplay}
-          </StyledTag>
+          </AntdTag>
         </Tooltip>
       ) : (
         <Tooltip title={toolTipTitle} key={toolTipTitle}>
-          <StyledTag
+          <AntdTag
             data-test="tag"
             key={id}
             onClick={onClick}
             role={whatRole}
+            css={css`
+              margin-top: ${theme.sizeUnit}px;
+              margin-bottom: ${theme.sizeUnit}px;
+            `}
             {...rest}
           >
             {' '}
@@ -91,7 +93,7 @@ const SupersetTag = ({
             ) : (
               children || tagDisplay
             )}
-          </StyledTag>
+          </AntdTag>
         </Tooltip>
       )}
     </>

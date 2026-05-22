@@ -19,7 +19,7 @@
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { t } from '@apache-superset/core/translation';
-import { styled } from '@apache-superset/core/theme';
+import { css, useTheme } from '@apache-superset/core/theme';
 import { Form, Checkbox } from '@superset-ui/core/components';
 import { StandardModal } from 'src/components/Modal';
 import { RootState } from 'src/dashboard/types';
@@ -28,14 +28,6 @@ import {
   validateRefreshFrequency,
   getRefreshWarningMessage,
 } from './RefreshFrequency';
-
-const ModalContent = styled.div`
-  padding: ${({ theme }) => theme.sizeUnit * 4}px;
-`;
-
-const CheckboxFormItem = styled(Form.Item)`
-  padding-top: ${({ theme }) => theme.sizeUnit * 4}px;
-`;
 
 interface RefreshIntervalModalProps {
   show: boolean;
@@ -62,6 +54,7 @@ const RefreshIntervalModal = ({
   pauseOnInactiveTab,
   onPauseOnInactiveTabChange,
 }: RefreshIntervalModalProps) => {
+  const theme = useTheme();
   const [refreshFrequency, setRefreshFrequency] = useState(initialFrequency);
   const [localPauseOnInactiveTab, setLocalPauseOnInactiveTab] =
     useState(pauseOnInactiveTab);
@@ -120,7 +113,11 @@ const RefreshIntervalModal = ({
       saveDisabled={refreshErrors.length > 0}
       errorTooltip={refreshErrors[0]}
     >
-      <ModalContent>
+      <div
+        css={css`
+          padding: ${theme.sizeUnit * 4}px;
+        `}
+      >
         <Form layout="vertical">
           <Form.Item
             label={t('Refresh frequency')}
@@ -138,16 +135,20 @@ const RefreshIntervalModal = ({
               onChange={handleFrequencyChange}
             />
           </Form.Item>
-          <CheckboxFormItem>
+          <Form.Item
+            css={css`
+              padding-top: ${theme.sizeUnit * 4}px;
+            `}
+          >
             <Checkbox
               checked={localPauseOnInactiveTab}
               onChange={e => setLocalPauseOnInactiveTab(e.target.checked)}
             >
               {t('Pause auto refresh if tab is inactive')}
             </Checkbox>
-          </CheckboxFormItem>
+          </Form.Item>
         </Form>
-      </ModalContent>
+      </div>
     </StandardModal>
   );
 };
