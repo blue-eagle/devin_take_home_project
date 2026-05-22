@@ -71,7 +71,7 @@ class AcquireDistributedLock(BaseDistributedLockCommand):
         else:
             self._acquire_kv()
 
-    def _acquire_redis(self, redis_client: Any) -> None:
+    def _acquire_redis(self, redis_client: redis.Redis[Any]) -> None:
         """Acquire lock using Redis SET NX EX (atomic)."""
         try:
             # SET NX EX: Set if not exists, with expiration

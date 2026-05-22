@@ -31,6 +31,7 @@ from sqlalchemy import text
 
 from superset import db
 from superset.commands.base import BaseCommand
+from superset.models.core import Database
 
 logger = logging.getLogger(__name__)
 
@@ -152,7 +153,7 @@ class BaseStreamingCSVExportCommand(BaseCommand):
     def _execute_query_and_stream(
         self,
         sql: str,
-        database: Any,
+        database: Database,
         limit: int | None,
         catalog: str | None = None,
         schema: str | None = None,

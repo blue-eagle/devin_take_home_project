@@ -16,7 +16,9 @@
 # under the License.
 
 import logging
-from typing import Any, Optional
+from typing import Optional
+
+from flask_appbuilder.security.sqla.models import User
 
 from superset import db, security_manager
 from superset.commands.base import BaseCommand
@@ -33,7 +35,7 @@ class ResetSupersetCommand(BaseCommand):
     def __init__(
         self,
         confirm: bool,
-        user: Any,
+        user: User,
         exclude_users: Optional[str] = None,
         exclude_roles: Optional[str] = None,
     ) -> None:

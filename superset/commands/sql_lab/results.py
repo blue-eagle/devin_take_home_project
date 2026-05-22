@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 class SqlExecutionResultsCommand(BaseCommand):
     _key: str
     _rows: int | None
-    _blob: Any
+    _blob: bytes | None
     _query: Query
 
     def __init__(
@@ -141,6 +141,7 @@ class SqlExecutionResultsCommand(BaseCommand):
     ) -> dict[str, Any]:
         """Runs arbitrary sql and returns data as json"""
         self.validate()
+        assert self._blob is not None
         payload = utils.zlib_decompress(
             self._blob, decode=not results_backend_use_msgpack
         )
