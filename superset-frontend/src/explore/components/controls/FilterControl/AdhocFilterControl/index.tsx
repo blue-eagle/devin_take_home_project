@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Component, ReactNode } from 'react';
+import { ReactNode, useState, useCallback, useEffect, useRef } from 'react';
 import { SupersetClient, ensureIsArray } from '@superset-ui/core';
 import { logging } from '@apache-superset/core/utils';
 import { t } from '@apache-superset/core/translation';
@@ -96,21 +96,7 @@ interface FilterOption {
   [key: string]: unknown;
 }
 
-interface AdhocFilterControlState {
-  values: AdhocFilter[];
-  options: FilterOption[];
-  partitionColumn: string | null;
-}
-
 const { warning } = Modal;
-
-const defaultProps = {
-  name: '',
-  onChange: () => {},
-  columns: [],
-  savedMetrics: [],
-  selectedMetrics: [],
-};
 
 function optionsForSelect(props: AdhocFilterControlProps): FilterOption[] {
   const options = [
@@ -154,71 +140,85 @@ function optionsForSelect(props: AdhocFilterControlProps): FilterOption[] {
     );
 }
 
-class AdhocFilterControl extends Component<
-  AdhocFilterControlProps,
-  AdhocFilterControlState
-> {
-  optionRenderer: (option: FilterOption) => JSX.Element;
-  valueRenderer: (adhocFilter: AdhocFilter, index: number) => JSX.Element;
+function AdhocFilterControl({
+  name = '',
+  onChange = () => {},
+  columns = [],
+  savedMetrics = [],
+  selectedMetrics = [],
+  label,
+  sections,
+  operators,
+  value,
+  datasource,
+  isLoading,
+  canDelete,
+  theme,
+  ...restProps
+}: AdhocFilterControlProps) {
+  const props = {
+    name,
+    onChange,
+    columns,
+    savedMetrics,
+    selectedMetrics,
+    label,
+    sections,
+    operators,
+    value,
+    datasource,
+    isLoading,
+    canDelete,
+    theme,
+    ...restProps,
+  };
 
-  constructor(props: AdhocFilterControlProps) {
-    super(props);
-    this.onRemoveFilter = this.onRemoveFilter.bind(this);
-    this.onNewFilter = this.onNewFilter.bind(this);
-    this.onFilterEdit = this.onFilterEdit.bind(this);
-    this.moveLabel = this.moveLabel.bind(this);
-    this.onChange = this.onChange.bind(this);
-    this.mapOption = this.mapOption.bind(this);
-    this.getMetricExpression = this.getMetricExpression.bind(this);
-    this.removeFilter = this.removeFilter.bind(this);
-
-    const filters = (this.props.value || []).map(filter =>
+  const [values, setValues] = useState<AdhocFilter[]>(() =>
+    (value || []).map(filter =>
       isDictionaryForAdhocFilter(filter) ? new AdhocFilter(filter) : filter,
-    );
+    ),
+  );
+  const [options, setOptions] = useState<FilterOption[]>(() =>
+    optionsForSelect(props),
+  );
+  const [partitionColumn, setPartitionColumn] = useState<string | null>(null);
 
-    this.optionRenderer = option => <FilterDefinitionOption option={option} />;
-    this.valueRenderer = (adhocFilter, index) => (
-      <AdhocFilterOption
-        key={index}
-        index={index}
-        adhocFilter={adhocFilter}
-        onFilterEdit={this.onFilterEdit}
-        options={this.state.options}
-        sections={this.props.sections}
-        operators={this.props.operators as Operators[] | undefined}
-        datasource={this.props.datasource}
-        onRemoveFilter={e => {
-          e.stopPropagation();
-          this.onRemoveFilter(index);
-        }}
-        onMoveLabel={this.moveLabel}
-        onDropLabel={() => this.props.onChange?.(this.state.values)}
-        partitionColumn={this.state.partitionColumn}
-      />
-    );
-    this.state = {
-      values: filters,
-      options: optionsForSelect(this.props),
-      partitionColumn: null,
-    };
-  }
+  const prevColumns = useRef(columns);
+  const prevValue = useRef(value);
 
-  componentDidMount() {
-    const { datasource } = this.props;
+  useEffect(() => {
+    if (columns !== prevColumns.current) {
+      setOptions(optionsForSelect(props));
+      prevColumns.current = columns;
+    }
+  }, [columns]);
+
+  useEffect(() => {
+    if (value !== prevValue.current) {
+      setValues(
+        (value || []).map(filter =>
+          isDictionaryForAdhocFilter(filter) ? new AdhocFilter(filter) : filter,
+        ),
+      );
+      prevValue.current = value;
+    }
+  }, [value]);
+
+  useEffect(() => {
     if (datasource && datasource.type === 'table') {
       const dbId = datasource.database?.id;
       const {
-        datasource_name: name,
+        datasource_name: dsName,
         catalog,
         schema,
         is_sqllab_view: isSqllabView,
       } = datasource;
 
-      if (!isSqllabView && dbId && name && schema) {
+      if (!isSqllabView && dbId && dsName && schema) {
         SupersetClient.get({
           endpoint: `/api/v1/database/${dbId}/table_metadata/extra/${toQueryString(
             {
-              name,
+              name: dsName,
               catalog,
               schema,
             },
@@ -227,14 +227,12 @@ class AdhocFilterControl extends Component<
           .then(({ json }) => {
             if (json && json.partitions) {
               const { partitions } = json;
-              // for now only show latest_partition option
-              // when table datasource has only 1 partition key.
               if (
                 partitions &&
                 partitions.cols &&
                 Object.keys(partitions.cols).length === 1
               ) {
-                this.setState({ partitionColumn: partitions.cols[0] });
+                setPartitionColumn(partitions.cols[0]);
               }
             }
           })
@@ -243,177 +241,172 @@ class AdhocFilterControl extends Component<
           });
       }
     }
-  }
+  }, [datasource]);
 
-  componentDidUpdate(prevProps: AdhocFilterControlProps): void {
-    if (this.props.columns !== prevProps.columns) {
-      this.setState({ options: optionsForSelect(this.props) });
-    }
-    if (this.props.value !== prevProps.value) {
-      this.setState({
-        values: (this.props.value || []).map(filter =>
-          isDictionaryForAdhocFilter(filter) ? new AdhocFilter(filter) : filter,
-        ),
-      });
-    }
-  }
-
-  removeFilter(index: number): void {
-    const valuesCopy = [...this.state.values];
-    valuesCopy.splice(index, 1);
-    this.setState(prevState => ({
-      ...prevState,
-      values: valuesCopy,
-    }));
-    this.props.onChange?.(valuesCopy);
-  }
-
-  onRemoveFilter(index: number): void {
-    const { canDelete } = this.props;
-    const { values } = this.state;
-    const result = canDelete?.(values[index], values);
-    if (typeof result === 'string') {
-      warning({ title: t('Warning'), content: result });
-      return;
-    }
-    this.removeFilter(index);
-  }
-
-  onNewFilter(newFilter: FilterOption | AdhocFilter): void {
-    const mappedOption = this.mapOption(newFilter);
-    if (mappedOption) {
-      this.setState(
-        prevState => ({
-          ...prevState,
-          values: [...prevState.values, mappedOption],
-        }),
-        () => {
-          this.props.onChange?.(this.state.values);
-        },
+  const getMetricExpression = useCallback(
+    (savedMetricName: string): string => {
+      const metric = savedMetrics?.find(
+        sm => sm.metric_name === savedMetricName,
       );
-    }
-  }
+      return metric?.expression ?? '';
+    },
+    [savedMetrics],
+  );
 
-  onFilterEdit(changedFilter: AdhocFilter): void {
-    this.props.onChange?.(
-      this.state.values.map(value => {
-        if (value.filterOptionName === changedFilter.filterOptionName) {
-          return changedFilter;
-        }
-        return value;
-      }),
-    );
-  }
+  const mapOption = useCallback(
+    (option: FilterOption | AdhocFilter): AdhocFilter | null => {
+      if (option instanceof AdhocFilter) {
+        return option;
+      }
+      if (option.saved_metric_name) {
+        return new AdhocFilter({
+          expressionType: ExpressionTypes.Sql,
+          subject: getMetricExpression(option.saved_metric_name),
+          operator:
+            OPERATOR_ENUM_TO_OPERATOR_TYPE[Operators.GreaterThan].operation,
+          comparator: 0,
+          clause: Clauses.Having,
+        });
+      }
+      if (option.label) {
+        return new AdhocFilter({
+          expressionType: ExpressionTypes.Sql,
+          subject: new AdhocMetric(option).translateToSql(),
+          operator:
+            OPERATOR_ENUM_TO_OPERATOR_TYPE[Operators.GreaterThan].operation,
+          comparator: 0,
+          clause: Clauses.Having,
+        });
+      }
+      if (option.column_name) {
+        return new AdhocFilter({
+          expressionType: ExpressionTypes.Simple,
+          subject: option.column_name,
+          operator: OPERATOR_ENUM_TO_OPERATOR_TYPE[Operators.Equals].operation,
+          comparator: '',
+          clause: Clauses.Where,
+          isNew: true,
+        });
+      }
+      return null;
+    },
+    [getMetricExpression],
+  );
 
-  onChange(opts: FilterOption[] | null): void {
-    const options = (opts || [])
-      .map(option => this.mapOption(option))
-      .filter((option): option is AdhocFilter => option !== null);
-    this.props.onChange?.(options);
-  }
+  const removeFilter = useCallback(
+    (index: number) => {
+      const valuesCopy = [...values];
+      valuesCopy.splice(index, 1);
+      setValues(valuesCopy);
+      onChange?.(valuesCopy);
+    },
+    [values, onChange],
+  );
 
-  getMetricExpression(savedMetricName: string): string {
-    const metric = this.props.savedMetrics?.find(
-      savedMetric => savedMetric.metric_name === savedMetricName,
-    );
-    return metric?.expression ?? '';
-  }
+  const onRemoveFilter = useCallback(
+    (index: number) => {
+      const result = canDelete?.(values[index], values);
+      if (typeof result === 'string') {
+        warning({ title: t('Warning'), content: result });
+        return;
+      }
+      removeFilter(index);
+    },
+    [canDelete, values, removeFilter],
+  );
 
-  moveLabel(dragIndex: number, hoverIndex: number): void {
-    const { values } = this.state;
+  const onFilterEdit = useCallback(
+    (changedFilter: AdhocFilter) => {
+      onChange?.(
+        values.map(v => {
+          if (v.filterOptionName === changedFilter.filterOptionName) {
+            return changedFilter;
+          }
+          return v;
+        }),
+      );
+    },
+    [onChange, values],
+  );
 
-    const newValues = [...values];
-    [newValues[hoverIndex], newValues[dragIndex]] = [
-      newValues[dragIndex],
-      newValues[hoverIndex],
-    ];
-    this.setState({ values: newValues });
-  }
+  const onNewFilter = useCallback(
+    (newFilter: FilterOption | AdhocFilter) => {
+      const mappedOption = mapOption(newFilter);
+      if (mappedOption) {
+        const newValues = [...values, mappedOption];
+        setValues(newValues);
+        onChange?.(newValues);
+      }
+    },
+    [mapOption, values, onChange],
+  );
 
-  mapOption(option: FilterOption | AdhocFilter): AdhocFilter | null {
-    // already a AdhocFilter, skip
-    if (option instanceof AdhocFilter) {
-      return option;
-    }
-    // via datasource saved metric
-    if (option.saved_metric_name) {
-      return new AdhocFilter({
-        expressionType: ExpressionTypes.Sql,
-        subject: this.getMetricExpression(option.saved_metric_name),
-        operator:
-          OPERATOR_ENUM_TO_OPERATOR_TYPE[Operators.GreaterThan].operation,
-        comparator: 0,
-        clause: Clauses.Having,
-      });
-    }
-    // has a custom label, meaning it's custom column
-    if (option.label) {
-      return new AdhocFilter({
-        expressionType: ExpressionTypes.Sql,
-        subject: new AdhocMetric(option).translateToSql(),
-        operator:
-          OPERATOR_ENUM_TO_OPERATOR_TYPE[Operators.GreaterThan].operation,
-        comparator: 0,
-        clause: Clauses.Having,
-      });
-    }
-    // add a new filter item
-    if (option.column_name) {
-      return new AdhocFilter({
-        expressionType: ExpressionTypes.Simple,
-        subject: option.column_name,
-        operator: OPERATOR_ENUM_TO_OPERATOR_TYPE[Operators.Equals].operation,
-        comparator: '',
-        clause: Clauses.Where,
-        isNew: true,
-      });
-    }
-    return null;
-  }
+  const moveLabel = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      const newValues = [...values];
+      [newValues[hoverIndex], newValues[dragIndex]] = [
+        newValues[dragIndex],
+        newValues[hoverIndex],
+      ];
+      setValues(newValues);
+    },
+    [values],
+  );
 
-  addNewFilterPopoverTrigger(trigger: ReactNode): JSX.Element {
-    return (
-      <AdhocFilterPopoverTrigger
-        operators={this.props.operators as Operators[] | undefined}
-        sections={this.props.sections}
-        adhocFilter={new AdhocFilter({})}
-        datasource={(this.props.datasource as Record<string, unknown>) || {}}
-        options={this.state.options}
-        onFilterEdit={this.onNewFilter}
-        partitionColumn={this.state.partitionColumn ?? undefined}
-      >
-        {trigger}
-      </AdhocFilterPopoverTrigger>
-    );
-  }
+  const valueRenderer = (adhocFilter: AdhocFilter, index: number) => (
+    <AdhocFilterOption
+      key={index}
+      index={index}
+      adhocFilter={adhocFilter}
+      onFilterEdit={onFilterEdit}
+      options={options}
+      sections={sections}
+      operators={operators as Operators[] | undefined}
+      datasource={datasource}
+      onRemoveFilter={e => {
+        e.stopPropagation();
+        onRemoveFilter(index);
+      }}
+      onMoveLabel={moveLabel}
+      onDropLabel={() => onChange?.(values)}
+      partitionColumn={partitionColumn}
+    />
+  );
 
-  render() {
-    return (
-      <div className="metrics-select" data-test="adhoc-filter-control">
-        <HeaderContainer>
-          <ControlHeader {...this.props} />
-        </HeaderContainer>
-        <LabelsContainer>
-          {[
-            ...(this.state.values.length > 0
-              ? this.state.values.map((value, index) =>
-                  this.valueRenderer(value, index),
-                )
-              : []),
-            this.addNewFilterPopoverTrigger(
-              <AddControlLabel role="button" data-test="add-filter-button">
-                <Icons.PlusOutlined iconSize="m" />
-                {t('Add filter')}
-              </AddControlLabel>,
-            ),
-          ]}
-        </LabelsContainer>
-      </div>
-    );
-  }
+  const addNewFilterPopoverTrigger = (trigger: ReactNode) => (
+    <AdhocFilterPopoverTrigger
+      operators={operators as Operators[] | undefined}
+      sections={sections}
+      adhocFilter={new AdhocFilter({})}
+      datasource={(datasource as Record<string, unknown>) || {}}
+      options={options}
+      onFilterEdit={onNewFilter}
+      partitionColumn={partitionColumn ?? undefined}
+    >
+      {trigger}
+    </AdhocFilterPopoverTrigger>
+  );
+
+  return (
+    <div className="metrics-select" data-test="adhoc-filter-control">
+      <HeaderContainer>
+        <ControlHeader {...props} />
+      </HeaderContainer>
+      <LabelsContainer>
+        {[
+          ...(values.length > 0
+            ? values.map((v, index) => valueRenderer(v, index))
+            : []),
+          addNewFilterPopoverTrigger(
+            <AddControlLabel role="button" data-test="add-filter-button">
+              <Icons.PlusOutlined iconSize="m" />
+              {t('Add filter')}
+            </AddControlLabel>,
+          ),
+        ]}
+      </LabelsContainer>
+    </div>
+  );
 }
-
-// @ts-expect-error - defaultProps for backward compatibility
-AdhocFilterControl.defaultProps = defaultProps;
 
 export default withTheme(AdhocFilterControl);
