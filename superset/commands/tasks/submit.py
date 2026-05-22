@@ -53,7 +53,7 @@ class SubmitTaskCommand(BaseCommand):
     - Join an existing task by adding the user as subscriber
     """
 
-    def __init__(self, data: dict[str, Any]):
+    def __init__(self, data: dict[str, Any]) -> None:
         self._properties = data.copy()
 
     @transaction(on_error=partial(on_error, reraise=TaskCreateFailedError))

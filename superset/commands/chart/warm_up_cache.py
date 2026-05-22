@@ -41,7 +41,7 @@ class ChartWarmUpCacheCommand(BaseCommand):
         chart_or_id: Union[int, Slice],
         dashboard_id: Optional[int],
         extra_filters: Optional[str],
-    ):
+    ) -> None:
         self._chart_or_id = chart_or_id
         self._dashboard_id = dashboard_id
         self._extra_filters = extra_filters

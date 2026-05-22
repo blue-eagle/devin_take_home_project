@@ -38,7 +38,7 @@ BYPASS_VALIDATION_ENGINES = {"bigquery", "datastore", "snowflake"}
 
 
 class ValidateDatabaseParametersCommand(BaseCommand):
-    def __init__(self, properties: dict[str, Any]):
+    def __init__(self, properties: dict[str, Any]) -> None:
         self._properties = properties.copy()
         self._model: Optional[Database] = None
 

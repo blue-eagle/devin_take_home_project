@@ -61,7 +61,7 @@ class SqlJsonExecutionContext:  # pylint: disable=too-many-instance-attributes
     query: Query
     _sql_result: SqlResults | None
 
-    def __init__(self, query_params: dict[str, Any]):
+    def __init__(self, query_params: dict[str, Any]) -> None:
         self.create_table_as_select = None
         self.database = None
         self._init_from_query_params(query_params)
@@ -197,7 +197,7 @@ class CreateTableAsSelect:  # pylint: disable=too-few-public-methods
 
     def __init__(
         self, ctas_method: CTASMethod, target_schema_name: str, target_table_name: str
-    ):
+    ) -> None:
         self.ctas_method = ctas_method
         self.target_schema_name = target_schema_name
         self.target_table_name = target_table_name

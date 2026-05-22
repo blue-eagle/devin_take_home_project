@@ -244,7 +244,7 @@ class SerializationError(SupersetException):
 class InvalidPayloadFormatError(SupersetErrorException):
     status = 400
 
-    def __init__(self, message: str = "Request payload has incorrect format"):
+    def __init__(self, message: str = "Request payload has incorrect format") -> None:
         error = SupersetError(
             message=message,
             error_type=SupersetErrorType.INVALID_PAYLOAD_FORMAT_ERROR,
@@ -256,7 +256,7 @@ class InvalidPayloadFormatError(SupersetErrorException):
 class InvalidPayloadSchemaError(SupersetErrorException):
     status = 422
 
-    def __init__(self, error: ValidationError):
+    def __init__(self, error: ValidationError) -> None:
         # dataclasses.asdict does not work with defaultdict, convert to dict
         # https://bugs.python.org/issue35540
         for k, v in error.messages.items():
@@ -290,7 +290,7 @@ class SupersetMarshmallowValidationError(SupersetErrorException):
 
     status = 422
 
-    def __init__(self, exc: ValidationError, payload: dict[str, Any]):
+    def __init__(self, exc: ValidationError, payload: dict[str, Any]) -> None:
         error = SupersetError(
             message=_("The schema of the submitted payload is invalid."),
             error_type=SupersetErrorType.MARSHMALLOW_ERROR,
@@ -315,7 +315,7 @@ class SupersetParseError(SupersetErrorException):
         highlight: Optional[str] = None,
         line: Optional[int] = None,
         column: Optional[int] = None,
-    ):
+    ) -> None:
         if message is None:
             parts = [_("Error parsing")]
             if highlight:
@@ -357,7 +357,7 @@ class OAuth2RedirectError(SupersetErrorException):
 
     status = 403
 
-    def __init__(self, url: str, tab_id: str, redirect_uri: str):
+    def __init__(self, url: str, tab_id: str, redirect_uri: str) -> None:
         super().__init__(
             SupersetError(
                 message="You don't have permission to access the data.",
@@ -394,7 +394,7 @@ class OAuth2Error(SupersetErrorException):
     Exception for when OAuth2 goes wrong.
     """
 
-    def __init__(self, error: str):
+    def __init__(self, error: str) -> None:
         super().__init__(
             SupersetError(
                 message="Something went wrong while doing OAuth2",
@@ -410,7 +410,7 @@ class SupersetDisallowedSQLFunctionException(SupersetErrorException):
     Disallowed function found on SQL statement
     """
 
-    def __init__(self, functions: set[str]):
+    def __init__(self, functions: set[str]) -> None:
         super().__init__(
             SupersetError(
                 message=f"SQL statement contains disallowed function(s): {functions}",
@@ -425,7 +425,7 @@ class SupersetDisallowedSQLTableException(SupersetErrorException):
     Disallowed table/view found in SQL statement
     """
 
-    def __init__(self, tables: set[str]):
+    def __init__(self, tables: set[str]) -> None:
         super().__init__(
             SupersetError(
                 message=f"SQL statement references disallowed table(s): {tables}",
@@ -450,7 +450,7 @@ class ReleaseDistributedLockFailedException(Exception):  # noqa: N818
 class DatabaseNotFoundException(SupersetErrorException):
     status = 404
 
-    def __init__(self, message: str):
+    def __init__(self, message: str) -> None:
         super().__init__(
             SupersetError(
                 message=message,
@@ -463,7 +463,7 @@ class DatabaseNotFoundException(SupersetErrorException):
 class TableNotFoundException(SupersetErrorException):
     status = 404
 
-    def __init__(self, message: str):
+    def __init__(self, message: str) -> None:
         super().__init__(
             SupersetError(
                 message=message,

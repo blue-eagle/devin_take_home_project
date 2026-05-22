@@ -53,7 +53,7 @@ class CreateDashboardPermalinkCommand(BaseDashboardPermalinkCommand):
         self,
         dashboard_id: str,
         state: DashboardPermalinkState,
-    ):
+    ) -> None:
         self.dashboard_id = dashboard_id
         self.state = state
 

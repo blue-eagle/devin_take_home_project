@@ -45,7 +45,7 @@ class StreamingSqlResultExportCommand(BaseStreamingCSVExportCommand):
         self,
         client_id: str,
         chunk_size: int = 1000,
-    ):
+    ) -> None:
         """
         Initialize the SQL Lab streaming export command.
 
@@ -87,7 +87,9 @@ class StreamingSqlResultExportCommand(BaseStreamingCSVExportCommand):
                 status=403,
             ) from ex
 
-    def _get_sql_and_database(self) -> tuple[str, Any, str | None, str | None]:
+    def _get_sql_and_database(
+        self,
+    ) -> tuple[str, Any, str | None, str | None]:
         """
         Get the SQL query, database, catalog, and schema for SQL Lab export.
 

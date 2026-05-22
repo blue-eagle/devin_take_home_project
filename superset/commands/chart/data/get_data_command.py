@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 class ChartDataCommand(BaseCommand):
     _query_context: QueryContext
 
-    def __init__(self, query_context: QueryContext):
+    def __init__(self, query_context: QueryContext) -> None:
         self._query_context = query_context
 
     def run(self, **kwargs: Any) -> dict[str, Any]:

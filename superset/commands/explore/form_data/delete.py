@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 class DeleteFormDataCommand(BaseCommand, ABC):
-    def __init__(self, cmd_params: CommandParameters):
+    def __init__(self, cmd_params: CommandParameters) -> None:
         self._cmd_params = cmd_params
 
     def run(self) -> bool:

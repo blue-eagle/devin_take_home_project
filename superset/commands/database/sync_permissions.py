@@ -62,7 +62,7 @@ class SyncPermissionsCommand(BaseCommand):
         username: str | None,
         old_db_connection_name: str | None = None,
         db_connection: Database | None = None,
-    ):
+    ) -> None:
         """
         Constructor method.
         """

@@ -52,7 +52,7 @@ def is_query_context_update(properties: dict[str, Any]) -> bool:
 
 
 class UpdateChartCommand(UpdateMixin, BaseCommand):
-    def __init__(self, model_id: int, data: dict[str, Any]):
+    def __init__(self, model_id: int, data: dict[str, Any]) -> None:
         self._model_id = model_id
         self._properties = data.copy()
         self._model: Optional[Slice] = None

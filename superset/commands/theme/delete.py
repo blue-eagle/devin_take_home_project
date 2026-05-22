@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 class DeleteThemeCommand(BaseCommand):
-    def __init__(self, model_ids: list[int]):
+    def __init__(self, model_ids: list[int]) -> None:
         self._model_ids = model_ids
         self._models: Optional[list[Theme]] = None
         self._dashboard_usage: Optional[dict[int, list[str]]] = None

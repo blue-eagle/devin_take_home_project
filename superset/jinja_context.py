@@ -142,7 +142,7 @@ class ExtraCache:
         dialect: Dialect | None = None,
         table: SqlaTable | None = None,
         query_context_filters: list[Any] | None = None,
-    ):
+    ) -> None:
         self.extra_cache_keys = extra_cache_keys
         self.applied_filters = applied_filters if applied_filters is not None else []
         self.removed_filters = removed_filters if removed_filters is not None else []
@@ -623,7 +623,7 @@ def validate_template_context(
 
 
 class WhereInMacro:  # pylint: disable=too-few-public-methods
-    def __init__(self, dialect: Dialect):
+    def __init__(self, dialect: Dialect) -> None:
         self.dialect = dialect
 
     def __call__(

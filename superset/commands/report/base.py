@@ -34,6 +34,8 @@ from superset.commands.report.exceptions import (
 )
 from superset.daos.chart import ChartDAO
 from superset.daos.dashboard import DashboardDAO
+from superset.dashboards.permalink.types import DashboardPermalinkState
+from superset.models.dashboard import Dashboard
 from superset.reports.models import (
     ReportCreationMethod,
     ReportScheduleType,
@@ -136,8 +138,8 @@ class BaseReportScheduleCommand(BaseCommand):
 
     def _validate_native_filters(
         self,
-        dashboard: Any,
-        dashboard_state: Any,
+        dashboard: Dashboard,
+        dashboard_state: DashboardPermalinkState,
         exceptions: list[ValidationError],
     ) -> None:
         native_filters = dashboard_state.get("nativeFilters")

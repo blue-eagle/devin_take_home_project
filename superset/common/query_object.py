@@ -135,7 +135,7 @@ class QueryObject:  # pylint: disable=too-many-instance-attributes
         time_range: str | None = None,
         time_shift: str | None = None,
         **kwargs: Any,
-    ):
+    ) -> None:
         self._set_annotation_layers(annotation_layers)
         self.applied_time_extras = applied_time_extras or {}
         self.apply_fetch_values_predicate = apply_fetch_values_predicate or False

@@ -45,7 +45,7 @@ class QueryObjectFactory:  # pylint: disable=too-few-public-methods
         self,
         app_configurations: dict[str, Any],
         _datasource_dao: DatasourceDAO,
-    ):
+    ) -> None:
         self._config = app_configurations
         self._datasource_dao = _datasource_dao
 

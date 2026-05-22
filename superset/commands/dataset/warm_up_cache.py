@@ -34,7 +34,7 @@ class DatasetWarmUpCacheCommand(BaseCommand):
         table_name: str,
         dashboard_id: Optional[int],
         extra_filters: Optional[str],
-    ):
+    ) -> None:
         self._db_name = db_name
         self._table_name = table_name
         self._dashboard_id = dashboard_id

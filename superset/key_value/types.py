@@ -86,7 +86,7 @@ class PickleKeyValueCodec(KeyValueCodec):
 
 
 class MarshmallowKeyValueCodec(JsonKeyValueCodec):
-    def __init__(self, schema: Schema):
+    def __init__(self, schema: Schema) -> None:
         self.schema = schema
 
     def encode(self, value: dict[Any, Any]) -> bytes:

@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 class DeleteDatabaseCommand(BaseCommand):
-    def __init__(self, model_id: int):
+    def __init__(self, model_id: int) -> None:
         self._model_id = model_id
         self._model: Optional[Database] = None
 

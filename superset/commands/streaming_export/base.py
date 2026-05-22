@@ -31,6 +31,7 @@ from sqlalchemy import text
 
 from superset import db
 from superset.commands.base import BaseCommand
+from superset.models.core import Database
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +69,7 @@ class BaseStreamingCSVExportCommand(BaseCommand):
     - _get_row_limit(): Return optional row limit for the export
     """
 
-    def __init__(self, chunk_size: int = 1000):
+    def __init__(self, chunk_size: int = 1000) -> None:
         """
         Initialize the streaming export command.
 
@@ -152,7 +153,7 @@ class BaseStreamingCSVExportCommand(BaseCommand):
     def _execute_query_and_stream(
         self,
         sql: str,
-        database: Any,
+        database: Database,
         limit: int | None,
         catalog: str | None = None,
         schema: str | None = None,

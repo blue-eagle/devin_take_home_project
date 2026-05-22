@@ -79,7 +79,7 @@ class GuestUser(AnonymousUserMixin):
         """
         return False
 
-    def __init__(self, token: GuestToken, roles: list[Role]):
+    def __init__(self, token: GuestToken, roles: list[Role]) -> None:
         user = token["user"]
         self.guest_token = token
         self.username = user.get("username", "guest_user")

@@ -31,7 +31,9 @@ logger = logging.getLogger(__name__)
 
 
 class CreateCustomTagCommand(CreateMixin, BaseCommand):
-    def __init__(self, object_type: ObjectType, object_id: int, tags: list[str]):
+    def __init__(
+        self, object_type: ObjectType, object_id: int, tags: list[str]
+    ) -> None:
         self._object_type = object_type
         self._object_id = object_id
         self._tags = tags
@@ -65,7 +67,7 @@ class CreateCustomTagCommand(CreateMixin, BaseCommand):
 
 
 class CreateCustomTagWithRelationshipsCommand(CreateMixin, BaseCommand):
-    def __init__(self, data: dict[str, Any], bulk_create: bool = False):
+    def __init__(self, data: dict[str, Any], bulk_create: bool = False) -> None:
         self._properties = data.copy()
         self._bulk_create = bulk_create
         self._skipped_tagged_objects: set[tuple[str, int]] = set()

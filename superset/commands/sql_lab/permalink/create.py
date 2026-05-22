@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 class CreateSqlLabPermalinkCommand(BaseSqlLabPermalinkCommand):
-    def __init__(self, state: dict[str, Any]):
+    def __init__(self, state: dict[str, Any]) -> None:
         self._properties = state.copy()
 
     @transaction(

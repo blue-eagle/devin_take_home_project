@@ -66,7 +66,7 @@ class InternalUpdateTaskCommand(BaseCommand):
         task_uuid: UUID,
         properties: TaskProperties | None = None,
         payload: dict[str, Any] | None = None,
-    ):
+    ) -> None:
         """
         Initialize internal update command.
 
@@ -141,7 +141,7 @@ class InternalStatusTransitionCommand(BaseCommand):
         properties: TaskProperties | None = None,
         set_started_at: bool = False,
         set_ended_at: bool = False,
-    ):
+    ) -> None:
         """
         Initialize status transition command.
 

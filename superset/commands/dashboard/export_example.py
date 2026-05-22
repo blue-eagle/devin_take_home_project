@@ -505,7 +505,7 @@ class ExportExampleCommand(BaseCommand):
         dashboard_id: int,
         export_data: bool = True,
         sample_rows: int | None = None,
-    ):
+    ) -> None:
         self._dashboard_id = dashboard_id
         self._export_data = export_data
         self._sample_rows = sample_rows

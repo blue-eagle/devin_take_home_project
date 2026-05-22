@@ -69,7 +69,7 @@ class UpdateDatasetCommand(UpdateMixin, BaseCommand):
         model_id: int,
         data: dict[str, Any],
         override_columns: Optional[bool] = False,
-    ):
+    ) -> None:
         self._model_id = model_id
         self._properties = data.copy()
         self._model: Optional[SqlaTable] = None

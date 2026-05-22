@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 
 class CreateDatasetCommand(CreateMixin, BaseCommand):
-    def __init__(self, data: dict[str, Any]):
+    def __init__(self, data: dict[str, Any]) -> None:
         self._properties = data.copy()
 
     @transaction(on_error=partial(on_error, reraise=DatasetCreateFailedError))

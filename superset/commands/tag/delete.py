@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 class DeleteTaggedObjectCommand(DeleteMixin, BaseCommand):
-    def __init__(self, object_type: ObjectType, object_id: int, tag: str):
+    def __init__(self, object_type: ObjectType, object_id: int, tag: str) -> None:
         self._object_type = object_type
         self._object_id = object_id
         self._tag = tag
@@ -87,7 +87,7 @@ class DeleteTaggedObjectCommand(DeleteMixin, BaseCommand):
 
 
 class DeleteTagsCommand(DeleteMixin, BaseCommand):
-    def __init__(self, tags: list[str]):
+    def __init__(self, tags: list[str]) -> None:
         self._tags = tags
 
     @transaction(on_error=partial(on_error, reraise=TagDeleteFailedError))

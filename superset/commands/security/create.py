@@ -22,7 +22,7 @@ from typing import Any
 from superset.commands.base import BaseCommand
 from superset.commands.exceptions import DatasourceNotFoundValidationError
 from superset.commands.utils import populate_roles
-from superset.connectors.sqla.models import SqlaTable
+from superset.connectors.sqla.models import RowLevelSecurityFilter, SqlaTable
 from superset.daos.security import RLSDAO
 from superset.extensions import db
 from superset.utils.decorators import transaction
@@ -31,13 +31,13 @@ logger = logging.getLogger(__name__)
 
 
 class CreateRLSRuleCommand(BaseCommand):
-    def __init__(self, data: dict[str, Any]):
+    def __init__(self, data: dict[str, Any]) -> None:
         self._properties = data.copy()
         self._tables = self._properties.get("tables", [])
         self._roles = self._properties.get("roles", [])
 
     @transaction()
-    def run(self) -> Any:
+    def run(self) -> RowLevelSecurityFilter:
         self.validate()
         return RLSDAO.create(attributes=self._properties)
 

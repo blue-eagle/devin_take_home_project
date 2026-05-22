@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 class DeleteReportScheduleCommand(BaseCommand):
-    def __init__(self, model_ids: list[int]):
+    def __init__(self, model_ids: list[int]) -> None:
         self._model_ids = model_ids
         self._models: Optional[list[ReportSchedule]] = None
 

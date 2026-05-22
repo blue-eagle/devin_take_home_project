@@ -143,7 +143,7 @@ class PooledChartScreenshot(PooledBaseScreenshot):
         digest: str | None,
         window_size: WindowSize | None = None,
         thumb_size: WindowSize | None = None,
-    ):
+    ) -> None:
         from superset.utils.urls import modify_url_query
         from superset.utils.webdriver import ChartStandaloneMode
 
@@ -230,7 +230,7 @@ class PooledExploreScreenshot(PooledBaseScreenshot):
         digest: str | None,
         window_size: WindowSize | None = None,
         thumb_size: WindowSize | None = None,
-    ):
+    ) -> None:
         super().__init__(url, digest)
         self.window_size = window_size or (1600, 1200)
         self.thumb_size = thumb_size or (800, 600)
@@ -399,7 +399,7 @@ class PooledDashboardScreenshot(PooledBaseScreenshot):
         digest: str | None,
         window_size: WindowSize | None = None,
         thumb_size: WindowSize | None = None,
-    ):
+    ) -> None:
         from superset.utils.urls import modify_url_query
         from superset.utils.webdriver import DashboardStandaloneMode
 

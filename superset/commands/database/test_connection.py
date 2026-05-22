@@ -65,7 +65,7 @@ class TestConnectionDatabaseCommand(BaseCommand):
     _context: dict[str, Any]
     _uri: str
 
-    def __init__(self, data: dict[str, Any]):
+    def __init__(self, data: dict[str, Any]) -> None:
         self._properties = data.copy()
 
         if (database_name := self._properties.get("database_name")) is not None:

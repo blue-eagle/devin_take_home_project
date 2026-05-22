@@ -75,7 +75,7 @@ class MCPPermissionDeniedError(Exception):
         view_name: str,
         user: str | None = None,
         tool_name: str | None = None,
-    ):
+    ) -> None:
         self.permission_name = permission_name
         self.view_name = view_name
         self.user = user

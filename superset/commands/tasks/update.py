@@ -63,7 +63,7 @@ class UpdateTaskCommand(BaseCommand):
         payload: dict[str, Any] | None = None,
         properties: TaskProperties | None = None,
         skip_security_check: bool = False,
-    ):
+    ) -> None:
         """
         Initialize UpdateTaskCommand.
 

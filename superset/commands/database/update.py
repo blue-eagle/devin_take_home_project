@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 class UpdateDatabaseCommand(BaseCommand):
     _model: Database | None
 
-    def __init__(self, model_id: int, data: dict[str, Any]):
+    def __init__(self, model_id: int, data: dict[str, Any]) -> None:
         self._properties = data.copy()
         self._model_id = model_id
         self._model: Database | None = None

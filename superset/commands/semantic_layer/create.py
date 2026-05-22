@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 class CreateSemanticLayerCommand(BaseCommand):
-    def __init__(self, data: dict[str, Any]):
+    def __init__(self, data: dict[str, Any]) -> None:
         self._properties = data.copy()
 
     @transaction(
@@ -72,7 +72,7 @@ class CreateSemanticLayerCommand(BaseCommand):
 
 
 class CreateSemanticViewCommand(BaseCommand):
-    def __init__(self, data: dict[str, Any]):
+    def __init__(self, data: dict[str, Any]) -> None:
         self._properties = data.copy()
 
     @transaction(

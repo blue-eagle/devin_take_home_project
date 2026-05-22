@@ -1103,7 +1103,7 @@ class ReportScheduleStateMachine:  # pylint: disable=too-few-public-methods
         task_uuid: UUID,
         report_schedule: ReportSchedule,
         scheduled_dttm: datetime,
-    ):
+    ) -> None:
         self._execution_id = task_uuid
         self._report_schedule = report_schedule
         self._scheduled_dttm = scheduled_dttm
@@ -1131,7 +1131,7 @@ class AsyncExecuteReportScheduleCommand(BaseCommand):
     - On Alerts uses related Command AlertCommand and sends configured notifications
     """
 
-    def __init__(self, task_id: str, model_id: int, scheduled_dttm: datetime):
+    def __init__(self, task_id: str, model_id: int, scheduled_dttm: datetime) -> None:
         self._model_id = model_id
         self._model: Optional[ReportSchedule] = None
         self._scheduled_dttm = scheduled_dttm

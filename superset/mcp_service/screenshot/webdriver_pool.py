@@ -81,7 +81,7 @@ class WebDriverPool:
         idle_timeout_seconds: int = 300,  # 5 minutes
         health_check_interval: int = 60,  # 1 minute
         creation_timeout_seconds: int = 30,  # SECURITY FIX: Timeout for driver creation
-    ):
+    ) -> None:
         self.max_pool_size = max_pool_size
         self.max_age_seconds = max_age_seconds
         self.max_usage_count = max_usage_count

@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 class DeleteEmbeddedDashboardCommand(BaseCommand):
-    def __init__(self, dashboard: Dashboard):
+    def __init__(self, dashboard: Dashboard) -> None:
         self._dashboard = dashboard
 
     @transaction(on_error=partial(on_error, reraise=DashboardDeleteEmbeddedFailedError))
@@ -52,7 +52,7 @@ class DeleteEmbeddedDashboardCommand(BaseCommand):
 
 
 class DeleteDashboardCommand(BaseCommand):
-    def __init__(self, model_ids: list[int]):
+    def __init__(self, model_ids: list[int]) -> None:
         self._model_ids = model_ids
         self._models: Optional[list[Dashboard]] = None
 

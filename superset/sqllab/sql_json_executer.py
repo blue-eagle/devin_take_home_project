@@ -62,7 +62,9 @@ class SqlJsonExecutorBase(SqlJsonExecutor, ABC):
     _query_dao: QueryDAO
     _get_sql_results_task: GetSqlResultsTask
 
-    def __init__(self, query_dao: QueryDAO, get_sql_results_task: GetSqlResultsTask):
+    def __init__(
+        self, query_dao: QueryDAO, get_sql_results_task: GetSqlResultsTask
+    ) -> None:
         self._query_dao = query_dao
         self._get_sql_results_task = get_sql_results_task
 
@@ -77,7 +79,7 @@ class SynchronousSqlJsonExecutor(SqlJsonExecutorBase):
         get_sql_results_task: GetSqlResultsTask,
         timeout_duration_in_seconds: int,
         sqllab_backend_persistence_feature_enable: bool,
-    ):
+    ) -> None:
         super().__init__(query_dao, get_sql_results_task)
         self._timeout_duration_in_seconds = timeout_duration_in_seconds
         self._sqllab_backend_persistence_feature_enable = (

@@ -38,7 +38,7 @@ _extension_context: local = local()
 class ExtensionContext:
     """Manages ambient extension context during loading."""
 
-    def __init__(self, manifest: Manifest):
+    def __init__(self, manifest: Manifest) -> None:
         self.manifest = manifest
 
     def __enter__(self) -> "ExtensionContext":
@@ -61,7 +61,7 @@ class ExtensionContext:
 class ExtensionContextWrapper:
     """Wrapper for extension context with extensible properties."""
 
-    def __init__(self, manifest: Manifest):
+    def __init__(self, manifest: Manifest) -> None:
         self._manifest = manifest
 
     @property

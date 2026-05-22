@@ -163,7 +163,7 @@ def validate_feature_flags(
 class RelatedFieldFilter:
     # data class to specify what filter to use on a /related endpoint
     # pylint: disable=too-few-public-methods
-    def __init__(self, field_name: str, filter_class: type[BaseFilter]):
+    def __init__(self, field_name: str, filter_class: type[BaseFilter]) -> None:
         self.field_name = field_name
         self.filter_class = filter_class
 

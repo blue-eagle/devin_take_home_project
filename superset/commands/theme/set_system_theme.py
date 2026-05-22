@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class SetSystemDefaultThemeCommand(BaseCommand):
-    def __init__(self, theme_id: int):
+    def __init__(self, theme_id: int) -> None:
         self._theme_id = theme_id
         self._theme: Optional[Theme] = None
 
@@ -62,7 +62,7 @@ class SetSystemDefaultThemeCommand(BaseCommand):
 
 
 class SetSystemDarkThemeCommand(BaseCommand):
-    def __init__(self, theme_id: int):
+    def __init__(self, theme_id: int) -> None:
         self._theme_id = theme_id
         self._theme: Optional[Theme] = None
 

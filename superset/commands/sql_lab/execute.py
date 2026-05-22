@@ -163,8 +163,11 @@ class ExecuteSqlCommand(BaseCommand):
             raise
 
     def _get_the_query_db(self) -> Database:
-        mydb: Any = self._database_dao.find_by_id(self._execution_context.database_id)
+        mydb: Database | None = self._database_dao.find_by_id(
+            self._execution_context.database_id
+        )
         self._validate_query_db(mydb)
+        assert mydb is not None
         return mydb
 
     @classmethod

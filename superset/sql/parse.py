@@ -355,7 +355,7 @@ class BaseSQLStatement(Generic[InternalRepresentation]):
         statement: str | None = None,
         engine: str = "base",
         ast: InternalRepresentation | None = None,
-    ):
+    ) -> None:
         if ast:
             self._parsed = ast
         elif statement:
@@ -567,7 +567,7 @@ class SQLStatement(BaseSQLStatement[exp.Expression]):
         statement: str | None = None,
         engine: str = "base",
         ast: exp.Expression | None = None,
-    ):
+    ) -> None:
         self._dialect = SQLGLOT_DIALECTS.get(engine)
         super().__init__(statement, engine, ast)
 
@@ -1109,7 +1109,7 @@ class KustoKQLStatement(BaseSQLStatement[str]):
         statement: str | None = None,
         engine: str = "kustokql",
         ast: str | None = None,
-    ):
+    ) -> None:
         super().__init__(statement, engine, ast)
 
     @classmethod
@@ -1329,7 +1329,7 @@ class SQLScript:
         self,
         script: str,
         engine: str,
-    ):
+    ) -> None:
         statement_class = self.special_engines.get(engine, SQLStatement)
         self.engine = engine
         self.statements = statement_class.split_script(script, engine)

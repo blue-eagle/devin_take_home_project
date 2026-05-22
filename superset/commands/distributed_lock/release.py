@@ -50,7 +50,7 @@ class ReleaseDistributedLock(BaseDistributedLockCommand):
         else:
             self._release_kv()
 
-    def _release_redis(self, redis_client: Any) -> None:
+    def _release_redis(self, redis_client: redis.Redis[Any]) -> None:
         """Release lock using Redis DELETE."""
         try:
             redis_client.delete(self.redis_lock_key)

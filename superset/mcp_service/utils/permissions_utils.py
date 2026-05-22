@@ -262,7 +262,7 @@ class PermissionAwareSerializer:
     Wrapper for serializers that automatically applies field-level permissions.
     """
 
-    def __init__(self, object_type: str, base_serializer: Any):
+    def __init__(self, object_type: str, base_serializer: Any) -> None:
         self.object_type = object_type
         self.base_serializer = base_serializer
 

@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 class DeleteDatasetMetricCommand(BaseCommand):
-    def __init__(self, dataset_id: int, model_id: int):
+    def __init__(self, dataset_id: int, model_id: int) -> None:
         self._dataset_id = dataset_id
         self._model_id = model_id
         self._model: Optional[SqlMetric] = None

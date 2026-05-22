@@ -55,7 +55,7 @@ OPERATOR_FUNCTIONS = {">=": ge, ">": gt, "<=": le, "<": lt, "==": eq, "!=": ne}
 
 
 class AlertCommand(BaseCommand):
-    def __init__(self, report_schedule: ReportSchedule, execution_id: UUID):
+    def __init__(self, report_schedule: ReportSchedule, execution_id: UUID) -> None:
         self._report_schedule = report_schedule
         self._execution_id = execution_id
         self._result: float | None = None
