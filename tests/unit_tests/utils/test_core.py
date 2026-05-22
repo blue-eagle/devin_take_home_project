@@ -647,8 +647,9 @@ def test_get_user_agent(mocker: MockerFixture, app_context: None) -> None:
 
 @with_config(
     {
-        "USER_AGENT_FUNC": lambda database,
-        source: f"{database.database_name} {source.name}"
+        "USER_AGENT_FUNC": lambda database, source: (
+            f"{database.database_name} {source.name}"
+        )
     }
 )
 def test_get_user_agent_custom(mocker: MockerFixture, app_context: None) -> None:
@@ -1689,6 +1690,16 @@ def test_sanitize_url_blocks_dangerous():
     """Test that dangerous URL schemes are blocked."""
     assert sanitize_url("javascript:alert('xss')") == ""
     assert sanitize_url("data:text/html,<script>alert(1)</script>") == ""
+
+
+def test_sanitize_url_empty_and_whitespace():
+    """Test that empty and whitespace-only inputs return empty string."""
+    assert sanitize_url("") == ""
+    assert sanitize_url("   ") == ""
+    assert (
+        sanitize_url("  https://example.com/image.png  ")
+        == "https://example.com/image.png"
+    )
 
 
 def test_markdown_basic() -> None:
