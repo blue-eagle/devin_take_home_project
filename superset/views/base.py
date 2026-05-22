@@ -21,7 +21,7 @@ import functools
 import logging
 import os
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Callable, cast
 
 from flask import (
@@ -152,7 +152,11 @@ def data_payload_response(payload_json: str, has_error: bool = False) -> FlaskRe
 def generate_download_headers(
     extension: str, filename: str | None = None
 ) -> dict[str, Any]:
-    filename = filename if filename else datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = (
+        filename
+        if filename
+        else datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
+    )
     content_disp = f"attachment; filename={filename}.{extension}"
     headers = {"Content-Disposition": content_disp}
     return headers

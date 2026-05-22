@@ -19,7 +19,7 @@ from __future__ import annotations
 import calendar
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from time import struct_time
 
@@ -73,7 +73,7 @@ def parse_human_datetime(human_readable: str) -> datetime:
     if re.search(x_periods, human_readable, re.IGNORECASE):
         raise TimeRangeAmbiguousError(human_readable)
     try:
-        default = datetime(year=datetime.now().year, month=1, day=1)
+        default = datetime(year=datetime.now(tz=timezone.utc).year, month=1, day=1)
         dttm = parse(human_readable, default=default)
     except (ValueError, OverflowError) as ex:
         cal = parsedatetime.Calendar()
@@ -118,7 +118,9 @@ def get_past_or_future(
 ) -> datetime:
     cal = parsedatetime.Calendar()
     source_dttm = dttm_from_timetuple(
-        source_time.timetuple() if source_time else datetime.now().timetuple()
+        source_time.timetuple()
+        if source_time
+        else datetime.now(tz=timezone.utc).timetuple()
     )
     return dttm_from_timetuple(cal.parse(human_readable or "", source_dttm)[0])
 
@@ -134,7 +136,9 @@ def parse_human_timedelta(
     True
     """
     source_dttm = dttm_from_timetuple(
-        source_time.timetuple() if source_time else datetime.now().timetuple()
+        source_time.timetuple()
+        if source_time
+        else datetime.now(tz=timezone.utc).timetuple()
     )
     return get_past_or_future(human_readable, source_time) - source_dttm
 

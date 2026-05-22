@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from typing import Any
 from zipfile import ZipFile
@@ -469,7 +469,7 @@ class ThemeRestApi(BaseSupersetModelRestApi):
         """
         requested_ids = kwargs["rison"]
 
-        timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+        timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%S")
         root = f"theme_export_{timestamp}"
         filename = f"{root}.zip"
 
@@ -559,9 +559,9 @@ class ThemeRestApi(BaseSupersetModelRestApi):
     @safe
     @statsd_metrics
     @event_logger.log_this_with_context(
-        action=lambda self,
-        *args,
-        **kwargs: f"{self.__class__.__name__}.set_system_default",
+        action=lambda self, *args, **kwargs: (
+            f"{self.__class__.__name__}.set_system_default"
+        ),
         log_to_statsd=False,
     )
     def set_system_default(self, pk: int) -> Response:
@@ -626,9 +626,9 @@ class ThemeRestApi(BaseSupersetModelRestApi):
     @safe
     @statsd_metrics
     @event_logger.log_this_with_context(
-        action=lambda self,
-        *args,
-        **kwargs: f"{self.__class__.__name__}.set_system_dark",
+        action=lambda self, *args, **kwargs: (
+            f"{self.__class__.__name__}.set_system_dark"
+        ),
         log_to_statsd=False,
     )
     def set_system_dark(self, pk: int) -> Response:
@@ -693,9 +693,9 @@ class ThemeRestApi(BaseSupersetModelRestApi):
     @safe
     @statsd_metrics
     @event_logger.log_this_with_context(
-        action=lambda self,
-        *args,
-        **kwargs: f"{self.__class__.__name__}.unset_system_default",
+        action=lambda self, *args, **kwargs: (
+            f"{self.__class__.__name__}.unset_system_default"
+        ),
         log_to_statsd=False,
     )
     def unset_system_default(self) -> Response:
@@ -743,9 +743,9 @@ class ThemeRestApi(BaseSupersetModelRestApi):
     @safe
     @statsd_metrics
     @event_logger.log_this_with_context(
-        action=lambda self,
-        *args,
-        **kwargs: f"{self.__class__.__name__}.unset_system_dark",
+        action=lambda self, *args, **kwargs: (
+            f"{self.__class__.__name__}.unset_system_dark"
+        ),
         log_to_statsd=False,
     )
     def unset_system_dark(self) -> Response:

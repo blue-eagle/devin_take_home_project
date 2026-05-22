@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 from flask import g
@@ -583,7 +583,7 @@ class DashboardDAO(BaseDAO[Dashboard]):
                     class_name=FavStarClassName.DASHBOARD,
                     obj_id=dashboard.id,
                     user_id=get_user_id(),
-                    dttm=datetime.now(),
+                    dttm=datetime.now(tz=timezone.utc),
                 )
             )
 

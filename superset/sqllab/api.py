@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, cast, Optional
 from urllib import parse
 
@@ -420,7 +420,7 @@ class SqlLabRestApi(BaseSupersetApi):
         command.validate()
 
         if not filename:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
             filename = secure_filename(f"sqllab_{client_id}_{timestamp}.csv")
 
         # Get the callable that returns the generator

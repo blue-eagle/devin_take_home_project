@@ -16,7 +16,7 @@
 # under the License.
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import sqlalchemy as sa
 
@@ -60,7 +60,8 @@ class QueryPruneCommand(BaseCommand):
             db.session.execute(
                 sa.select(Query.id).where(
                     Query.changed_on
-                    < datetime.now() - timedelta(days=self.retention_period_days)
+                    < datetime.now(tz=timezone.utc)
+                    - timedelta(days=self.retention_period_days)
                 )
             )
             .scalars()

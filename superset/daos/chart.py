@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List
 
 from flask_appbuilder.models.sqla.interface import SQLAInterface
@@ -128,7 +128,7 @@ class ChartDAO(BaseDAO[Slice]):
                     class_name=FavStarClassName.CHART,
                     obj_id=chart.id,
                     user_id=get_user_id(),
-                    dttm=datetime.now(),
+                    dttm=datetime.now(tz=timezone.utc),
                 )
             )
 

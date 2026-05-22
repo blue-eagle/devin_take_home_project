@@ -14,7 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from dateutil.parser import isoparse
@@ -61,7 +61,7 @@ def validate_python_date_format(dt_format: str) -> bool:
     if dt_format in ("epoch_s", "epoch_ms"):
         return True
     try:
-        dt_str = datetime.now().strftime(dt_format)
+        dt_str = datetime.now(tz=timezone.utc).strftime(dt_format)
         isoparse(dt_str)
     except ValueError as ex:
         raise ValidationError([_("Invalid date/timestamp format")]) from ex

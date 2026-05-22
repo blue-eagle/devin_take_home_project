@@ -22,7 +22,7 @@ Pydantic schemas for chart-related responses
 from __future__ import annotations
 
 import difflib
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated, Any, Dict, List, Literal, Protocol
 
 import humanize
@@ -293,7 +293,7 @@ def _humanize_timestamp(dt: datetime | None) -> str | None:
     """Convert a datetime to a humanized string like '2 hours ago'."""
     if dt is None:
         return None
-    return humanize.naturaltime(datetime.now() - dt)
+    return humanize.naturaltime(datetime.now(tz=timezone.utc) - dt)
 
 
 def extract_filters_from_form_data(

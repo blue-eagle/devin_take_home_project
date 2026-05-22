@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 import dateutil.parser
@@ -240,7 +240,7 @@ class DatasetDAO(BaseDAO[SqlaTable]):
         if dt_format in ("epoch_s", "epoch_ms"):
             return True
         try:
-            dt_str = datetime.now().strftime(dt_format)
+            dt_str = datetime.now(tz=timezone.utc).strftime(dt_format)
             dateutil.parser.isoparse(dt_str)
             return True
         except ValueError:
@@ -271,7 +271,7 @@ class DatasetDAO(BaseDAO[SqlaTable]):
                 force_update = True
 
             if force_update:
-                attributes["changed_on"] = datetime.now()
+                attributes["changed_on"] = datetime.now(tz=timezone.utc)
 
         return super().update(item, attributes)
 

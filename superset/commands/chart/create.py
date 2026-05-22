@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import partial
 from typing import Any, Optional
 
@@ -46,7 +46,7 @@ class CreateChartCommand(CreateMixin, BaseCommand):
     @transaction(on_error=partial(on_error, reraise=ChartCreateFailedError))
     def run(self) -> Model:
         self.validate()
-        self._properties["last_saved_at"] = datetime.now()
+        self._properties["last_saved_at"] = datetime.now(tz=timezone.utc)
         self._properties["last_saved_by"] = g.user
         return ChartDAO.create(attributes=self._properties)
 

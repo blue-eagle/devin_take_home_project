@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
@@ -74,7 +74,7 @@ class KeyValueDAO(BaseDAO[KeyValueEntry]):
             .filter(
                 and_(
                     KeyValueEntry.resource == resource.value,
-                    KeyValueEntry.expires_on <= datetime.now(),
+                    KeyValueEntry.expires_on <= datetime.now(tz=timezone.utc),
                 )
             )
             .delete()
@@ -95,7 +95,7 @@ class KeyValueDAO(BaseDAO[KeyValueEntry]):
         entry = KeyValueEntry(
             resource=resource.value,
             value=encoded_value,
-            created_on=datetime.now(),
+            created_on=datetime.now(tz=timezone.utc),
             created_by_fk=get_user_id(),
             expires_on=expires_on,
         )
@@ -121,7 +121,7 @@ class KeyValueDAO(BaseDAO[KeyValueEntry]):
         if entry := KeyValueDAO.get_entry(resource, key):
             entry.value = codec.encode(value)
             entry.expires_on = expires_on
-            entry.changed_on = datetime.now()
+            entry.changed_on = datetime.now(tz=timezone.utc)
             entry.changed_by_fk = get_user_id()
             return entry
 
@@ -138,7 +138,7 @@ class KeyValueDAO(BaseDAO[KeyValueEntry]):
         if entry := KeyValueDAO.get_entry(resource, key):
             entry.value = codec.encode(value)
             entry.expires_on = expires_on
-            entry.changed_on = datetime.now()
+            entry.changed_on = datetime.now(tz=timezone.utc)
             entry.changed_by_fk = get_user_id()
             return entry
 

@@ -16,7 +16,7 @@
 # under the License.
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import sqlalchemy as sa
 
@@ -65,7 +65,8 @@ class LogPruneCommand(BaseCommand):
 
         # Select all IDs that need to be deleted
         select_stmt = sa.select(Log.id).where(
-            Log.dttm < datetime.now() - timedelta(days=self.retention_period_days)
+            Log.dttm
+            < datetime.now(tz=timezone.utc) - timedelta(days=self.retention_period_days)
         )
 
         # Optionally limited by max_rows_per_run

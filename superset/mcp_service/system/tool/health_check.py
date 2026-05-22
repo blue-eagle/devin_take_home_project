@@ -82,7 +82,7 @@ async def health_check() -> HealthCheckResponse:
 
         response = HealthCheckResponse(
             status="healthy",
-            timestamp=datetime.datetime.now().isoformat(),
+            timestamp=datetime.datetime.now(tz=datetime.timezone.utc).isoformat(),
             service=service_name,
             version=version,
             python_version=platform.python_version(),
@@ -98,7 +98,7 @@ async def health_check() -> HealthCheckResponse:
         # Return error status but don't raise to keep tool working
         response = HealthCheckResponse(
             status="error",
-            timestamp=datetime.datetime.now().isoformat(),
+            timestamp=datetime.datetime.now(tz=datetime.timezone.utc).isoformat(),
             service=service_name,
             version="unknown",
             python_version=platform.python_version(),

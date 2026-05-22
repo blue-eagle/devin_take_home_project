@@ -278,12 +278,10 @@ class Task(CoreTask, AuditMixinNullable, Model):
             )
             return (now - started).total_seconds()
         elif self.created_on:
-            # Pending - created_on is naive LOCAL time (from AuditMixinNullable)
-            # Use naive local time for comparison
-            now = datetime.now()  # Local time, no timezone
+            now = datetime.now(tz=timezone.utc)
             created = (
-                self.created_on.replace(tzinfo=None)
-                if self.created_on.tzinfo is not None
+                self.created_on.replace(tzinfo=timezone.utc)
+                if self.created_on.tzinfo is None
                 else self.created_on
             )
             return (now - created).total_seconds()
