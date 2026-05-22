@@ -13,10 +13,10 @@ jobs:
         id: check_pr
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
         run: |
-          ISSUE_NUM="${{ github.event.issue.number }}"
-          # List open PRs and check if any branch matches issue-{N}-
-          prs=$(gh api "repos/${{ github.repository }}/pulls?state=open&per_page=100" \
+          prs=$(gh api "repos/${REPO}/pulls?state=open&per_page=100" \
             --jq ".[] | select(.head.ref | test(\"issue-${ISSUE_NUM}(?:-|$)\")) | .html_url")
           if [ -n "$prs" ]; then
             echo "pr_exists=true" >> "$GITHUB_OUTPUT"
@@ -37,12 +37,11 @@ jobs:
         env:
           DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
           DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          REPO: ${{ github.repository }}
         run: |
-          ISSUE_NUM="${{ github.event.issue.number }}"
-          ISSUE_TITLE="${{ github.event.issue.title }}"
-          ISSUE_URL="${{ github.event.issue.html_url }}"
-          REPO="${{ github.repository }}"
-
           PROMPT=$(cat <<'EOF'
           You are an automated code-remediation agent.
 
@@ -61,7 +60,7 @@ jobs:
           EOF
           )
 
-          # Replace placeholders
+          # Replace placeholders using env vars (not ${{ }} interpolation)
           PROMPT="${PROMPT//REPO_PLACEHOLDER/$REPO}"
           PROMPT="${PROMPT//ISSUE_URL_PLACEHOLDER/$ISSUE_URL}"
           PROMPT="${PROMPT//ISSUE_NUM_PLACEHOLDER/$ISSUE_NUM}"
@@ -89,10 +88,12 @@ jobs:
         if: steps.check_pr.outputs.pr_exists == 'false' && steps.dispatch.outputs.session_url
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
         run: |
-          gh issue comment "${{ github.event.issue.number }}" \
-            --repo "${{ github.repository }}" \
-            --body "🤖 **devinfixer** dispatched a Devin session to remediate this issue.
+          gh issue comment "$ISSUE_NUM" \
+            --repo "$REPO" \
+            --body "**devinfixer** dispatched a Devin session to remediate this issue.
 
           **Session:** ${{ steps.dispatch.outputs.session_url }}
 
