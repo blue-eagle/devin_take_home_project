@@ -24,7 +24,7 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_babel import gettext as __
 from marshmallow import fields, Schema
 from marshmallow.validate import Range
-from sqlalchemy import types
+from sqlalchemy import text, types
 from sqlalchemy.engine.default import DefaultDialect
 from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.engine.url import URL
@@ -554,11 +554,14 @@ class DatabricksNativeEngineSpec(DatabricksDynamicBaseEngineSpec):
             return default_catalog
 
         with database.get_sqla_engine() as engine:
-            catalogs = {catalog for (catalog,) in engine.execute("SHOW CATALOGS")}
-            if len(catalogs) == 1:
-                return catalogs.pop()
+            with engine.connect() as conn:
+                catalogs = {
+                    catalog for (catalog,) in conn.execute(text("SHOW CATALOGS"))
+                }
+                if len(catalogs) == 1:
+                    return catalogs.pop()
 
-            return engine.execute("SELECT current_catalog()").scalar()
+                return conn.execute(text("SELECT current_catalog()")).scalar()
 
     @classmethod
     def get_prequeries(
@@ -582,7 +585,8 @@ class DatabricksNativeEngineSpec(DatabricksDynamicBaseEngineSpec):
         database: Database,
         inspector: Inspector,
     ) -> set[str]:
-        return {catalog for (catalog,) in inspector.bind.execute("SHOW CATALOGS")}
+        with inspector.engine.connect() as conn:
+            return {catalog for (catalog,) in conn.execute(text("SHOW CATALOGS"))}
 
 
 class DatabricksPythonConnectorEngineSpec(DatabricksDynamicBaseEngineSpec):
@@ -746,7 +750,8 @@ class DatabricksPythonConnectorEngineSpec(DatabricksDynamicBaseEngineSpec):
         database: Database,
         inspector: Inspector,
     ) -> set[str]:
-        return {catalog for (catalog,) in inspector.bind.execute("SHOW CATALOGS")}
+        with inspector.engine.connect() as conn:
+            return {catalog for (catalog,) in conn.execute(text("SHOW CATALOGS"))}
 
     @classmethod
     def adjust_engine_params(
@@ -765,5 +770,5 @@ class DatabricksPythonConnectorEngineSpec(DatabricksDynamicBaseEngineSpec):
         return uri, connect_args
 
 
-# TODO: remove once we've upgraded to SQLAlchemy>=2.0 and databricks-sql-python>=3.x
+# TODO: remove once databricks-sql-python>=3.x is adopted
 monkeypatch_dialect()

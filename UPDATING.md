@@ -24,6 +24,24 @@ assists people when migrating to a new version.
 
 ## Next
 
+### Core dependency upgrades: SQLAlchemy 2.0, Flask 3.x, Flask-Migrate 4.x
+
+The following core dependencies have been upgraded:
+
+| Package | Old | New |
+|---------|-----|-----|
+| `sqlalchemy` | 1.4.x | 2.0.x |
+| `flask-sqlalchemy` | 2.5.x | 3.x |
+| `flask` | 2.3.x | 3.x |
+| `flask-migrate` | 3.1.x | 4.x |
+
+**Breaking changes for custom DB engine specs:** If you have custom DB engine specs or plugins that use `engine.execute()`, `inspector.bind`, or pass raw SQL strings to `conn.execute()`, you must update them:
+- Replace `engine.execute(sql)` with `with engine.connect() as conn: conn.execute(text(sql))`
+- Replace `inspector.bind.execute(sql)` with `with inspector.engine.connect() as conn: conn.execute(text(sql))`
+- Wrap raw SQL strings in `sqlalchemy.text()` when calling `conn.execute()`
+
+**Breaking changes for custom Alembic migrations:** If you have custom migration scripts using `conn.execute("SQL string")`, wrap the SQL in `text()`.
+
 ### Granular Export Controls
 
 A new feature flag `GRANULAR_EXPORT_CONTROLS` introduces three fine-grained permissions that replace the legacy `can_csv` permission:
