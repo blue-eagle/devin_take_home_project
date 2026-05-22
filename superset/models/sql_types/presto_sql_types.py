@@ -21,7 +21,6 @@ from typing import Any, Optional
 from sqlalchemy.engine.interfaces import Dialect
 from sqlalchemy.sql.sqltypes import DATE, Integer, TIMESTAMP
 from sqlalchemy.sql.type_api import TypeEngine
-from sqlalchemy.sql.visitors import Visitable
 from sqlalchemy.types import TypeDecorator
 
 # _compiler_dispatch is defined to help with type compilation
@@ -37,7 +36,7 @@ class TinyInteger(Integer):
         return int
 
     @classmethod
-    def _compiler_dispatch(cls, _visitor: Visitable, **_kw: Any) -> str:
+    def _compiler_dispatch(cls, _visitor: Any, **_kw: Any) -> str:
         return "TINYINT"
 
 
@@ -51,7 +50,7 @@ class Interval(TypeEngine):
         return None
 
     @classmethod
-    def _compiler_dispatch(cls, _visitor: Visitable, **_kw: Any) -> str:
+    def _compiler_dispatch(cls, _visitor: Any, **_kw: Any) -> str:
         return "INTERVAL"
 
 
@@ -65,7 +64,7 @@ class Array(TypeEngine):
         return list
 
     @classmethod
-    def _compiler_dispatch(cls, _visitor: Visitable, **_kw: Any) -> str:
+    def _compiler_dispatch(cls, _visitor: Any, **_kw: Any) -> str:
         return "ARRAY"
 
 
@@ -79,7 +78,7 @@ class Map(TypeEngine):
         return dict
 
     @classmethod
-    def _compiler_dispatch(cls, _visitor: Visitable, **_kw: Any) -> str:
+    def _compiler_dispatch(cls, _visitor: Any, **_kw: Any) -> str:
         return "MAP"
 
 
@@ -93,7 +92,7 @@ class Row(TypeEngine):
         return None
 
     @classmethod
-    def _compiler_dispatch(cls, _visitor: Visitable, **_kw: Any) -> str:
+    def _compiler_dispatch(cls, _visitor: Any, **_kw: Any) -> str:
         return "ROW"
 
 

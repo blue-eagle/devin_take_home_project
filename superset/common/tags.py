@@ -440,7 +440,7 @@ def add_owners(metadata: MetaData) -> None:
     columns = ["tag_id", "object_id", "object_type"]
 
     # create a custom tag for each user
-    ids = select([users.c.id])
+    ids = select(users.c.id)
     insert = tag.insert()
     for (id_,) in db.session.execute(ids):
         with contextlib.suppress(IntegrityError):  # already exists
@@ -478,18 +478,16 @@ def add_favorites(metadata: MetaData) -> None:
     columns = ["tag_id", "object_id", "object_type"]
 
     # create a custom tag for each user
-    ids = select([users.c.id])
+    ids = select(users.c.id)
     insert = tag.insert()
     for (id_,) in db.session.execute(ids):
         with contextlib.suppress(IntegrityError):  # already exists
             db.session.execute(insert, name=f"favorited_by:{id_}", type=TagType.type)
     favstars = (
         select(
-            [
-                tag.c.id.label("tag_id"),
-                favstar.c.obj_id.label("object_id"),
-                func.lower(favstar.c.class_name).label("object_type"),
-            ]
+            tag.c.id.label("tag_id"),
+            favstar.c.obj_id.label("object_id"),
+            func.lower(favstar.c.class_name).label("object_type"),
         )
         .select_from(
             join(

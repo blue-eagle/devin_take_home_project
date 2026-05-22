@@ -21,7 +21,6 @@ from typing import Any, Optional
 
 from sqlalchemy.engine.interfaces import Dialect
 from sqlalchemy.sql.sqltypes import CHAR
-from sqlalchemy.sql.visitors import Visitable
 from sqlalchemy.types import TypeDecorator
 
 # _compiler_dispatch is defined to help with type compilation
@@ -40,7 +39,7 @@ class GUID(TypeDecorator):
         return uuid.UUID
 
     @classmethod
-    def _compiler_dispatch(cls, _visitor: Visitable, **_kw: Any) -> str:
+    def _compiler_dispatch(cls, _visitor: Any, **_kw: Any) -> str:
         """Return the SQL type for the GUID type, which is CHAR(36) in SQL Server."""
         return "CHAR(36)"
 

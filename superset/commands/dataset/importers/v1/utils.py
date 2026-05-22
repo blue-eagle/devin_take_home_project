@@ -24,7 +24,7 @@ import pandas as pd
 from flask import current_app as app
 from sqlalchemy import BigInteger, Boolean, Date, DateTime, Float, String, Text
 from sqlalchemy.exc import MultipleResultsFound
-from sqlalchemy.sql.visitors import VisitableType
+from sqlalchemy.sql.type_api import TypeEngine
 
 from superset import db, security_manager
 from superset.commands.dataset.exceptions import (
@@ -63,7 +63,7 @@ type_map = {
 }
 
 
-def get_sqla_type(native_type: str) -> VisitableType:
+def get_sqla_type(native_type: str) -> TypeEngine:
     if native_type.upper() in type_map:
         return type_map[native_type.upper()]
 
@@ -76,7 +76,7 @@ def get_sqla_type(native_type: str) -> VisitableType:
     )
 
 
-def get_dtype(df: pd.DataFrame, dataset: SqlaTable) -> dict[str, VisitableType]:
+def get_dtype(df: pd.DataFrame, dataset: SqlaTable) -> dict[str, TypeEngine]:
     return {
         column.column_name: get_sqla_type(column.type)
         for column in dataset.columns

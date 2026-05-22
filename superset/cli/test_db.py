@@ -121,11 +121,14 @@ def test_datetime(console: Console, engine: Engine) -> None:
 
     console.print("Inserting timestamp value...")
     insert_stmt = insert(table).values(ts=now)
-    engine.execute(insert_stmt)
+    with engine.connect() as conn:
+        conn.execute(insert_stmt)
+        conn.commit()
 
     console.print("Reading timestamp value...")
     select_stmt = select(table)
-    row = engine.execute(select_stmt).fetchone()
+    with engine.connect() as conn:
+        row = conn.execute(select_stmt).fetchone()
     assert row[0] == now
     console.print(":thumbs_up: [green]Success!")
 
@@ -138,7 +141,7 @@ def test_datetime(console: Console, engine: Engine) -> None:
     "raw_engine_kwargs",
     help="Connect args as JSON or YAML",
 )
-def test_db(sqlalchemy_uri: str, raw_engine_kwargs: str | None = None) -> None:
+def test_db(sqlalchemy_uri: str, raw_engine_kwargs: str | None = None) -> None:  # noqa: PT028
     """
     Run a series of tests against an analytical database.
 
