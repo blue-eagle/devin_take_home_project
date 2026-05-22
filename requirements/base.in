@@ -16,8 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-# Security: CVE-2026-21441 - decompression bomb bypass on redirects
-urllib3>=2.6.3,<3.0.0
+# Security: PYSEC-2026-142, PYSEC-2026-141
+urllib3>=2.7.0,<3.0.0
 # Security: CVE-2026-27199 - Windows device name handling in safe_join
 werkzeug>=3.1.6,<4.0.0
 # Security: CVE-2025-68146 - TOCTOU symlink vulnerability
@@ -27,10 +27,10 @@ brotli>=1.2.0,<2.0.0
 numexpr>=2.9.0
 # Security: CVE-2026-34073 (MEDIUM) - Improper Certificate Validation
 cryptography>=46.0.7,<47.0.0
-# Security: Snyk - XSS vulnerability in Mako templates
-mako>=1.3.11,<2.0.0
-# Security: CVE-2024-52338 (CRITICAL) - Deserialization of untrusted data in IPC/Parquet readers
-pyarrow>=20.0.0,<21.0.0
+# Security: CVE-2026-44307 (MEDIUM) - XSS vulnerability in Mako templates
+mako>=1.3.12,<2.0.0
+# Security: PYSEC-2026-113 (HIGH) - Deserialization of untrusted data in IPC/Parquet readers
+pyarrow>=23.0.1,<24.0.0
 # Security: CVE-2026-27459 - pyopenssl certificate validation
 pyopenssl>=26.0.0,<27.0.0
 # Security: CVE-2026-25645 (MEDIUM) - Insecure Temporary File
@@ -57,4 +57,10 @@ openapi-schema-validator>=0.6.3
 # pkg_resources is deprecated and will be removed in setuptools 81+ (around 2025-11-30)
 # Known affected packages: Preset's 'clients' package
 # See docs/docs/contributing/pkg-resources-migration.md for details
+# Security: CVE-2026-45409 (MEDIUM) - IDNA vulnerability
+idna>=3.15,<4.0.0
+# Flask 3.x compatibility: flask-babel 3.x uses removed flask.helpers.locked_cached_property
+flask-babel>=4.0.0,<5.0.0
+# Flask 3.x compatibility: flask-sqlalchemy 2.x uses removed flask._app_ctx_stack
+flask-sqlalchemy>=3.0.0,<4.0.0
 setuptools<81
