@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unused-state */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { RefObject, ReactNode, PureComponent } from 'react';
+import React, { RefObject, ReactNode, useCallback } from 'react';
 
 import { styled } from '@apache-superset/core/theme';
 import cx from 'classnames';
 
 interface HoverMenuProps {
-  position: 'left' | 'top';
-  innerRef: RefObject<HTMLDivElement>;
-  children: ReactNode;
+  position?: 'left' | 'top';
+  innerRef?: RefObject<HTMLDivElement> | null;
+  children?: ReactNode;
   onHover?: (data: { isHovered: boolean }) => void;
 }
 
@@ -66,29 +65,20 @@ const HoverStyleOverrides = styled.div`
   }
 `;
 
-export default class HoverMenu extends PureComponent<HoverMenuProps> {
-  static defaultProps = {
-    position: 'left',
-    innerRef: null,
-    children: null,
-  };
+const HoverMenu: React.FC<HoverMenuProps> = React.memo(
+  ({ position = 'left', innerRef = null, children = null, onHover }) => {
+    const handleMouseEnter = useCallback(() => {
+      if (onHover) {
+        onHover({ isHovered: true });
+      }
+    }, [onHover]);
 
-  handleMouseEnter = () => {
-    const { onHover } = this.props;
-    if (onHover) {
-      onHover({ isHovered: true });
-    }
-  };
+    const handleMouseLeave = useCallback(() => {
+      if (onHover) {
+        onHover({ isHovered: false });
+      }
+    }, [onHover]);
 
-  handleMouseLeave = () => {
-    const { onHover } = this.props;
-    if (onHover) {
-      onHover({ isHovered: false });
-    }
-  };
-
-  render() {
-    const { innerRef, position, children } = this.props;
     return (
       <HoverStyleOverrides className="hover-menu-container">
         <div
@@ -98,13 +88,15 @@ export default class HoverMenu extends PureComponent<HoverMenuProps> {
             position === 'left' && 'hover-menu--left',
             position === 'top' && 'hover-menu--top',
           )}
-          onMouseEnter={this.handleMouseEnter}
-          onMouseLeave={this.handleMouseLeave}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           data-test="hover-menu"
         >
           {children}
         </div>
       </HoverStyleOverrides>
     );
-  }
-}
+  },
+);
+
+export default HoverMenu;

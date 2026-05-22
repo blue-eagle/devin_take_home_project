@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PureComponent } from 'react';
+import React, { useCallback } from 'react';
 import { css, styled } from '@apache-superset/core/theme';
 
 import { Draggable } from '../../dnd/DragDroppable';
@@ -63,26 +63,21 @@ const DividerLine = styled.div`
   `}
 `;
 
-class Divider extends PureComponent<DividerProps> {
-  constructor(props: DividerProps) {
-    super(props);
-    this.handleDeleteComponent = this.handleDeleteComponent.bind(this);
-  }
-
-  handleDeleteComponent() {
-    const { deleteComponent, id, parentId } = this.props;
-    deleteComponent(id, parentId);
-  }
-
-  render() {
-    const {
-      component,
-      depth,
-      parentComponent,
-      index,
-      handleComponentDrop,
-      editMode,
-    } = this.props;
+const Divider: React.FC<DividerProps> = React.memo(
+  ({
+    id,
+    parentId,
+    component,
+    depth,
+    parentComponent,
+    index,
+    handleComponentDrop,
+    editMode,
+    deleteComponent,
+  }) => {
+    const handleDeleteComponent = useCallback(() => {
+      deleteComponent(id, parentId);
+    }, [deleteComponent, id, parentId]);
 
     return (
       <Draggable
@@ -98,7 +93,7 @@ class Divider extends PureComponent<DividerProps> {
           <div ref={dragSourceRef}>
             {editMode && (
               <HoverMenu position="left">
-                <DeleteComponentButton onDelete={this.handleDeleteComponent} />
+                <DeleteComponentButton onDelete={handleDeleteComponent} />
               </HoverMenu>
             )}
             <DividerLine className="dashboard-component dashboard-component-divider" />
@@ -106,7 +101,7 @@ class Divider extends PureComponent<DividerProps> {
         )}
       </Draggable>
     );
-  }
-}
+  },
+);
 
 export default Divider;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PureComponent } from 'react';
+import React from 'react';
 import { t } from '@apache-superset/core/translation';
 
 import PopoverDropdown, {
@@ -40,18 +40,16 @@ const dropdownOptions = [
   },
 ];
 
-export default class MarkdownModeDropdown extends PureComponent<MarkdownModeDropdownProps> {
-  render() {
-    const { id, value, onChange } = this.props;
+const MarkdownModeDropdown: React.FC<MarkdownModeDropdownProps> = React.memo(
+  ({ id, value, onChange }) => (
+    <PopoverDropdown
+      data-test="markdown-mode-dropdown"
+      id={id}
+      options={dropdownOptions}
+      value={value}
+      onChange={onChange}
+    />
+  ),
+);
 
-    return (
-      <PopoverDropdown
-        data-test="markdown-mode-dropdown"
-        id={id}
-        options={dropdownOptions}
-        value={value}
-        onChange={onChange}
-      />
-    );
-  }
-}
+export default MarkdownModeDropdown;

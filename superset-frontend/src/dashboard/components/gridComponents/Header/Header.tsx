@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PureComponent } from 'react';
+import React, { useState, useCallback } from 'react';
 import cx from 'classnames';
 import { css, styled } from '@apache-superset/core/theme';
 
@@ -83,10 +83,6 @@ interface HeaderProps {
   handleComponentDrop: (dropResult: any) => void;
   deleteComponent: (id: string, parentId: string) => void;
   updateComponents: (changes: Record<string, ComponentShape>) => void;
-}
-
-interface HeaderState {
-  isFocused: boolean;
 }
 
 const HeaderStyles = styled.div`
@@ -159,65 +155,62 @@ const HeaderStyles = styled.div`
   `}
 `;
 
-class Header extends PureComponent<HeaderProps, HeaderState> {
-  handleChangeSize: (nextValue: string) => void;
-  handleChangeBackground: (nextValue: string) => void;
-  handleChangeText: (nextValue: string) => void;
+const Header: React.FC<HeaderProps> = React.memo(
+  ({
+    id,
+    dashboardId,
+    parentId,
+    component,
+    depth,
+    parentComponent,
+    index,
+    editMode,
+    embeddedMode,
+    handleComponentDrop,
+    deleteComponent,
+    updateComponents,
+  }) => {
+    const [isFocused, setIsFocused] = useState(false);
 
-  constructor(props: HeaderProps) {
-    super(props);
-    this.state = {
-      isFocused: false,
-    };
-    this.handleDeleteComponent = this.handleDeleteComponent.bind(this);
-    this.handleChangeFocus = this.handleChangeFocus.bind(this);
-    this.handleUpdateMeta = this.handleUpdateMeta.bind(this);
+    const handleUpdateMeta = useCallback(
+      (metaKey: keyof ComponentMeta, nextValue: string): void => {
+        if (nextValue && component.meta[metaKey] !== nextValue) {
+          updateComponents({
+            [component.id]: {
+              ...component,
+              meta: {
+                ...component.meta,
+                [metaKey]: nextValue,
+              },
+            },
+          } as Record<string, ComponentShape>);
+        }
+      },
+      [updateComponents, component],
+    );
 
-    this.handleChangeSize = (nextValue: string) =>
-      this.handleUpdateMeta('headerSize', nextValue);
-    this.handleChangeBackground = (nextValue: string) =>
-      this.handleUpdateMeta('background', nextValue);
-    this.handleChangeText = (nextValue: string) =>
-      this.handleUpdateMeta('text', nextValue);
-  }
+    const handleChangeFocus = useCallback((nextFocus: boolean): void => {
+      setIsFocused(nextFocus);
+    }, []);
 
-  handleChangeFocus(nextFocus: boolean): void {
-    this.setState(() => ({ isFocused: nextFocus }));
-  }
+    const handleChangeSize = useCallback(
+      (nextValue: string) => handleUpdateMeta('headerSize', nextValue),
+      [handleUpdateMeta],
+    );
 
-  handleUpdateMeta(metaKey: keyof ComponentMeta, nextValue: string): void {
-    const { updateComponents, component } = this.props;
-    if (nextValue && component.meta[metaKey] !== nextValue) {
-      updateComponents({
-        [component.id]: {
-          ...component,
-          meta: {
-            ...component.meta,
-            [metaKey]: nextValue,
-          },
-        },
-      } as Record<string, ComponentShape>);
-    }
-  }
+    const handleChangeBackground = useCallback(
+      (nextValue: string) => handleUpdateMeta('background', nextValue),
+      [handleUpdateMeta],
+    );
 
-  handleDeleteComponent(): void {
-    const { deleteComponent, id, parentId } = this.props;
-    deleteComponent(id, parentId);
-  }
+    const handleChangeText = useCallback(
+      (nextValue: string) => handleUpdateMeta('text', nextValue),
+      [handleUpdateMeta],
+    );
 
-  render() {
-    const { isFocused } = this.state;
-
-    const {
-      dashboardId,
-      component,
-      depth,
-      parentComponent,
-      index,
-      handleComponentDrop,
-      editMode,
-      embeddedMode,
-    } = this.props;
+    const handleDeleteComponent = useCallback((): void => {
+      deleteComponent(id, parentId);
+    }, [deleteComponent, id, parentId]);
 
     const headerStyle = headerStyleOptions.find(
       opt => opt.value === (component.meta.headerSize || SMALL_HEADER),
@@ -252,18 +245,18 @@ class Header extends PureComponent<HeaderProps, HeaderState> {
                 </HoverMenu>
               )}
             <WithPopoverMenu
-              onChangeFocus={this.handleChangeFocus}
+              onChangeFocus={handleChangeFocus}
               menuItems={[
                 <PopoverDropdown
                   id={`${component.id}-header-style`}
                   options={headerStyleOptions}
                   value={component.meta.headerSize as string}
-                  onChange={this.handleChangeSize}
+                  onChange={handleChangeSize}
                 />,
                 <BackgroundStyleDropdown
                   id={`${component.id}-background`}
                   value={component.meta.background as string}
-                  onChange={this.handleChangeBackground}
+                  onChange={handleChangeBackground}
                 />,
               ]}
               editMode={editMode}
@@ -279,14 +272,14 @@ class Header extends PureComponent<HeaderProps, HeaderState> {
                 {editMode && (
                   <HoverMenu position="top">
                     <DeleteComponentButton
-                      onDelete={this.handleDeleteComponent}
+                      onDelete={handleDeleteComponent}
                     />
                   </HoverMenu>
                 )}
                 <EditableTitle
                   title={component.meta.text}
                   canEdit={editMode}
-                  onSaveTitle={this.handleChangeText}
+                  onSaveTitle={handleChangeText}
                   showTooltip={false}
                 />
                 {!editMode && !embeddedMode && (
@@ -301,7 +294,7 @@ class Header extends PureComponent<HeaderProps, HeaderState> {
         )}
       </Draggable>
     );
-  }
-}
+  },
+);
 
 export default Header;
