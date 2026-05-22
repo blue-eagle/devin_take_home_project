@@ -64,53 +64,48 @@ const setup = (
     },
   );
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('TemplateParamsEditor', () => {
-  test('should render with a title', () => {
-    const { container } = setup();
-    expect(container.querySelector('div[role="button"]')).toBeInTheDocument();
-  });
+test('TemplateParamsEditor should render with a title', () => {
+  const { container } = setup();
+  expect(container.querySelector('div[role="button"]')).toBeInTheDocument();
+});
 
-  test('should open a modal with the ace editor', async () => {
-    const { container, getByTestId } = setup();
-    fireEvent.click(getByText(container, 'Parameters'));
-    await waitFor(() => {
-      expect(getByTestId('mock-async-ace-editor')).toBeInTheDocument();
-    });
+test('TemplateParamsEditor should open a modal with the ace editor', async () => {
+  const { container, getByTestId } = setup();
+  fireEvent.click(getByText(container, 'Parameters'));
+  await waitFor(() => {
+    expect(getByTestId('mock-async-ace-editor')).toBeInTheDocument();
   });
+});
 
-  test('renders templateParams', async () => {
-    const { container, getByTestId } = setup();
-    fireEvent.click(getByText(container, 'Parameters'));
-    await waitFor(() => {
-      expect(getByTestId('mock-async-ace-editor')).toBeInTheDocument();
-    });
-    expect(getByTestId('mock-async-ace-editor')).toHaveTextContent(
-      defaultQueryEditor.templateParams,
-    );
+test('TemplateParamsEditor renders templateParams', async () => {
+  const { container, getByTestId } = setup();
+  fireEvent.click(getByText(container, 'Parameters'));
+  await waitFor(() => {
+    expect(getByTestId('mock-async-ace-editor')).toBeInTheDocument();
   });
+  expect(getByTestId('mock-async-ace-editor')).toHaveTextContent(
+    defaultQueryEditor.templateParams,
+  );
+});
 
-  test('renders code from unsaved changes', async () => {
-    const expectedCode = 'custom code value';
-    const { container, getByTestId } = setup(
-      {},
-      mockStore({
-        ...initialState,
-        sqlLab: {
-          ...initialState.sqlLab,
-          unsavedQueryEditor: {
-            id: defaultQueryEditor.id,
-            templateParams: expectedCode,
-          },
+test('TemplateParamsEditor renders code from unsaved changes', async () => {
+  const expectedCode = 'custom code value';
+  const { container, getByTestId } = setup(
+    {},
+    mockStore({
+      ...initialState,
+      sqlLab: {
+        ...initialState.sqlLab,
+        unsavedQueryEditor: {
+          id: defaultQueryEditor.id,
+          templateParams: expectedCode,
         },
-      }),
-    );
-    fireEvent.click(getByText(container, 'Parameters'));
-    await waitFor(() => {
-      expect(getByTestId('mock-async-ace-editor')).toBeInTheDocument();
-    });
-    expect(getByTestId('mock-async-ace-editor')).toHaveTextContent(
-      expectedCode,
-    );
+      },
+    }),
+  );
+  fireEvent.click(getByText(container, 'Parameters'));
+  await waitFor(() => {
+    expect(getByTestId('mock-async-ace-editor')).toBeInTheDocument();
   });
+  expect(getByTestId('mock-async-ace-editor')).toHaveTextContent(expectedCode);
 });

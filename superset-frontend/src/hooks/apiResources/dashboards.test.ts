@@ -45,70 +45,67 @@ test('useDashboard excludes thumbnail_url from request', async () => {
   fetchMock.clearHistory().removeRoutes();
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('useDashboardDatasets', () => {
-  const mockDatasets = [
-    {
-      id: 1,
-      metrics: [
-        {
-          metric_name: 'count',
-          currency: { symbol: 'GBP', symbolPosition: 'prefix' },
-        },
-        {
-          metric_name: 'revenue',
-          currency: { symbol: 'USD', symbolPosition: 'suffix' },
-        },
-        { metric_name: 'no_currency' },
-      ],
-    },
-    {
-      id: 2,
-      metrics: [{ metric_name: 'no_currency' }],
-    },
-    {
-      id: 3,
-      metrics: [
-        {
-          metric_name: 'other_currency',
-          currency: { symbol: 'CNY', symbolPosition: 'suffix' },
-        },
-      ],
-    },
-  ];
+const mockDatasets = [
+  {
+    id: 1,
+    metrics: [
+      {
+        metric_name: 'count',
+        currency: { symbol: 'GBP', symbolPosition: 'prefix' },
+      },
+      {
+        metric_name: 'revenue',
+        currency: { symbol: 'USD', symbolPosition: 'suffix' },
+      },
+      { metric_name: 'no_currency' },
+    ],
+  },
+  {
+    id: 2,
+    metrics: [{ metric_name: 'no_currency' }],
+  },
+  {
+    id: 3,
+    metrics: [
+      {
+        metric_name: 'other_currency',
+        currency: { symbol: 'CNY', symbolPosition: 'suffix' },
+      },
+    ],
+  },
+];
 
-  beforeEach(() => {
-    fetchMock.clearHistory().removeRoutes();
+beforeEach(() => {
+  fetchMock.clearHistory().removeRoutes();
+});
+
+test('useDashboardDatasets adds currencyFormats to datasets', async () => {
+  fetchMock.get('glob:*/api/v1/dashboard/*/datasets', {
+    result: mockDatasets,
   });
 
-  test('adds currencyFormats to datasets', async () => {
-    fetchMock.get('glob:*/api/v1/dashboard/*/datasets', {
-      result: mockDatasets,
-    });
+  const { result } = renderHook(() => useDashboardDatasets(1));
 
-    const { result } = renderHook(() => useDashboardDatasets(1));
-
-    const expectedContent = [
-      {
-        ...mockDatasets[0],
-        currencyFormats: {
-          count: { symbol: 'GBP', symbolPosition: 'prefix' },
-          revenue: { symbol: 'USD', symbolPosition: 'suffix' },
-        },
+  const expectedContent = [
+    {
+      ...mockDatasets[0],
+      currencyFormats: {
+        count: { symbol: 'GBP', symbolPosition: 'prefix' },
+        revenue: { symbol: 'USD', symbolPosition: 'suffix' },
       },
-      {
-        ...mockDatasets[1],
-        currencyFormats: {},
+    },
+    {
+      ...mockDatasets[1],
+      currencyFormats: {},
+    },
+    {
+      ...mockDatasets[2],
+      currencyFormats: {
+        other_currency: { symbol: 'CNY', symbolPosition: 'suffix' },
       },
-      {
-        ...mockDatasets[2],
-        currencyFormats: {
-          other_currency: { symbol: 'CNY', symbolPosition: 'suffix' },
-        },
-      },
-    ];
-    await waitFor(() => {
-      expect(result.current.result).toEqual(expectedContent);
-    });
+    },
+  ];
+  await waitFor(() => {
+    expect(result.current.result).toEqual(expectedContent);
   });
 });

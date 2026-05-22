@@ -201,76 +201,70 @@ test('calls onShowChartTimestampsChange when switch is toggled', async () => {
   expect(onShowChartTimestampsChange.mock.calls[0][0]).toBe(true);
 });
 
-// CSS Template Tests
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('CSS Template functionality', () => {
-  test('does not show CSS template select when feature flag is disabled', () => {
-    mockIsFeatureEnabled.mockReturnValue(false);
-    render(<StylingSection {...defaultProps} />);
+test('CSS Template functionality does not show CSS template select when feature flag is disabled', () => {
+  mockIsFeatureEnabled.mockReturnValue(false);
+  render(<StylingSection {...defaultProps} />);
 
-    expect(
-      screen.queryByTestId('dashboard-css-template-field'),
-    ).not.toBeInTheDocument();
-  });
+  expect(
+    screen.queryByTestId('dashboard-css-template-field'),
+  ).not.toBeInTheDocument();
+});
 
-  test('fetches CSS templates on mount when feature enabled', async () => {
-    mockIsFeatureEnabled.mockImplementation(flag => flag === 'CSS_TEMPLATES');
-    render(<StylingSection {...defaultProps} />);
+test('CSS Template functionality fetches CSS templates on mount when feature enabled', async () => {
+  mockIsFeatureEnabled.mockImplementation(flag => flag === 'CSS_TEMPLATES');
+  render(<StylingSection {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(mockSupersetClient.get).toHaveBeenCalledWith({
-        endpoint: expect.stringContaining('/api/v1/css_template/'),
-      });
+  await waitFor(() => {
+    expect(mockSupersetClient.get).toHaveBeenCalledWith({
+      endpoint: expect.stringContaining('/api/v1/css_template/'),
     });
   });
+});
 
-  test('shows CSS template select when feature flag is enabled and templates exist', async () => {
-    mockIsFeatureEnabled.mockImplementation(flag => flag === 'CSS_TEMPLATES');
-    render(<StylingSection {...defaultProps} />);
+test('CSS Template functionality shows CSS template select when feature flag is enabled and templates exist', async () => {
+  mockIsFeatureEnabled.mockImplementation(flag => flag === 'CSS_TEMPLATES');
+  render(<StylingSection {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('Load CSS template (optional)'),
-      ).toBeInTheDocument();
-    });
-
+  await waitFor(() => {
     expect(
-      screen.getByTestId('dashboard-css-template-select'),
+      screen.getByText('Load CSS template (optional)'),
     ).toBeInTheDocument();
   });
 
-  test('shows error toast when template fetch fails', async () => {
-    mockIsFeatureEnabled.mockImplementation(flag => flag === 'CSS_TEMPLATES');
-    const addDangerToast = jest.fn();
-    mockSupersetClient.get.mockRejectedValueOnce(new Error('API Error'));
+  expect(
+    screen.getByTestId('dashboard-css-template-select'),
+  ).toBeInTheDocument();
+});
 
-    render(
-      <StylingSection {...defaultProps} addDangerToast={addDangerToast} />,
+test('CSS Template functionality shows error toast when template fetch fails', async () => {
+  mockIsFeatureEnabled.mockImplementation(flag => flag === 'CSS_TEMPLATES');
+  const addDangerToast = jest.fn();
+  mockSupersetClient.get.mockRejectedValueOnce(new Error('API Error'));
+
+  render(<StylingSection {...defaultProps} addDangerToast={addDangerToast} />);
+
+  await waitFor(() => {
+    expect(addDangerToast).toHaveBeenCalledWith(
+      'An error occurred while fetching available CSS templates',
     );
+  });
+});
 
-    await waitFor(() => {
-      expect(addDangerToast).toHaveBeenCalledWith(
-        'An error occurred while fetching available CSS templates',
-      );
-    });
+test('CSS Template functionality does not show CSS template select when no templates available', async () => {
+  mockIsFeatureEnabled.mockImplementation(flag => flag === 'CSS_TEMPLATES');
+  mockSupersetClient.get.mockResolvedValueOnce({
+    json: { result: [] },
+    response: {} as Response,
   });
 
-  test('does not show CSS template select when no templates available', async () => {
-    mockIsFeatureEnabled.mockImplementation(flag => flag === 'CSS_TEMPLATES');
-    mockSupersetClient.get.mockResolvedValueOnce({
-      json: { result: [] },
-      response: {} as Response,
-    });
+  render(<StylingSection {...defaultProps} />);
 
-    render(<StylingSection {...defaultProps} />);
-
-    // Wait for fetch to complete
-    await waitFor(() => {
-      expect(mockSupersetClient.get).toHaveBeenCalled();
-    });
-
-    expect(
-      screen.queryByTestId('dashboard-css-template-field'),
-    ).not.toBeInTheDocument();
+  // Wait for fetch to complete
+  await waitFor(() => {
+    expect(mockSupersetClient.get).toHaveBeenCalled();
   });
+
+  expect(
+    screen.queryByTestId('dashboard-css-template-field'),
+  ).not.toBeInTheDocument();
 });

@@ -146,163 +146,152 @@ const addNewRuleDefaultProps: RowLevelSecurityModalProps = {
   onHide: NOOP,
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('Rule modal', () => {
-  async function renderAndWait(props: RowLevelSecurityModalProps) {
-    const mounted = act(async () => {
-      render(<RowLevelSecurityModal {...props} />, { useRedux: true });
-    });
-    return mounted;
-  }
+async function renderAndWait(props: RowLevelSecurityModalProps) {
+  const mounted = act(async () => {
+    render(<RowLevelSecurityModal {...props} />, { useRedux: true });
+  });
+  return mounted;
+}
 
-  test('Sets correct title for adding new rule', async () => {
-    await renderAndWait(addNewRuleDefaultProps);
-    const title = screen.getByText('Add Rule');
-    expect(title).toBeInTheDocument();
-    expect(fetchMock.callHistory.calls(getRuleEndpoint)).toHaveLength(0);
-    expect(fetchMock.callHistory.calls(getRelatedTablesEndpoint)).toHaveLength(
-      0,
-    );
-    expect(fetchMock.callHistory.calls(getRelatedRolesEndpoint)).toHaveLength(
-      0,
-    );
+test('Rule modal Sets correct title for adding new rule', async () => {
+  await renderAndWait(addNewRuleDefaultProps);
+  const title = screen.getByText('Add Rule');
+  expect(title).toBeInTheDocument();
+  expect(fetchMock.callHistory.calls(getRuleEndpoint)).toHaveLength(0);
+  expect(fetchMock.callHistory.calls(getRelatedTablesEndpoint)).toHaveLength(0);
+  expect(fetchMock.callHistory.calls(getRelatedRolesEndpoint)).toHaveLength(0);
+});
+
+test('Rule modal Sets correct title for editing existing rule', async () => {
+  await renderAndWait({
+    ...addNewRuleDefaultProps,
+    rule: {
+      id: 1,
+      name: 'test rule',
+      filter_type: FilterType.Base,
+      tables: [{ key: 1, id: 1, value: 'birth_names' }],
+      roles: [],
+    },
+  });
+  const title = screen.getByText('Edit Rule');
+  expect(title).toBeInTheDocument();
+  expect(fetchMock.callHistory.calls(getRuleEndpoint)).toHaveLength(1);
+  expect(fetchMock.callHistory.calls(getRelatedTablesEndpoint)).toHaveLength(0);
+  expect(fetchMock.callHistory.calls(getRelatedRolesEndpoint)).toHaveLength(0);
+});
+
+test('Rule modal Fills correct values when editing rule', async () => {
+  await renderAndWait({
+    ...addNewRuleDefaultProps,
+    rule: {
+      id: 1,
+      name: 'rls 1',
+      filter_type: FilterType.Base,
+    },
   });
 
-  test('Sets correct title for editing existing rule', async () => {
-    await renderAndWait({
-      ...addNewRuleDefaultProps,
-      rule: {
-        id: 1,
-        name: 'test rule',
-        filter_type: FilterType.Base,
-        tables: [{ key: 1, id: 1, value: 'birth_names' }],
-        roles: [],
-      },
-    });
-    const title = screen.getByText('Edit Rule');
-    expect(title).toBeInTheDocument();
-    expect(fetchMock.callHistory.calls(getRuleEndpoint)).toHaveLength(1);
-    expect(fetchMock.callHistory.calls(getRelatedTablesEndpoint)).toHaveLength(
-      0,
-    );
-    expect(fetchMock.callHistory.calls(getRelatedRolesEndpoint)).toHaveLength(
-      0,
-    );
+  const name = await screen.findByTestId('rule-name-test');
+  expect(name).toHaveDisplayValue('rls 1');
+  userEvent.clear(name);
+  userEvent.type(name, 'rls 2');
+  expect(name).toHaveDisplayValue('rls 2');
+
+  const filterType = await screen.findByText('Base');
+  expect(filterType).toBeInTheDocument();
+
+  const roles = await screen.findByText('Admin');
+  expect(roles).toBeInTheDocument();
+
+  const tables = await screen.findByText('birth_names');
+  expect(tables).toBeInTheDocument();
+
+  const groupKey = await screen.findByTestId('group-key-test');
+  expect(groupKey).toHaveValue('g1');
+  userEvent.clear(groupKey);
+  userEvent.type(groupKey, 'g2');
+  expect(groupKey).toHaveValue('g2');
+
+  const clause = await screen.findByTestId('clause-test');
+  expect(clause).toHaveValue('gender="girl"');
+  userEvent.clear(clause);
+  userEvent.type(clause, 'gender="boy"');
+  expect(clause).toHaveValue('gender="boy"');
+
+  const description = await screen.findByTestId('description-test');
+  expect(description).toHaveValue('test rls rule with RTL');
+  userEvent.clear(description);
+  userEvent.type(description, 'test description');
+  expect(description).toHaveValue('test description');
+});
+
+test('Rule modal Does not allow to create rule without name, tables and clause', async () => {
+  jest.setTimeout(10000);
+  await renderAndWait(addNewRuleDefaultProps);
+
+  const addButton = screen.getByRole('button', { name: /add/i });
+  expect(addButton).toBeDisabled();
+
+  const nameTextBox = screen.getByTestId('rule-name-test');
+  userEvent.type(nameTextBox, 'name');
+
+  expect(addButton).toBeDisabled();
+
+  await selectOption('birth_names', 'Tables');
+  expect(addButton).toBeDisabled();
+
+  const clause = await screen.findByTestId('clause-test');
+  userEvent.type(clause, 'gender="girl"');
+
+  expect(addButton).toBeEnabled();
+});
+
+test('Rule modal Creates a new rule', async () => {
+  await renderAndWait(addNewRuleDefaultProps);
+
+  const addButton = screen.getByRole('button', { name: /add/i });
+
+  const nameTextBox = screen.getByTestId('rule-name-test');
+  userEvent.type(nameTextBox, 'name');
+
+  await selectOption('birth_names', 'Tables');
+
+  const clause = await screen.findByTestId('clause-test');
+  userEvent.type(clause, 'gender="girl"');
+
+  fetchMock.clearHistory();
+
+  await waitFor(() => userEvent.click(addButton), { timeout: 10000 });
+
+  await waitFor(
+    () => {
+      expect(fetchMock.callHistory.calls(postRuleEndpoint)).toHaveLength(1);
+    },
+    { timeout: 10000 },
+  );
+});
+
+test('Rule modal Updates existing rule', async () => {
+  await renderAndWait({
+    ...addNewRuleDefaultProps,
+    rule: {
+      id: 1,
+      name: 'rls 1',
+      filter_type: FilterType.Base,
+    },
   });
 
-  test('Fills correct values when editing rule', async () => {
-    await renderAndWait({
-      ...addNewRuleDefaultProps,
-      rule: {
-        id: 1,
-        name: 'rls 1',
-        filter_type: FilterType.Base,
-      },
-    });
+  const addButton = screen.getByRole('button', { name: /save/i });
+  await waitFor(() => userEvent.click(addButton));
 
-    const name = await screen.findByTestId('rule-name-test');
-    expect(name).toHaveDisplayValue('rls 1');
-    userEvent.clear(name);
-    userEvent.type(name, 'rls 2');
-    expect(name).toHaveDisplayValue('rls 2');
-
-    const filterType = await screen.findByText('Base');
-    expect(filterType).toBeInTheDocument();
-
-    const roles = await screen.findByText('Admin');
-    expect(roles).toBeInTheDocument();
-
-    const tables = await screen.findByText('birth_names');
-    expect(tables).toBeInTheDocument();
-
-    const groupKey = await screen.findByTestId('group-key-test');
-    expect(groupKey).toHaveValue('g1');
-    userEvent.clear(groupKey);
-    userEvent.type(groupKey, 'g2');
-    expect(groupKey).toHaveValue('g2');
-
-    const clause = await screen.findByTestId('clause-test');
-    expect(clause).toHaveValue('gender="girl"');
-    userEvent.clear(clause);
-    userEvent.type(clause, 'gender="boy"');
-    expect(clause).toHaveValue('gender="boy"');
-
-    const description = await screen.findByTestId('description-test');
-    expect(description).toHaveValue('test rls rule with RTL');
-    userEvent.clear(description);
-    userEvent.type(description, 'test description');
-    expect(description).toHaveValue('test description');
-  });
-
-  test('Does not allow to create rule without name, tables and clause', async () => {
-    jest.setTimeout(10000);
-    await renderAndWait(addNewRuleDefaultProps);
-
-    const addButton = screen.getByRole('button', { name: /add/i });
-    expect(addButton).toBeDisabled();
-
-    const nameTextBox = screen.getByTestId('rule-name-test');
-    userEvent.type(nameTextBox, 'name');
-
-    expect(addButton).toBeDisabled();
-
-    await selectOption('birth_names', 'Tables');
-    expect(addButton).toBeDisabled();
-
-    const clause = await screen.findByTestId('clause-test');
-    userEvent.type(clause, 'gender="girl"');
-
-    expect(addButton).toBeEnabled();
-  });
-
-  test('Creates a new rule', async () => {
-    await renderAndWait(addNewRuleDefaultProps);
-
-    const addButton = screen.getByRole('button', { name: /add/i });
-
-    const nameTextBox = screen.getByTestId('rule-name-test');
-    userEvent.type(nameTextBox, 'name');
-
-    await selectOption('birth_names', 'Tables');
-
-    const clause = await screen.findByTestId('clause-test');
-    userEvent.type(clause, 'gender="girl"');
-
-    fetchMock.clearHistory();
-
-    await waitFor(() => userEvent.click(addButton), { timeout: 10000 });
-
-    await waitFor(
-      () => {
-        expect(fetchMock.callHistory.calls(postRuleEndpoint)).toHaveLength(1);
-      },
-      { timeout: 10000 },
-    );
-  });
-
-  test('Updates existing rule', async () => {
-    await renderAndWait({
-      ...addNewRuleDefaultProps,
-      rule: {
-        id: 1,
-        name: 'rls 1',
-        filter_type: FilterType.Base,
-      },
-    });
-
-    const addButton = screen.getByRole('button', { name: /save/i });
-    await waitFor(() => userEvent.click(addButton));
-
-    await waitFor(
-      () => {
-        const allCalls = fetchMock.callHistory.calls(putRuleEndpoint);
-        // Find the PUT request among all calls
-        const putCall = allCalls.find(call => call.options?.method === 'put');
-        expect(putCall).toBeTruthy();
-        expect(putCall?.options?.body).toContain('"name":"rls 1"');
-        expect(putCall?.options?.body).toContain('"filter_type":"Base"');
-      },
-      { timeout: 10000 },
-    );
-  });
+  await waitFor(
+    () => {
+      const allCalls = fetchMock.callHistory.calls(putRuleEndpoint);
+      // Find the PUT request among all calls
+      const putCall = allCalls.find(call => call.options?.method === 'put');
+      expect(putCall).toBeTruthy();
+      expect(putCall?.options?.body).toContain('"name":"rls 1"');
+      expect(putCall?.options?.body).toContain('"filter_type":"Base"');
+    },
+    { timeout: 10000 },
+  );
 });

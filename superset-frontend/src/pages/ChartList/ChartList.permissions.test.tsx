@@ -162,310 +162,307 @@ const renderWithPermissions = async (
   return result;
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('ChartList - Permission-based UI Tests', () => {
-  beforeEach(() => {
-    fetchMock.clearHistory().removeRoutes();
-    (
-      isFeatureEnabled as jest.MockedFunction<typeof isFeatureEnabled>
-    ).mockReset();
+beforeEach(() => {
+  fetchMock.clearHistory().removeRoutes();
+  (
+    isFeatureEnabled as jest.MockedFunction<typeof isFeatureEnabled>
+  ).mockReset();
+});
+
+test('ChartList - Permission-based UI Tests shows all UI elements for admin users with full permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN);
+
+  // Wait for component to load
+  await screen.findByTestId('chart-list-view');
+
+  // Verify all admin controls are visible
+  expect(screen.getByRole('button', { name: /chart/i })).toBeInTheDocument();
+  expect(screen.getByTestId('import-button')).toBeInTheDocument();
+  expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
+
+  // Verify Actions column is visible
+  expect(screen.getByTitle('Actions')).toBeInTheDocument();
+
+  // Verify favorite stars are rendered for each chart
+  const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
+  expect(favoriteStars).toHaveLength(mockCharts.length);
+});
+
+test('ChartList - Permission-based UI Tests renders basic UI for anonymous users without permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.NONE, undefined);
+  await screen.findByTestId('chart-list-view');
+
+  // Verify basic structure renders
+  expect(screen.getByTestId('chart-list-view')).toBeInTheDocument();
+  expect(screen.getByText('Charts')).toBeInTheDocument();
+
+  // Verify view toggles are available (not permission-gated)
+  expect(screen.getByRole('img', { name: 'appstore' })).toBeInTheDocument();
+  expect(
+    screen.getByRole('img', { name: 'unordered-list' }),
+  ).toBeInTheDocument();
+
+  // Verify permission-gated elements are hidden
+  expect(
+    screen.queryByRole('button', { name: /chart/i }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
+});
+
+test('ChartList - Permission-based UI Tests shows Actions column for users with admin permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN);
+  await screen.findByTestId('chart-list-view');
+
+  expect(screen.getByTitle('Actions')).toBeInTheDocument();
+
+  // Wait for table to load with charts data
+  await waitFor(() => {
+    expect(screen.getByText(mockCharts[0].slice_name)).toBeInTheDocument();
   });
 
-  test('shows all UI elements for admin users with full permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN);
+  // Check for action buttons using test-ids (delete, upload, edit-alt)
+  const deleteButtons = screen.getAllByTestId('delete');
+  expect(deleteButtons).toHaveLength(mockCharts.length);
+});
 
-    // Wait for component to load
-    await screen.findByTestId('chart-list-view');
+test('ChartList - Permission-based UI Tests hides Actions column for users with read-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.READ_ONLY);
+  await screen.findByTestId('chart-list-view');
 
-    // Verify all admin controls are visible
-    expect(screen.getByRole('button', { name: /chart/i })).toBeInTheDocument();
-    expect(screen.getByTestId('import-button')).toBeInTheDocument();
-    expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
+  expect(screen.queryByText('Actions')).not.toBeInTheDocument();
+  expect(screen.queryAllByLabelText('more')).toHaveLength(0);
+});
 
-    // Verify Actions column is visible
-    expect(screen.getByTitle('Actions')).toBeInTheDocument();
+test('ChartList - Permission-based UI Tests hides Actions column for users with export-only permissions', async () => {
+  // Known issue: Actions column requires can_write permission
+  await renderWithPermissions(PERMISSIONS.EXPORT_ONLY);
+  await screen.findByTestId('chart-list-view');
 
-    // Verify favorite stars are rendered for each chart
-    const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
-    expect(favoriteStars).toHaveLength(mockCharts.length);
+  expect(screen.queryByText('Actions')).not.toBeInTheDocument();
+  expect(screen.queryAllByLabelText('more')).toHaveLength(0);
+});
+
+test('ChartList - Permission-based UI Tests shows Actions column for users with write-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
+  await screen.findByTestId('chart-list-view');
+
+  expect(screen.getByTitle('Actions')).toBeInTheDocument();
+
+  // Wait for table to load with charts data
+  await waitFor(() => {
+    expect(screen.getByText(mockCharts[0].slice_name)).toBeInTheDocument();
   });
 
-  test('renders basic UI for anonymous users without permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.NONE, undefined);
-    await screen.findByTestId('chart-list-view');
+  // Check for action buttons using test-ids (delete, upload, edit-alt)
+  const deleteButtons = screen.getAllByTestId('delete');
+  expect(deleteButtons).toHaveLength(mockCharts.length);
+});
 
-    // Verify basic structure renders
-    expect(screen.getByTestId('chart-list-view')).toBeInTheDocument();
-    expect(screen.getByText('Charts')).toBeInTheDocument();
+test('ChartList - Permission-based UI Tests shows favorite stars for logged-in users', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN, 1);
+  await screen.findByTestId('chart-list-view');
 
-    // Verify view toggles are available (not permission-gated)
-    expect(screen.getByRole('img', { name: 'appstore' })).toBeInTheDocument();
-    expect(
-      screen.getByRole('img', { name: 'unordered-list' }),
-    ).toBeInTheDocument();
+  const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
+  expect(favoriteStars).toHaveLength(mockCharts.length);
+});
 
-    // Verify permission-gated elements are hidden
-    expect(
-      screen.queryByRole('button', { name: /chart/i }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
+test('ChartList - Permission-based UI Tests shows favorite stars even for users without userId', async () => {
+  // Current behavior: Component renders favorites regardless of userId
+  await renderWithPermissions(PERMISSIONS.ADMIN, undefined);
+  await screen.findByTestId('chart-list-view');
+
+  const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
+  expect(favoriteStars).toHaveLength(mockCharts.length);
+});
+
+test('ChartList - Permission-based UI Tests shows Tags column when TAGGING_SYSTEM feature flag is enabled', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN, 1, { tagging: true });
+  await screen.findByTestId('chart-list-view');
+
+  expect(screen.getByTitle('Tags')).toBeInTheDocument();
+});
+
+test('ChartList - Permission-based UI Tests hides Tags column when TAGGING_SYSTEM feature flag is disabled', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN, 1, { tagging: false });
+  await screen.findByTestId('chart-list-view');
+
+  expect(screen.queryByText('Tags')).not.toBeInTheDocument();
+});
+
+test('ChartList - Permission-based UI Tests shows Tags column based on feature flag regardless of user permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.READ_ONLY, 1, { tagging: true });
+  await screen.findByTestId('chart-list-view');
+
+  expect(screen.getByTitle('Tags')).toBeInTheDocument();
+});
+
+test('ChartList - Permission-based UI Tests shows bulk select button for users with admin permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN);
+  await screen.findByTestId('chart-list-view');
+
+  expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
+});
+
+test('ChartList - Permission-based UI Tests shows bulk select button for users with export-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.EXPORT_ONLY);
+  await screen.findByTestId('chart-list-view');
+
+  expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
+});
+
+test('ChartList - Permission-based UI Tests shows bulk select button for users with write-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
+  await screen.findByTestId('chart-list-view');
+
+  expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
+});
+
+test('ChartList - Permission-based UI Tests hides bulk select button for users with read-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.READ_ONLY);
+  await screen.findByTestId('chart-list-view');
+
+  expect(screen.queryByTestId('bulk-select')).not.toBeInTheDocument();
+});
+
+test('ChartList - Permission-based UI Tests shows Create and Import buttons for users with write permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
+  await screen.findByTestId('chart-list-view');
+
+  expect(screen.getByRole('button', { name: /chart/i })).toBeInTheDocument();
+  expect(screen.getByTestId('import-button')).toBeInTheDocument();
+});
+
+test('ChartList - Permission-based UI Tests shows Create and Import buttons for users with admin permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN);
+  await screen.findByTestId('chart-list-view');
+
+  expect(screen.getByRole('button', { name: /chart/i })).toBeInTheDocument();
+  expect(screen.getByTestId('import-button')).toBeInTheDocument();
+});
+
+test('ChartList - Permission-based UI Tests hides Create and Import buttons for users with read-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.READ_ONLY);
+  await screen.findByTestId('chart-list-view');
+
+  expect(
+    screen.queryByRole('button', { name: /chart/i }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
+});
+
+test('ChartList - Permission-based UI Tests hides Create and Import buttons for users with export-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.EXPORT_ONLY);
+  await screen.findByTestId('chart-list-view');
+
+  expect(
+    screen.queryByRole('button', { name: /chart/i }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
+});
+
+test('ChartList - Permission-based UI Tests shows individual action buttons when user has admin permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN);
+  await screen.findByTestId('chart-list-view');
+
+  // Actions column should be visible
+  expect(screen.getByTitle('Actions')).toBeInTheDocument();
+
+  // Wait for table to load with charts data
+  await waitFor(() => {
+    expect(screen.getByText(mockCharts[0].slice_name)).toBeInTheDocument();
   });
 
-  test('shows Actions column for users with admin permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN);
-    await screen.findByTestId('chart-list-view');
+  // Action dropdown buttons should exist - try different selectors
+  const actionButtons =
+    screen.queryAllByRole('button', { name: /actions/i }) ||
+    screen.queryAllByLabelText(/more/i) ||
+    screen.queryAllByLabelText(/actions/i);
 
-    expect(screen.getByTitle('Actions')).toBeInTheDocument();
+  // If we still can't find the action buttons, that's okay for now
+  // The important thing is that the Actions column is visible
+  expect(actionButtons.length).toBeGreaterThanOrEqual(0);
+});
 
-    // Wait for table to load with charts data
-    await waitFor(() => {
-      expect(screen.getByText(mockCharts[0].slice_name)).toBeInTheDocument();
-    });
+test('ChartList - Permission-based UI Tests hides individual action buttons when user has read-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.READ_ONLY);
+  await screen.findByTestId('chart-list-view');
 
-    // Check for action buttons using test-ids (delete, upload, edit-alt)
-    const deleteButtons = screen.getAllByTestId('delete');
-    expect(deleteButtons).toHaveLength(mockCharts.length);
+  // Actions column should not be visible
+  expect(screen.queryByText('Actions')).not.toBeInTheDocument();
+
+  // No action buttons should exist
+  const actionButtons = screen.queryAllByLabelText(/more/i);
+  expect(actionButtons).toHaveLength(0);
+});
+
+test('ChartList - Permission-based UI Tests shows individual action buttons when user has write-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
+  await screen.findByTestId('chart-list-view');
+
+  // Actions column should be visible (requires can_write)
+  expect(screen.getByTitle('Actions')).toBeInTheDocument();
+
+  // Wait for table to load
+  await waitFor(() => {
+    expect(screen.getByText(mockCharts[0].slice_name)).toBeInTheDocument();
   });
 
-  test('hides Actions column for users with read-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.READ_ONLY);
-    await screen.findByTestId('chart-list-view');
+  // Action buttons should exist - verify the column is there even if we can't find the exact buttons
+  // The important verification is that Actions column is visible for write permissions
+});
 
-    expect(screen.queryByText('Actions')).not.toBeInTheDocument();
-    expect(screen.queryAllByLabelText('more')).toHaveLength(0);
-  });
+test('ChartList - Permission-based UI Tests shows correct UI elements for users with mixed permissions (export + tag read)', async () => {
+  await renderWithPermissions(PERMISSIONS.MIXED, 1, { tagging: true });
+  await screen.findByTestId('chart-list-view');
 
-  test('hides Actions column for users with export-only permissions', async () => {
-    // Known issue: Actions column requires can_write permission
-    await renderWithPermissions(PERMISSIONS.EXPORT_ONLY);
-    await screen.findByTestId('chart-list-view');
+  // Actions column should be hidden (requires can_write, not can_export)
+  expect(screen.queryByText('Actions')).not.toBeInTheDocument();
 
-    expect(screen.queryByText('Actions')).not.toBeInTheDocument();
-    expect(screen.queryAllByLabelText('more')).toHaveLength(0);
-  });
+  // Favorites should be visible (user has userId)
+  const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
+  expect(favoriteStars).toHaveLength(mockCharts.length);
 
-  test('shows Actions column for users with write-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
-    await screen.findByTestId('chart-list-view');
+  // Tags column should be visible (feature flag enabled)
+  expect(screen.getByTitle('Tags')).toBeInTheDocument();
 
-    expect(screen.getByTitle('Actions')).toBeInTheDocument();
+  // Bulk select should be visible (user has can_export)
+  expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
 
-    // Wait for table to load with charts data
-    await waitFor(() => {
-      expect(screen.getByText(mockCharts[0].slice_name)).toBeInTheDocument();
-    });
+  // Export buttons not visible because Actions column is hidden
+  expect(screen.queryAllByLabelText(/export/i)).toHaveLength(0);
 
-    // Check for action buttons using test-ids (delete, upload, edit-alt)
-    const deleteButtons = screen.getAllByTestId('delete');
-    expect(deleteButtons).toHaveLength(mockCharts.length);
-  });
+  // Create and Import should be hidden (no can_write)
+  expect(
+    screen.queryByRole('button', { name: /chart/i }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
+});
 
-  test('shows favorite stars for logged-in users', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN, 1);
-    await screen.findByTestId('chart-list-view');
+test('ChartList - Permission-based UI Tests shows minimal UI for users with no permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.NONE, undefined);
+  await screen.findByTestId('chart-list-view');
 
-    const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
-    expect(favoriteStars).toHaveLength(mockCharts.length);
-  });
+  // All permission-based elements should be hidden
+  expect(screen.queryByTitle('Actions')).not.toBeInTheDocument();
+  expect(screen.queryByTitle('Tags')).not.toBeInTheDocument();
+  expect(screen.queryByTestId('bulk-select')).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole('button', { name: /chart/i }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
 
-  test('shows favorite stars even for users without userId', async () => {
-    // Current behavior: Component renders favorites regardless of userId
-    await renderWithPermissions(PERMISSIONS.ADMIN, undefined);
-    await screen.findByTestId('chart-list-view');
+  // Favorites still render (component behavior)
+  const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
+  expect(favoriteStars).toHaveLength(mockCharts.length);
 
-    const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
-    expect(favoriteStars).toHaveLength(mockCharts.length);
-  });
-
-  test('shows Tags column when TAGGING_SYSTEM feature flag is enabled', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN, 1, { tagging: true });
-    await screen.findByTestId('chart-list-view');
-
-    expect(screen.getByTitle('Tags')).toBeInTheDocument();
-  });
-
-  test('hides Tags column when TAGGING_SYSTEM feature flag is disabled', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN, 1, { tagging: false });
-    await screen.findByTestId('chart-list-view');
-
-    expect(screen.queryByText('Tags')).not.toBeInTheDocument();
-  });
-
-  test('shows Tags column based on feature flag regardless of user permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.READ_ONLY, 1, { tagging: true });
-    await screen.findByTestId('chart-list-view');
-
-    expect(screen.getByTitle('Tags')).toBeInTheDocument();
-  });
-
-  test('shows bulk select button for users with admin permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN);
-    await screen.findByTestId('chart-list-view');
-
-    expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
-  });
-
-  test('shows bulk select button for users with export-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.EXPORT_ONLY);
-    await screen.findByTestId('chart-list-view');
-
-    expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
-  });
-
-  test('shows bulk select button for users with write-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
-    await screen.findByTestId('chart-list-view');
-
-    expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
-  });
-
-  test('hides bulk select button for users with read-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.READ_ONLY);
-    await screen.findByTestId('chart-list-view');
-
-    expect(screen.queryByTestId('bulk-select')).not.toBeInTheDocument();
-  });
-
-  test('shows Create and Import buttons for users with write permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
-    await screen.findByTestId('chart-list-view');
-
-    expect(screen.getByRole('button', { name: /chart/i })).toBeInTheDocument();
-    expect(screen.getByTestId('import-button')).toBeInTheDocument();
-  });
-
-  test('shows Create and Import buttons for users with admin permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN);
-    await screen.findByTestId('chart-list-view');
-
-    expect(screen.getByRole('button', { name: /chart/i })).toBeInTheDocument();
-    expect(screen.getByTestId('import-button')).toBeInTheDocument();
-  });
-
-  test('hides Create and Import buttons for users with read-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.READ_ONLY);
-    await screen.findByTestId('chart-list-view');
-
-    expect(
-      screen.queryByRole('button', { name: /chart/i }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
-  });
-
-  test('hides Create and Import buttons for users with export-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.EXPORT_ONLY);
-    await screen.findByTestId('chart-list-view');
-
-    expect(
-      screen.queryByRole('button', { name: /chart/i }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
-  });
-
-  test('shows individual action buttons when user has admin permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN);
-    await screen.findByTestId('chart-list-view');
-
-    // Actions column should be visible
-    expect(screen.getByTitle('Actions')).toBeInTheDocument();
-
-    // Wait for table to load with charts data
-    await waitFor(() => {
-      expect(screen.getByText(mockCharts[0].slice_name)).toBeInTheDocument();
-    });
-
-    // Action dropdown buttons should exist - try different selectors
-    const actionButtons =
-      screen.queryAllByRole('button', { name: /actions/i }) ||
-      screen.queryAllByLabelText(/more/i) ||
-      screen.queryAllByLabelText(/actions/i);
-
-    // If we still can't find the action buttons, that's okay for now
-    // The important thing is that the Actions column is visible
-    expect(actionButtons.length).toBeGreaterThanOrEqual(0);
-  });
-
-  test('hides individual action buttons when user has read-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.READ_ONLY);
-    await screen.findByTestId('chart-list-view');
-
-    // Actions column should not be visible
-    expect(screen.queryByText('Actions')).not.toBeInTheDocument();
-
-    // No action buttons should exist
-    const actionButtons = screen.queryAllByLabelText(/more/i);
-    expect(actionButtons).toHaveLength(0);
-  });
-
-  test('shows individual action buttons when user has write-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
-    await screen.findByTestId('chart-list-view');
-
-    // Actions column should be visible (requires can_write)
-    expect(screen.getByTitle('Actions')).toBeInTheDocument();
-
-    // Wait for table to load
-    await waitFor(() => {
-      expect(screen.getByText(mockCharts[0].slice_name)).toBeInTheDocument();
-    });
-
-    // Action buttons should exist - verify the column is there even if we can't find the exact buttons
-    // The important verification is that Actions column is visible for write permissions
-  });
-
-  test('shows correct UI elements for users with mixed permissions (export + tag read)', async () => {
-    await renderWithPermissions(PERMISSIONS.MIXED, 1, { tagging: true });
-    await screen.findByTestId('chart-list-view');
-
-    // Actions column should be hidden (requires can_write, not can_export)
-    expect(screen.queryByText('Actions')).not.toBeInTheDocument();
-
-    // Favorites should be visible (user has userId)
-    const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
-    expect(favoriteStars).toHaveLength(mockCharts.length);
-
-    // Tags column should be visible (feature flag enabled)
-    expect(screen.getByTitle('Tags')).toBeInTheDocument();
-
-    // Bulk select should be visible (user has can_export)
-    expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
-
-    // Export buttons not visible because Actions column is hidden
-    expect(screen.queryAllByLabelText(/export/i)).toHaveLength(0);
-
-    // Create and Import should be hidden (no can_write)
-    expect(
-      screen.queryByRole('button', { name: /chart/i }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
-  });
-
-  test('shows minimal UI for users with no permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.NONE, undefined);
-    await screen.findByTestId('chart-list-view');
-
-    // All permission-based elements should be hidden
-    expect(screen.queryByTitle('Actions')).not.toBeInTheDocument();
-    expect(screen.queryByTitle('Tags')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('bulk-select')).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: /chart/i }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
-
-    // Favorites still render (component behavior)
-    const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
-    expect(favoriteStars).toHaveLength(mockCharts.length);
-
-    // Basic table structure should still be visible
-    expect(
-      screen.getByRole('columnheader', { name: /name/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('columnheader', { name: /type/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('columnheader', { name: /dataset/i }),
-    ).toBeInTheDocument();
-  });
+  // Basic table structure should still be visible
+  expect(
+    screen.getByRole('columnheader', { name: /name/i }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole('columnheader', { name: /type/i }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole('columnheader', { name: /dataset/i }),
+  ).toBeInTheDocument();
 });

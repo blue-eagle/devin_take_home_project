@@ -18,23 +18,21 @@
  */
 import parseCookie from 'src/utils/parseCookie';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('parseCookie', () => {
-  let cookieVal = '';
-  Object.defineProperty(document, 'cookie', {
-    get: jest.fn().mockImplementation(() => cookieVal),
-  });
-  test('parses cookie strings', () => {
-    cookieVal = 'val1=foo; val2=bar';
-    expect(parseCookie()).toEqual({ val1: 'foo', val2: 'bar' });
-  });
+let cookieVal = '';
+Object.defineProperty(document, 'cookie', {
+  get: jest.fn().mockImplementation(() => cookieVal),
+});
 
-  test('parses empty cookie strings', () => {
-    cookieVal = '';
-    expect(parseCookie()).toEqual({});
-  });
+test('parseCookie parses cookie strings', () => {
+  cookieVal = 'val1=foo; val2=bar';
+  expect(parseCookie()).toEqual({ val1: 'foo', val2: 'bar' });
+});
 
-  test('accepts an arg', () => {
-    expect(parseCookie('val=foo')).toEqual({ val: 'foo' });
-  });
+test('parseCookie parses empty cookie strings', () => {
+  cookieVal = '';
+  expect(parseCookie()).toEqual({});
+});
+
+test('parseCookie accepts an arg', () => {
+  expect(parseCookie('val=foo')).toEqual({ val: 'foo' });
 });

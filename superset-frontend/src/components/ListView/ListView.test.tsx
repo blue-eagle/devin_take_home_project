@@ -215,138 +215,135 @@ const factory = (overrides?: Partial<ListViewProps>) => {
   );
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('ListView', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    factory();
+beforeEach(() => {
+  jest.clearAllMocks();
+  factory();
+});
+
+afterEach(() => {
+  mockedPropsComprehensive.fetchData.mockClear();
+  mockedPropsComprehensive.bulkActions.forEach(ba => {
+    ba.onSelect.mockClear();
   });
+});
 
-  afterEach(() => {
-    mockedPropsComprehensive.fetchData.mockClear();
-    mockedPropsComprehensive.bulkActions.forEach(ba => {
-      ba.onSelect.mockClear();
-    });
+test('ListView calls fetchData on mount', () => {
+  expect(mockedPropsComprehensive.fetchData).toHaveBeenCalledWith({
+    filters: [],
+    pageIndex: 0,
+    pageSize: 1,
+    sortBy: [],
   });
+});
 
-  test('calls fetchData on mount', () => {
-    expect(mockedPropsComprehensive.fetchData).toHaveBeenCalledWith({
-      filters: [],
-      pageIndex: 0,
-      pageSize: 1,
-      sortBy: [],
-    });
+test('ListView calls fetchData on sort', async () => {
+  const sortHeader = screen.getAllByTestId('sort-header')[1];
+  await userEvent.click(sortHeader);
+
+  expect(mockedPropsComprehensive.fetchData).toHaveBeenCalledWith({
+    filters: [],
+    pageIndex: 0,
+    pageSize: 1,
+    sortBy: [
+      {
+        desc: false,
+        id: 'id',
+      },
+    ],
   });
+});
 
-  test('calls fetchData on sort', async () => {
-    const sortHeader = screen.getAllByTestId('sort-header')[1];
-    await userEvent.click(sortHeader);
+test('ListView renders pagination controls', () => {
+  const paginationList = screen.getByRole('list');
+  expect(paginationList).toBeInTheDocument();
 
-    expect(mockedPropsComprehensive.fetchData).toHaveBeenCalledWith({
-      filters: [],
-      pageIndex: 0,
-      pageSize: 1,
-      sortBy: [
-        {
-          desc: false,
-          id: 'id',
-        },
-      ],
-    });
+  const pageOneItem = screen.getByRole('listitem', { name: '1' });
+  expect(pageOneItem).toBeInTheDocument();
+});
+
+test('ListView calls fetchData on page change', async () => {
+  const pageTwoItem = screen.getByRole('listitem', { name: '2' });
+  await userEvent.click(pageTwoItem);
+
+  await waitFor(() => {
+    const { calls } = mockedPropsComprehensive.fetchData.mock;
+    const pageChangeCall = calls.find(
+      (call: [ListViewFetchDataConfig]) =>
+        call?.[0]?.pageIndex === 1 &&
+        call?.[0]?.filters?.length === 0 &&
+        call?.[0]?.pageSize === 1,
+    );
+    expect(pageChangeCall).toBeDefined();
   });
+});
 
-  test('renders pagination controls', () => {
-    const paginationList = screen.getByRole('list');
-    expect(paginationList).toBeInTheDocument();
+test('ListView handles bulk actions on 1 row', async () => {
+  const checkboxes = screen.getAllByRole('checkbox');
+  await userEvent.click(checkboxes[1]); // Index 1 is the first row checkbox
 
-    const pageOneItem = screen.getByRole('listitem', { name: '1' });
-    expect(pageOneItem).toBeInTheDocument();
-  });
+  const bulkActionButton = within(
+    screen.getByTestId('bulk-select-controls'),
+  ).getByTestId('bulk-select-action');
+  await userEvent.click(bulkActionButton);
 
-  test('calls fetchData on page change', async () => {
-    const pageTwoItem = screen.getByRole('listitem', { name: '2' });
-    await userEvent.click(pageTwoItem);
-
-    await waitFor(() => {
-      const { calls } = mockedPropsComprehensive.fetchData.mock;
-      const pageChangeCall = calls.find(
-        (call: [ListViewFetchDataConfig]) =>
-          call?.[0]?.pageIndex === 1 &&
-          call?.[0]?.filters?.length === 0 &&
-          call?.[0]?.pageSize === 1,
-      );
-      expect(pageChangeCall).toBeDefined();
-    });
-  });
-
-  test('handles bulk actions on 1 row', async () => {
-    const checkboxes = screen.getAllByRole('checkbox');
-    await userEvent.click(checkboxes[1]); // Index 1 is the first row checkbox
-
-    const bulkActionButton = within(
-      screen.getByTestId('bulk-select-controls'),
-    ).getByTestId('bulk-select-action');
-    await userEvent.click(bulkActionButton);
-
-    expect(
-      mockedPropsComprehensive.bulkActions[0].onSelect,
-    ).toHaveBeenCalledWith([
+  expect(mockedPropsComprehensive.bulkActions[0].onSelect).toHaveBeenCalledWith(
+    [
       {
         age: 10,
         id: 1,
         name: 'data 1',
         time: '2020-11-18T07:53:45.354Z',
       },
-    ]);
+    ],
+  );
+});
+
+test('ListView renders UI filters', () => {
+  const filterControls = screen.getAllByRole('combobox');
+  expect(filterControls).toHaveLength(2);
+});
+
+test('ListView calls fetchData on filter', async () => {
+  // Handle select filter
+  const selectFilter = screen.getAllByRole('combobox')[0];
+  await userEvent.click(selectFilter);
+  const option = screen.getByText('foo');
+  await userEvent.click(option);
+
+  // Handle search filter
+  const searchFilter = screen.getByPlaceholderText('Type a value');
+  await userEvent.type(searchFilter, 'something');
+  await userEvent.tab();
+
+  expect(mockedPropsComprehensive.fetchData).toHaveBeenCalledWith(
+    expect.objectContaining({
+      filters: [
+        {
+          id: 'id',
+          operator: 'eq',
+          value: { label: 'foo', value: 'bar' },
+        },
+        {
+          id: 'name',
+          operator: 'ct',
+          value: 'something',
+        },
+      ],
+    }),
+  );
+});
+
+test('ListView calls fetchData on card view sort', async () => {
+  factory({
+    renderCard: jest.fn(),
+    initialSort: [{ id: 'something' }],
   });
 
-  test('renders UI filters', () => {
-    const filterControls = screen.getAllByRole('combobox');
-    expect(filterControls).toHaveLength(2);
-  });
+  const sortSelect = screen.getByTestId('card-sort-select');
+  await userEvent.click(sortSelect);
 
-  test('calls fetchData on filter', async () => {
-    // Handle select filter
-    const selectFilter = screen.getAllByRole('combobox')[0];
-    await userEvent.click(selectFilter);
-    const option = screen.getByText('foo');
-    await userEvent.click(option);
+  const sortOption = screen.getByText('Alphabetical');
+  await userEvent.click(sortOption);
 
-    // Handle search filter
-    const searchFilter = screen.getByPlaceholderText('Type a value');
-    await userEvent.type(searchFilter, 'something');
-    await userEvent.tab();
-
-    expect(mockedPropsComprehensive.fetchData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filters: [
-          {
-            id: 'id',
-            operator: 'eq',
-            value: { label: 'foo', value: 'bar' },
-          },
-          {
-            id: 'name',
-            operator: 'ct',
-            value: 'something',
-          },
-        ],
-      }),
-    );
-  });
-
-  test('calls fetchData on card view sort', async () => {
-    factory({
-      renderCard: jest.fn(),
-      initialSort: [{ id: 'something' }],
-    });
-
-    const sortSelect = screen.getByTestId('card-sort-select');
-    await userEvent.click(sortSelect);
-
-    const sortOption = screen.getByText('Alphabetical');
-    await userEvent.click(sortOption);
-
-    expect(mockedPropsComprehensive.fetchData).toHaveBeenCalled();
-  });
+  expect(mockedPropsComprehensive.fetchData).toHaveBeenCalled();
 });
