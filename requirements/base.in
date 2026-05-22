@@ -59,4 +59,6 @@ openapi-schema-validator>=0.6.3
 # See docs/docs/contributing/pkg-resources-migration.md for details
 # Security: CVE-2026-45409 (MEDIUM) - IDNA vulnerability
 idna>=3.15,<4.0.0
+# Flask 3.x compatibility: flask-babel 3.x uses removed flask.helpers.locked_cached_property
+flask-babel>=4.0.0,<5.0.0
 setuptools<81
