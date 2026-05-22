@@ -175,7 +175,7 @@ class SecretsMigrator:
         table_name: str,
     ) -> Row:
         cols = ",".join(pk_columns + column_names)
-        return conn.execute(f"SELECT {cols} FROM {table_name}")  # noqa: S608
+        return conn.execute(text(f"SELECT {cols} FROM {table_name}"))  # noqa: S608
 
     def _re_encrypt_row(
         self,
