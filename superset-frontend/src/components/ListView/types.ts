@@ -58,7 +58,7 @@ export interface ListViewFilter {
   unfilteredLabel?: string;
   selects?: SelectOption[];
   onFilterOpen?: () => void;
-  onFilterUpdate?: (value?: InnerFilterValue) => void;
+  onFilterUpdate?: (value?: unknown) => void;
   fetchSelects?: (
     filterValue: string,
     page: number,

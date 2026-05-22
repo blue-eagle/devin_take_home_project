@@ -920,7 +920,7 @@ const AlertReportModal: FunctionComponent<AlertReportModalProps> = ({
       );
     }
 
-    const data: Partial<AlertObject> & Record<string, unknown> = {
+    const data = {
       ...currentAlert,
       type: isReport ? 'Report' : 'Alert',
       force_screenshot: shouldEnableForceScreenshot || forceScreenshot,
@@ -1602,17 +1602,13 @@ const AlertReportModal: FunctionComponent<AlertReportModalProps> = ({
       | number
       | number[],
   ) => {
-    let values:
-      | SelectValue
-      | SelectValue[]
-      | string
-      | string[]
-      | number
-      | number[];
+    let values: ExtraNativeFilter['filterValues'];
     if (typeof filterValues === 'string') {
       values = [filterValues];
+    } else if (Array.isArray(filterValues)) {
+      values = filterValues as ExtraNativeFilter['filterValues'];
     } else {
-      values = filterValues;
+      values = [filterValues as string | number];
     }
 
     setNativeFilterData(
@@ -1684,7 +1680,7 @@ const AlertReportModal: FunctionComponent<AlertReportModalProps> = ({
               ),
             );
           }}
-          value={filterValues?.[0]} // only showing first value in the array for filter_time
+          value={filterValues?.[0] as string | undefined} // only showing first value in the array for filter_time
         />
       );
     }
@@ -1739,7 +1735,7 @@ const AlertReportModal: FunctionComponent<AlertReportModalProps> = ({
         ariaLabel={t('Select Value')}
         placeholder={t('Select Value')}
         disabled={!filter?.optionFilterValues}
-        value={filter?.filterValues}
+        value={filter?.filterValues as SelectValue | SelectValue[] | undefined}
         options={filter?.optionFilterValues || []}
         onChange={value =>
           onChangeDashboardFilterValue(
