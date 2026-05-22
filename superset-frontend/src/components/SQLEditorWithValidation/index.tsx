@@ -19,6 +19,7 @@
 import { useCallback, useState, useEffect, forwardRef } from 'react';
 import { t } from '@apache-superset/core/translation';
 import type { editors } from '@apache-superset/core';
+import { logging } from '@apache-superset/core/utils';
 import { SupersetClient } from '@superset-ui/core';
 import { logging } from '@apache-superset/core/utils';
 import { styled } from '@apache-superset/core/theme';

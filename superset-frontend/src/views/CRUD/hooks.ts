@@ -19,6 +19,7 @@
 import rison from 'rison';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { t } from '@apache-superset/core/translation';
+import { logging } from '@apache-superset/core/utils';
 import {
   makeApi,
   SupersetClient,
