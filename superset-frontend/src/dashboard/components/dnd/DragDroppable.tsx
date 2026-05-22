@@ -20,8 +20,11 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import {
   ComponentType as ReactComponentType,
   CSSProperties,
-  PureComponent,
   ReactNode,
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
 } from 'react';
 import { TAB_TYPE } from 'src/dashboard/util/componentTypes';
 import {
@@ -77,10 +80,6 @@ interface DragDroppableDndProps {
 
 type DragDroppableAllProps = DragDroppableOwnProps & DragDroppableDndProps;
 
-interface DragDroppableState {
-  dropIndicator: string | null;
-}
-
 const DragDroppableStyles = styled.div`
   ${({ theme }) => css`
     position: relative;
@@ -122,163 +121,130 @@ const DragDroppableStyles = styled.div`
     }
   `};
 `;
+
 // export unwrapped component for testing
-export class UnwrappedDragDroppable extends PureComponent<
-  DragDroppableAllProps,
-  DragDroppableState
-> {
-  mounted: boolean;
+export function UnwrappedDragDroppable({
+  children = () => null,
+  className = null,
+  style = null,
+  onDropIndicatorChange = () => {},
+  onDragTab = () => {},
+  orientation = 'row' as const,
+  useEmptyDragPreview = false,
+  isDragging = false,
+  isDraggingOver = false,
+  isDraggingOverShallow = false,
+  droppableRef = (() => {}) as unknown as ConnectDropTarget,
+  dragSourceRef = (() => {}) as unknown as ConnectDragSource,
+  dragPreviewRef = (() => {}) as unknown as ConnectDragPreview,
+  disableDragDrop = false,
+  editMode,
+  component,
+  index,
+  dragComponentType,
+  dragComponentId,
+  parentComponent,
+  dropToChild,
+  onDrop,
+  onHover,
+  ...restProps
+}: Partial<DragDroppableAllProps> &
+  Pick<DragDroppableAllProps, 'component' | 'index'>) {
+  const [dropIndicator] = useState<string | null>(null);
+  const mountedRef = useRef(false);
+  const divRef = useRef<HTMLDivElement | null>(null);
+  const prevDragComponentIdRef = useRef(dragComponentId);
+  const prevIsDraggingOverRef = useRef(isDraggingOver);
+  const prevDropIndicatorRef = useRef(dropIndicator);
+  const prevIndexRef = useRef(index);
 
-  ref: HTMLDivElement | null;
-
-  static defaultProps = {
-    className: null,
-    style: null,
-    parentComponent: undefined,
-    disableDragDrop: false,
-    dropToChild: false,
-    children() {},
-    onDrop() {},
-    onHover() {},
-    onDropIndicatorChange() {},
-    onDragTab() {},
-    orientation: 'row' as const,
-    useEmptyDragPreview: false,
-    isDragging: false,
-    isDraggingOver: false,
-    isDraggingOverShallow: false,
-    droppableRef() {},
-    dragSourceRef() {},
-    dragPreviewRef() {},
-  };
-
-  constructor(props: DragDroppableAllProps) {
-    super(props);
-    this.state = {
-      dropIndicator: null, // this gets set/modified by the react-dnd HOCs
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
     };
-    this.mounted = false;
-    this.ref = null;
-    this.setRef = this.setRef.bind(this);
-  }
+  }, []);
 
-  componentDidMount(): void {
-    this.mounted = true;
-  }
-
-  componentWillUnmount(): void {
-    this.mounted = false;
-  }
-
-  componentDidUpdate(
-    prevProps: DragDroppableAllProps,
-    prevState: DragDroppableState,
-  ): void {
-    const {
-      onDropIndicatorChange,
-      isDraggingOver,
-      component,
-      index,
-      dragComponentId,
-      onDragTab,
-    } = this.props;
-    const { dropIndicator } = this.state;
+  useEffect(() => {
     const isTabsType = component.type === TAB_TYPE;
     const validStateChange =
-      dropIndicator !== prevState.dropIndicator ||
-      isDraggingOver !== prevProps.isDraggingOver ||
-      index !== prevProps.index;
+      dropIndicator !== prevDropIndicatorRef.current ||
+      isDraggingOver !== prevIsDraggingOverRef.current ||
+      index !== prevIndexRef.current;
 
     if (onDropIndicatorChange && isTabsType && validStateChange) {
       onDropIndicatorChange({ dropIndicator, isDraggingOver, index });
     }
 
-    if (dragComponentId !== prevProps.dragComponentId) {
+    if (dragComponentId !== prevDragComponentIdRef.current) {
       setTimeout(() => {
-        /**
-         * This timeout ensures the dargSourceRef and dragPreviewRef are set
-         * before the component is removed in Tabs.jsx. Otherwise react-dnd
-         * will not render the drag preview.
-         */
         onDragTab?.(dragComponentId);
       });
     }
-  }
 
-  setRef(ref: HTMLDivElement | null): void {
-    this.ref = ref;
-    // this is needed for a custom drag preview
-    if (this.props.useEmptyDragPreview) {
-      this.props.dragPreviewRef(getEmptyImage(), {
-        // IE fallback: specify that we'd rather screenshot the node
-        // when it already knows it's being dragged so we can hide it with CSS.
-        captureDraggingState: true,
-      });
-    } else {
-      this.props.dragPreviewRef(ref);
-    }
-    this.props.droppableRef?.(ref);
-  }
+    prevDragComponentIdRef.current = dragComponentId;
+    prevIsDraggingOverRef.current = isDraggingOver;
+    prevDropIndicatorRef.current = dropIndicator;
+    prevIndexRef.current = index;
+  });
 
-  render(): ReactNode {
-    const {
-      children,
-      className,
-      orientation,
-      dragSourceRef,
-      disableDragDrop,
-      isDragging,
-      isDraggingOver,
-      style,
-      editMode,
-      component,
-      dragComponentType,
-    } = this.props;
+  const setRef = useCallback(
+    (ref: HTMLDivElement | null): void => {
+      divRef.current = ref;
+      if (useEmptyDragPreview) {
+        dragPreviewRef(getEmptyImage(), {
+          captureDraggingState: true,
+        });
+      } else {
+        dragPreviewRef(ref);
+      }
+      droppableRef?.(ref);
+    },
+    [useEmptyDragPreview, dragPreviewRef, droppableRef],
+  );
 
-    const { dropIndicator } = this.state;
-    const dropIndicatorProps: DropIndicatorProps | null =
-      isDraggingOver && dropIndicator && !disableDragDrop
-        ? {
-            className: cx(
-              'drop-indicator',
-              dropIndicator === DROP_FORBIDDEN && 'drop-indicator--forbidden',
-            ),
-          }
-        : null;
-
-    const draggingTabOnTab =
-      component.type === TAB_TYPE && dragComponentType === TAB_TYPE;
-
-    const childProps: ChildProps = editMode
+  const dropIndicatorProps: DropIndicatorProps | null =
+    isDraggingOver && dropIndicator && !disableDragDrop
       ? {
-          dragSourceRef,
-          dropIndicatorProps,
-          draggingTabOnTab,
-          'data-test': 'dragdroppable-content',
+          className: cx(
+            'drop-indicator',
+            dropIndicator === DROP_FORBIDDEN && 'drop-indicator--forbidden',
+          ),
         }
-      : {
-          dropIndicatorProps: null,
-          'data-test': 'dragdroppable-content',
-        };
+      : null;
 
-    return (
-      <DragDroppableStyles
-        style={style ?? undefined}
-        ref={this.setRef}
-        data-test="dragdroppable-object"
-        className={cx(
-          'dragdroppable',
-          editMode && 'dragdroppable--edit-mode',
-          orientation === 'row' && 'dragdroppable-row',
-          orientation === 'column' && 'dragdroppable-column',
-          isDragging && 'dragdroppable--dragging',
-          className,
-        )}
-      >
-        {children(childProps)}
-      </DragDroppableStyles>
-    );
-  }
+  const draggingTabOnTab =
+    component.type === TAB_TYPE && dragComponentType === TAB_TYPE;
+
+  const childProps: ChildProps = editMode
+    ? {
+        dragSourceRef,
+        dropIndicatorProps,
+        draggingTabOnTab,
+        'data-test': 'dragdroppable-content',
+      }
+    : {
+        dropIndicatorProps: null,
+        'data-test': 'dragdroppable-content',
+      };
+
+  return (
+    <DragDroppableStyles
+      style={style ?? undefined}
+      ref={setRef}
+      data-test="dragdroppable-object"
+      className={cx(
+        'dragdroppable',
+        editMode && 'dragdroppable--edit-mode',
+        orientation === 'row' && 'dragdroppable-row',
+        orientation === 'column' && 'dragdroppable-column',
+        isDragging && 'dragdroppable--dragging',
+        className,
+      )}
+    >
+      {children(childProps)}
+    </DragDroppableStyles>
+  );
 }
 
 // react-dnd's DragSource/DropTarget HOC types don't play well with
