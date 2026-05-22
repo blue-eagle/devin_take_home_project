@@ -17,7 +17,7 @@
  * under the License.
  */
 /* eslint-disable camelcase */
-import { PureComponent, createRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { isDefined, ensureIsArray, DatasourceType } from '@superset-ui/core';
 import { t } from '@apache-superset/core/translation';
@@ -49,7 +49,6 @@ import {
 } from 'src/explore/components/optionRenderers';
 import { getColumnKeywords } from 'src/explore/controlUtils/getColumnKeywords';
 import SQLEditorWithValidation from 'src/components/SQLEditorWithValidation';
-import type { RefObject } from 'react';
 
 interface ColumnType {
   column_name: string;
@@ -95,22 +94,8 @@ interface AdhocMetricEditPopoverProps {
   datasource?: DatasourceInfo;
   isNewMetric?: boolean;
   isLabelModified?: boolean;
-  /** Names of metrics the user may select; null means no filtering. */
   compatibleMetrics?: string[] | null;
 }
-
-interface AdhocMetricEditPopoverState {
-  adhocMetric: AdhocMetric;
-  savedMetric?: SavedMetricType;
-  width: number;
-  height: number;
-}
-
-const defaultProps = {
-  columns: [],
-  getCurrentTab: noOp,
-  isNewMetric: false,
-};
 
 const StyledSelect = styled(Select)`
   .metric-option {
@@ -126,238 +111,240 @@ const StyledSelect = styled(Select)`
 
 export const SAVED_TAB_KEY = 'SAVED';
 
-class AdhocMetricEditPopover extends PureComponent<
-  AdhocMetricEditPopoverProps,
-  AdhocMetricEditPopoverState
-> {
-  // "Saved" is a default tab unless there are no saved metrics for dataset
-  defaultActiveTabKey = this.getDefaultTab();
+const AdhocMetricEditPopover: React.FC<AdhocMetricEditPopoverProps> = React.memo(
+  ({
+    onChange,
+    onClose,
+    onResize,
+    getCurrentTab = noOp,
+    getCurrentLabel,
+    handleDatasetModal,
+    adhocMetric: propsAdhocMetric,
+    columns = [],
+    savedMetricsOptions,
+    savedMetric: propsSavedMetric,
+    datasource,
+    isNewMetric = false,
+    isLabelModified,
+    compatibleMetrics,
+    ...popoverProps
+  }) => {
+    const getDefaultTab = useCallback(() => {
+      if (
+        isDefined(propsAdhocMetric.column) ||
+        isDefined(propsAdhocMetric.sqlExpression)
+      ) {
+        return propsAdhocMetric.expressionType;
+      }
+      if (
+        (isNewMetric || propsSavedMetric?.metric_name) &&
+        Array.isArray(savedMetricsOptions) &&
+        savedMetricsOptions.length > 0
+      ) {
+        return SAVED_TAB_KEY;
+      }
+      return propsAdhocMetric.expressionType;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  editorRef: RefObject<editors.EditorHandle>;
+    const defaultActiveTabKey = useMemo(() => getDefaultTab(), [getDefaultTab]);
 
-  dragStartX = 0;
+    const [adhocMetric, setAdhocMetric] = useState(propsAdhocMetric);
+    const [savedMetric, setSavedMetric] = useState(propsSavedMetric);
+    const [width, setWidth] = useState(POPOVER_INITIAL_WIDTH);
+    const [height, setHeight] = useState(POPOVER_INITIAL_HEIGHT);
 
-  dragStartY = 0;
-
-  dragStartWidth = 0;
-
-  dragStartHeight = 0;
-
-  constructor(props: AdhocMetricEditPopoverProps) {
-    super(props);
-    this.onSave = this.onSave.bind(this);
-    this.onResetStateAndClose = this.onResetStateAndClose.bind(this);
-    this.onColumnChange = this.onColumnChange.bind(this);
-    this.onAggregateChange = this.onAggregateChange.bind(this);
-    this.onSavedMetricChange = this.onSavedMetricChange.bind(this);
-    this.onSqlExpressionChange = this.onSqlExpressionChange.bind(this);
-    this.onDragDown = this.onDragDown.bind(this);
-    this.onMouseMove = this.onMouseMove.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
-    this.onTabChange = this.onTabChange.bind(this);
-    this.editorRef = createRef();
-    this.refreshEditor = this.refreshEditor.bind(this);
-    this.getDefaultTab = this.getDefaultTab.bind(this);
-
-    this.state = {
-      adhocMetric: this.props.adhocMetric,
-      savedMetric: this.props.savedMetric,
+    const editorRef = useRef<editors.EditorHandle>(null);
+    const dragStartRef = useRef({
+      x: 0,
+      y: 0,
       width: POPOVER_INITIAL_WIDTH,
       height: POPOVER_INITIAL_HEIGHT,
-    };
-    document.addEventListener('mouseup', this.onMouseUp);
-  }
-
-  componentDidMount() {
-    this.props.getCurrentTab?.(this.defaultActiveTabKey);
-  }
-
-  componentDidUpdate(
-    _prevProps: AdhocMetricEditPopoverProps,
-    prevState: AdhocMetricEditPopoverState,
-  ) {
-    if (
-      prevState.adhocMetric?.sqlExpression !==
-        this.state.adhocMetric?.sqlExpression ||
-      prevState.adhocMetric?.aggregate !== this.state.adhocMetric?.aggregate ||
-      prevState.adhocMetric?.column?.column_name !==
-        this.state.adhocMetric?.column?.column_name ||
-      prevState.savedMetric?.metric_name !== this.state.savedMetric?.metric_name
-    ) {
-      this.props.getCurrentLabel?.({
-        savedMetricLabel:
-          this.state.savedMetric?.verbose_name ||
-          this.state.savedMetric?.metric_name,
-        adhocMetricLabel: this.state.adhocMetric?.getDefaultLabel(),
-      });
-    }
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('mouseup', this.onMouseUp);
-    document.removeEventListener('mousemove', this.onMouseMove);
-  }
-
-  getDefaultTab() {
-    const { adhocMetric, savedMetric, savedMetricsOptions, isNewMetric } =
-      this.props;
-    if (isDefined(adhocMetric.column) || isDefined(adhocMetric.sqlExpression)) {
-      return adhocMetric.expressionType;
-    }
-    if (
-      (isNewMetric || savedMetric?.metric_name) &&
-      Array.isArray(savedMetricsOptions) &&
-      savedMetricsOptions.length > 0
-    ) {
-      return SAVED_TAB_KEY;
-    }
-    return adhocMetric.expressionType;
-  }
-
-  onSave() {
-    const { adhocMetric, savedMetric } = this.state;
-
-    const metric = savedMetric?.metric_name ? savedMetric : adhocMetric;
-    const oldMetric = this.props.savedMetric?.metric_name
-      ? this.props.savedMetric
-      : this.props.adhocMetric;
-    this.props.onChange(
-      {
-        ...metric,
-      } as Metric,
-      oldMetric as Metric,
-    );
-    this.props.onClose();
-  }
-
-  onResetStateAndClose() {
-    this.setState(
-      {
-        adhocMetric: this.props.adhocMetric,
-        savedMetric: this.props.savedMetric,
-      },
-      this.props.onClose,
-    );
-  }
-
-  onColumnChange(columnName: string): void {
-    const column = this.props.columns?.find(
-      column => column.column_name === columnName,
-    );
-    this.setState(prevState => ({
-      adhocMetric: prevState.adhocMetric.duplicateWith({
-        column,
-        expressionType: EXPRESSION_TYPES.SIMPLE,
-      }),
-      savedMetric: undefined,
-    }));
-  }
-
-  onAggregateChange(aggregate: string | null): void {
-    // we construct this object explicitly to overwrite the value in the case aggregate is null
-    this.setState(prevState => ({
-      adhocMetric: prevState.adhocMetric.duplicateWith({
-        aggregate,
-        expressionType: EXPRESSION_TYPES.SIMPLE,
-      }),
-      savedMetric: undefined,
-    }));
-  }
-
-  onSavedMetricChange(savedMetricName: string): void {
-    const savedMetric = this.props.savedMetricsOptions?.find(
-      metric => metric.metric_name === savedMetricName,
-    );
-    this.setState(prevState => ({
-      savedMetric,
-      adhocMetric: prevState.adhocMetric.duplicateWith({
-        column: undefined,
-        aggregate: undefined,
-        sqlExpression: undefined,
-        expressionType: EXPRESSION_TYPES.SIMPLE,
-      }),
-    }));
-  }
-
-  onSqlExpressionChange(sqlExpression: string): void {
-    this.setState(prevState => ({
-      adhocMetric: prevState.adhocMetric.duplicateWith({
-        sqlExpression,
-        expressionType: EXPRESSION_TYPES.SQL,
-      }),
-      savedMetric: undefined,
-    }));
-  }
-
-  onDragDown(e: React.MouseEvent): void {
-    this.dragStartX = e.clientX;
-    this.dragStartY = e.clientY;
-    this.dragStartWidth = this.state.width;
-    this.dragStartHeight = this.state.height;
-    document.addEventListener('mousemove', this.onMouseMove);
-  }
-
-  onMouseMove(e: MouseEvent): void {
-    this.props.onResize();
-    this.setState({
-      width: Math.max(
-        this.dragStartWidth + (e.clientX - this.dragStartX),
-        POPOVER_INITIAL_WIDTH,
-      ),
-      height: Math.max(
-        this.dragStartHeight + (e.clientY - this.dragStartY),
-        POPOVER_INITIAL_HEIGHT,
-      ),
     });
-  }
 
-  onMouseUp(): void {
-    document.removeEventListener('mousemove', this.onMouseMove);
-  }
+    const prevAdhocMetric = useRef(adhocMetric);
+    const prevSavedMetric = useRef(savedMetric);
 
-  onTabChange(tab: string): void {
-    this.refreshEditor();
-    this.props.getCurrentTab?.(tab);
-  }
+    useEffect(() => {
+      getCurrentTab?.(defaultActiveTabKey);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  refreshEditor(): void {
-    setTimeout(() => {
-      this.editorRef.current?.resize();
-    }, 0);
-  }
+    useEffect(() => {
+      if (
+        prevAdhocMetric.current?.sqlExpression !== adhocMetric?.sqlExpression ||
+        prevAdhocMetric.current?.aggregate !== adhocMetric?.aggregate ||
+        prevAdhocMetric.current?.column?.column_name !==
+          adhocMetric?.column?.column_name ||
+        prevSavedMetric.current?.metric_name !== savedMetric?.metric_name
+      ) {
+        getCurrentLabel?.({
+          savedMetricLabel:
+            savedMetric?.verbose_name || savedMetric?.metric_name,
+          adhocMetricLabel: adhocMetric?.getDefaultLabel(),
+        });
+      }
+      prevAdhocMetric.current = adhocMetric;
+      prevSavedMetric.current = savedMetric;
+    }, [adhocMetric, savedMetric, getCurrentLabel]);
 
-  renderColumnOption(option: ColumnType): React.ReactNode {
-    const column = { ...option };
-    if (
-      (column as unknown as { metric_name?: string }).metric_name &&
-      !column.verbose_name
-    ) {
-      column.verbose_name = (
-        column as unknown as { metric_name: string }
-      ).metric_name;
-    }
-    return <StyledColumnOption column={column} showType />;
-  }
+    const onMouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
+    const handleMouseMove = useCallback((e: MouseEvent) => {
+      onMouseMoveRef.current(e);
+    }, []);
 
-  renderMetricOption(savedMetric: SavedMetricType): React.ReactNode {
-    return <StyledMetricOption metric={savedMetric} showType />;
-  }
+    onMouseMoveRef.current = (e: MouseEvent) => {
+      onResize();
+      setWidth(
+        Math.max(
+          dragStartRef.current.width + (e.clientX - dragStartRef.current.x),
+          POPOVER_INITIAL_WIDTH,
+        ),
+      );
+      setHeight(
+        Math.max(
+          dragStartRef.current.height + (e.clientY - dragStartRef.current.y),
+          POPOVER_INITIAL_HEIGHT,
+        ),
+      );
+    };
 
-  render() {
-    const {
-      adhocMetric: propsAdhocMetric,
-      savedMetric: propsSavedMetric,
-      columns,
-      savedMetricsOptions,
+    const handleMouseUp = useCallback(() => {
+      document.removeEventListener('mousemove', handleMouseMove);
+    }, [handleMouseMove]);
+
+    useEffect(() => {
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('mousemove', handleMouseMove);
+      };
+    }, [handleMouseUp, handleMouseMove]);
+
+    const onSave = useCallback(() => {
+      const metric = savedMetric?.metric_name ? savedMetric : adhocMetric;
+      const oldMetric = propsSavedMetric?.metric_name
+        ? propsSavedMetric
+        : propsAdhocMetric;
+      onChange({ ...metric } as Metric, oldMetric as Metric);
+      onClose();
+    }, [
+      savedMetric,
+      adhocMetric,
+      propsSavedMetric,
+      propsAdhocMetric,
       onChange,
       onClose,
-      onResize,
-      datasource,
-      isNewMetric,
-      isLabelModified,
-      ...popoverProps
-    } = this.props;
-    const { adhocMetric, savedMetric } = this.state;
+    ]);
+
+    const onResetStateAndClose = useCallback(() => {
+      setAdhocMetric(propsAdhocMetric);
+      setSavedMetric(propsSavedMetric);
+      onClose();
+    }, [propsAdhocMetric, propsSavedMetric, onClose]);
+
+    const onColumnChange = useCallback(
+      (columnName: string) => {
+        const column = columns?.find(col => col.column_name === columnName);
+        setAdhocMetric(prev =>
+          prev.duplicateWith({
+            column,
+            expressionType: EXPRESSION_TYPES.SIMPLE,
+          }),
+        );
+        setSavedMetric(undefined);
+      },
+      [columns],
+    );
+
+    const onAggregateChange = useCallback((aggregate: string | null) => {
+      setAdhocMetric(prev =>
+        prev.duplicateWith({
+          aggregate,
+          expressionType: EXPRESSION_TYPES.SIMPLE,
+        }),
+      );
+      setSavedMetric(undefined);
+    }, []);
+
+    const onSavedMetricChange = useCallback(
+      (savedMetricName: string) => {
+        const found = savedMetricsOptions?.find(
+          metric => metric.metric_name === savedMetricName,
+        );
+        setSavedMetric(found);
+        setAdhocMetric(prev =>
+          prev.duplicateWith({
+            column: undefined,
+            aggregate: undefined,
+            sqlExpression: undefined,
+            expressionType: EXPRESSION_TYPES.SIMPLE,
+          }),
+        );
+      },
+      [savedMetricsOptions],
+    );
+
+    const onSqlExpressionChange = useCallback((sqlExpression: string) => {
+      setAdhocMetric(prev =>
+        prev.duplicateWith({
+          sqlExpression,
+          expressionType: EXPRESSION_TYPES.SQL,
+        }),
+      );
+      setSavedMetric(undefined);
+    }, []);
+
+    const onDragDown = useCallback(
+      (e: React.MouseEvent) => {
+        dragStartRef.current = {
+          x: e.clientX,
+          y: e.clientY,
+          width,
+          height,
+        };
+        document.addEventListener('mousemove', handleMouseMove);
+      },
+      [width, height, handleMouseMove],
+    );
+
+    const refreshEditor = useCallback(() => {
+      setTimeout(() => {
+        editorRef.current?.resize();
+      }, 0);
+    }, []);
+
+    const onTabChange = useCallback(
+      (tab: string) => {
+        refreshEditor();
+        getCurrentTab?.(tab);
+      },
+      [refreshEditor, getCurrentTab],
+    );
+
+    const renderColumnOption = useCallback(
+      (option: ColumnType): React.ReactNode => {
+        const column = { ...option };
+        if (
+          (column as unknown as { metric_name?: string }).metric_name &&
+          !column.verbose_name
+        ) {
+          column.verbose_name = (
+            column as unknown as { metric_name: string }
+          ).metric_name;
+        }
+        return <StyledColumnOption column={column} showType />;
+      },
+      [],
+    );
+
+    const renderMetricOption = useCallback(
+      (metric: SavedMetricType): React.ReactNode => (
+        <StyledMetricOption metric={metric} showType />
+      ),
+      [],
+    );
+
     const columnsArray = columns ?? [];
     const keywords = sqlKeywords.concat(
       getColumnKeywords(
@@ -369,12 +356,11 @@ class AdhocMetricEditPopover extends PureComponent<
       (adhocMetric.column && adhocMetric.column.column_name) ||
       adhocMetric.inferSqlExpressionColumn();
 
-    // autofocus on column if there's no value in column; otherwise autofocus on aggregate
     const columnSelectProps = {
       ariaLabel: t('Select column'),
       placeholder: t('%s column(s)', columnsArray.length),
       value: columnValue,
-      onChange: this.onColumnChange,
+      onChange: onColumnChange,
       allowClear: true,
       autoFocus: !columnValue,
     };
@@ -386,7 +372,7 @@ class AdhocMetricEditPopover extends PureComponent<
         adhocMetric.aggregate ??
         adhocMetric.inferSqlExpressionAggregate() ??
         undefined,
-      onChange: this.onAggregateChange as (value: unknown) => void,
+      onChange: onAggregateChange as (value: unknown) => void,
       allowClear: true,
       autoFocus: !!columnValue,
     };
@@ -395,7 +381,7 @@ class AdhocMetricEditPopover extends PureComponent<
       ariaLabel: t('Select saved metrics'),
       placeholder: t('%s saved metric(s)', savedMetricsOptions?.length ?? 0),
       value: savedMetric?.metric_name,
-      onChange: this.onSavedMetricChange,
+      onChange: onSavedMetricChange,
       allowClear: true,
       autoFocus: true,
     };
@@ -428,10 +414,10 @@ class AdhocMetricEditPopover extends PureComponent<
         <Tabs
           id="adhoc-metric-edit-tabs"
           data-test="adhoc-metric-edit-tabs"
-          defaultActiveKey={this.defaultActiveTabKey}
+          defaultActiveKey={defaultActiveTabKey}
           className="adhoc-metric-edit-tabs"
-          style={{ height: this.state.height, width: this.state.width }}
-          onChange={this.onTabChange}
+          style={{ height, width }}
+          onChange={onTabChange}
           allowOverflow
           items={[
             {
@@ -447,17 +433,15 @@ class AdhocMetricEditPopover extends PureComponent<
                             b.metric_name ?? '',
                           ),
                         )
-                        .map(savedMetric => ({
-                          value: savedMetric.metric_name,
-                          label: this.renderMetricOption(savedMetric),
-                          key: savedMetric.id,
-                          metric_name: savedMetric.metric_name,
-                          verbose_name: savedMetric.verbose_name ?? '',
+                        .map(sm => ({
+                          value: sm.metric_name,
+                          label: renderMetricOption(sm),
+                          key: sm.id,
+                          metric_name: sm.metric_name,
+                          verbose_name: sm.verbose_name ?? '',
                           disabled:
-                            this.props.compatibleMetrics != null &&
-                            !this.props.compatibleMetrics.includes(
-                              savedMetric.metric_name,
-                            ),
+                            compatibleMetrics != null &&
+                            !compatibleMetrics.includes(sm.metric_name),
                         }))}
                       optionFilterProps={['metric_name', 'verbose_name']}
                       {...savedSelectProps}
@@ -483,8 +467,8 @@ class AdhocMetricEditPopover extends PureComponent<
                           tabIndex={0}
                           role="button"
                           onClick={() => {
-                            this.props.handleDatasetModal?.(true);
-                            this.props.onClose();
+                            handleDatasetModal?.(true);
+                            onClose();
                           }}
                         >
                           {t('Create a dataset')}
@@ -516,7 +500,7 @@ class AdhocMetricEditPopover extends PureComponent<
                       options={columnsArray.map(column => ({
                         value: column.column_name,
                         key: (column as { id?: unknown }).id,
-                        label: this.renderColumnOption(column),
+                        label: renderColumnOption(column),
                         column_name: column.column_name,
                         verbose_name: column.verbose_name ?? '',
                       }))}
@@ -554,10 +538,10 @@ class AdhocMetricEditPopover extends PureComponent<
               children: (
                 <SQLEditorWithValidation
                   data-test="sql-editor"
-                  ref={this.editorRef}
+                  ref={editorRef}
                   keywords={keywords}
-                  height={`${this.state.height - 120}px`}
-                  onChange={this.onSqlExpressionChange}
+                  height={`${height - 120}px`}
+                  onChange={onSqlExpressionChange}
                   width="100%"
                   lineNumbers={false}
                   value={
@@ -578,7 +562,7 @@ class AdhocMetricEditPopover extends PureComponent<
           <Button
             buttonSize="small"
             buttonStyle="secondary"
-            onClick={this.onResetStateAndClose}
+            onClick={onResetStateAndClose}
             data-test="AdhocMetricEdit#cancel"
             cta
           >
@@ -589,7 +573,7 @@ class AdhocMetricEditPopover extends PureComponent<
             buttonStyle="primary"
             buttonSize="small"
             data-test="AdhocMetricEdit#save"
-            onClick={this.onSave}
+            onClick={onSave}
             cta
           >
             {t('Save')}
@@ -598,24 +582,18 @@ class AdhocMetricEditPopover extends PureComponent<
             role="button"
             aria-label={t('Resize')}
             tabIndex={0}
-            onMouseDown={this.onDragDown}
+            onMouseDown={onDragDown}
             className="edit-popover-resize"
           />
         </div>
       </Form>
     );
-  }
-}
-// @ts-expect-error - defaultProps for backward compatibility
-AdhocMetricEditPopover.defaultProps = defaultProps;
+  },
+);
 
-// ---------------------------------------------------------------------------
-// Thin functional wrapper that injects compatibility data from Redux.
-// AdhocMetricEditPopover is a class component and cannot use hooks directly.
-// ---------------------------------------------------------------------------
 function AdhocMetricEditPopoverWithRedux(props: AdhocMetricEditPopoverProps) {
   const compatibleMetrics = useSelector(
-    (state: any) =>
+    (state: Record<string, Record<string, unknown>>) =>
       state.explore?.compatibleMetrics as string[] | null | undefined,
   );
   return (
