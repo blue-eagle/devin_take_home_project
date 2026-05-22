@@ -19,7 +19,7 @@
 
 import { t } from '@apache-superset/core/translation';
 import { SupersetClient } from '@superset-ui/core';
-import { styled, css } from '@apache-superset/core/theme';
+import { css, useTheme } from '@apache-superset/core/theme';
 import {
   Button,
   Card,
@@ -42,17 +42,6 @@ interface RegisterForm {
   confirmPassword: string;
 }
 
-const StyledCard = styled(Card)`
-  ${({ theme }) => css`
-    width: 50%;
-    margin-top: ${theme.marginXL}px;
-    background: ${theme.colorBgBase};
-    .ant-form-item-label label {
-      color: ${theme.colorPrimary};
-    }
-  `}
-`;
-
 const formItemLayout = {
   labelCol: {
     xs: { span: 24 },
@@ -65,6 +54,7 @@ const formItemLayout = {
 };
 
 export default function Login() {
+  const theme = useTheme();
   const [form] = Form.useForm<RegisterForm>();
   const [loading, setLoading] = useState(false);
   const [captchaResponse, setCaptchaResponse] = useState<string | null>(null);
@@ -123,7 +113,18 @@ export default function Login() {
       `}
       data-test="register-form"
     >
-      <StyledCard title={t('Fill out the registration form')} padded>
+      <Card
+        title={t('Fill out the registration form')}
+        padded
+        css={css`
+          width: 50%;
+          margin-top: ${theme.marginXL}px;
+          background: ${theme.colorBgBase};
+          .ant-form-item-label label {
+            color: ${theme.colorPrimary};
+          }
+        `}
+      >
         <Form form={form} onFinish={onFinish} {...formItemLayout}>
           <Form.Item<RegisterForm>
             label={t('Username')}
@@ -244,7 +245,7 @@ export default function Login() {
             </Button>
           </Form.Item>
         </Form>
-      </StyledCard>
+      </Card>
     </Flex>
   );
 }

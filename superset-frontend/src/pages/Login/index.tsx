@@ -19,7 +19,7 @@
 
 import { t } from '@apache-superset/core/translation';
 import { SupersetClient } from '@superset-ui/core';
-import { styled, css } from '@apache-superset/core/theme';
+import { css, useTheme } from '@apache-superset/core/theme';
 import {
   Button,
   Card,
@@ -27,8 +27,8 @@ import {
   Form,
   Input,
   Typography,
-  Icons,
 } from '@superset-ui/core/components';
+import { Icons } from '@superset-ui/core/components/Icons';
 import { useState, useEffect, useMemo } from 'react';
 import { capitalize } from 'lodash/fp';
 import { addDangerToast } from 'src/components/MessageToasts/actions';
@@ -60,26 +60,8 @@ enum AuthType {
   AuthSAML = 5,
 }
 
-const StyledCard = styled(Card)`
-  ${({ theme }) => css`
-    max-width: 400px;
-    width: 100%;
-    margin-top: ${theme.marginXL}px;
-    color: ${theme.colorBgContainer};
-    background: ${theme.colorBgBase};
-    .ant-form-item-label label {
-      color: ${theme.colorPrimary};
-    }
-  `}
-`;
-
-const StyledLabel = styled(Typography.Text)`
-  ${({ theme }) => css`
-    font-size: ${theme.fontSizeSM}px;
-  `}
-`;
-
 export default function Login() {
+  const theme = useTheme();
   const [form] = Form.useForm<LoginForm>();
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
@@ -162,7 +144,20 @@ export default function Login() {
         height: calc(100vh - 200px);
       `}
     >
-      <StyledCard title={t('Sign in')} padded>
+      <Card
+        title={t('Sign in')}
+        padded
+        css={css`
+          max-width: 400px;
+          width: 100%;
+          margin-top: ${theme.marginXL}px;
+          color: ${theme.colorBgContainer};
+          background: ${theme.colorBgBase};
+          .ant-form-item-label label {
+            color: ${theme.colorPrimary};
+          }
+        `}
+      >
         {authType === AuthType.AuthOID && (
           <Flex justify="center" vertical gap="middle">
             <Form layout="vertical" requiredMark="optional" form={form}>
@@ -213,7 +208,15 @@ export default function Login() {
               onFinish={onFinish}
             >
               <Form.Item<LoginForm>
-                label={<StyledLabel>{t('Username:')}</StyledLabel>}
+                label={
+                  <Typography.Text
+                    css={css`
+                      font-size: ${theme.fontSizeSM}px;
+                    `}
+                  >
+                    {t('Username:')}
+                  </Typography.Text>
+                }
                 name="username"
                 rules={[
                   { required: true, message: t('Please enter your username') },
@@ -226,7 +229,15 @@ export default function Login() {
                 />
               </Form.Item>
               <Form.Item<LoginForm>
-                label={<StyledLabel>{t('Password:')}</StyledLabel>}
+                label={
+                  <Typography.Text
+                    css={css`
+                      font-size: ${theme.fontSizeSM}px;
+                    `}
+                  >
+                    {t('Password:')}
+                  </Typography.Text>
+                }
                 name="password"
                 rules={[
                   { required: true, message: t('Please enter your password') },
@@ -267,7 +278,7 @@ export default function Login() {
             </Form>
           </Flex>
         )}
-      </StyledCard>
+      </Card>
     </Flex>
   );
 }

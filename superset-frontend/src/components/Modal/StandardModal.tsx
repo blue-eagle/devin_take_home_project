@@ -18,7 +18,7 @@
  */
 import { ReactNode } from 'react';
 import { t } from '@apache-superset/core/translation';
-import { styled } from '@apache-superset/core/theme';
+import { css, useTheme } from '@apache-superset/core/theme';
 import { Modal, Loading, Flex } from '@superset-ui/core/components';
 import { ModalTitleWithIcon } from 'src/components/ModalTitleWithIcon';
 
@@ -48,55 +48,6 @@ export const MODAL_STANDARD_WIDTH = 500;
 export const MODAL_MEDIUM_WIDTH = 600;
 export const MODAL_LARGE_WIDTH = 900;
 
-const StyledModal = styled(Modal)`
-  .ant-modal-body {
-    max-height: 80vh;
-    height: auto;
-    overflow-y: auto;
-    padding: 0;
-  }
-
-  .ant-modal-header {
-    padding: ${({ theme }) => theme.sizeUnit * 3}px
-      ${({ theme }) => theme.sizeUnit * 4}px
-      ${({ theme }) => theme.sizeUnit * 3}px;
-    margin-bottom: 0;
-    border-bottom: 1px solid ${({ theme }) => theme.colorBorder};
-  }
-
-  .ant-modal-footer {
-    height: ${({ theme }) => theme.sizeUnit * 16.25}px;
-  }
-
-  .control-label {
-    margin-top: ${({ theme }) => theme.sizeUnit}px;
-  }
-
-  /* Remove top margin from collapse component */
-  .ant-collapse {
-    border: none;
-
-    > .ant-collapse-item:first-of-type {
-      border-top: none;
-    }
-
-    /* Remove margin from collapse headers */
-    .ant-collapse-header {
-      padding-bottom: 0 !important;
-
-      /* Remove margin from the CollapseLabelInModal component */
-      > div {
-        margin-bottom: 0;
-      }
-    }
-  }
-
-  /* Ensure collapse sections have proper padding */
-  .ant-collapse-content-box {
-    padding: ${({ theme }) => theme.sizeUnit * 4}px;
-  }
-`;
-
 export function StandardModal({
   width = MODAL_STANDARD_WIDTH,
   title,
@@ -117,10 +68,54 @@ export function StandardModal({
   wrapProps,
   contentLoading = false,
 }: StandardModalProps) {
+  const theme = useTheme();
   const primaryButtonName = saveText || (isEditMode ? t('Save') : t('Add'));
 
   return (
-    <StyledModal
+    <Modal
+      css={css`
+        .ant-modal-body {
+          max-height: 80vh;
+          height: auto;
+          overflow-y: auto;
+          padding: 0;
+        }
+
+        .ant-modal-header {
+          padding: ${theme.sizeUnit * 3}px ${theme.sizeUnit * 4}px
+            ${theme.sizeUnit * 3}px;
+          margin-bottom: 0;
+          border-bottom: 1px solid ${theme.colorBorder};
+        }
+
+        .ant-modal-footer {
+          height: ${theme.sizeUnit * 16.25}px;
+        }
+
+        .control-label {
+          margin-top: ${theme.sizeUnit}px;
+        }
+
+        .ant-collapse {
+          border: none;
+
+          > .ant-collapse-item:first-of-type {
+            border-top: none;
+          }
+
+          .ant-collapse-header {
+            padding-bottom: 0 !important;
+
+            > div {
+              margin-bottom: 0;
+            }
+          }
+        }
+
+        .ant-collapse-content-box {
+          padding: ${theme.sizeUnit * 4}px;
+        }
+      `}
       disablePrimaryButton={saveDisabled || saveLoading || contentLoading}
       primaryButtonLoading={saveLoading}
       primaryTooltipMessage={errorTooltip}
@@ -150,6 +145,6 @@ export function StandardModal({
       ) : (
         children
       )}
-    </StyledModal>
+    </Modal>
   );
 }

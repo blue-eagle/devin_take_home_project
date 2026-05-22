@@ -19,7 +19,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { t } from '@apache-superset/core/translation';
-import { css, styled, useTheme } from '@apache-superset/core/theme';
+import { css, useTheme } from '@apache-superset/core/theme';
 import {
   Button,
   Card,
@@ -29,66 +29,6 @@ import {
 } from '@superset-ui/core/components';
 import { Icons } from '@superset-ui/core/components/Icons';
 import { getTargetUrl, isUrlTrusted, trustUrl, isAllowedScheme } from './utils';
-
-const PageContainer = styled(Flex)`
-  ${({ theme }) => css`
-    height: calc(100vh - 64px);
-    background-color: ${theme.colorBgLayout};
-    padding: ${theme.padding}px;
-  `}
-`;
-
-const WarningCard = styled(Card)`
-  ${({ theme }) => css`
-    max-width: 520px;
-    width: 100%;
-    box-shadow: ${theme.boxShadowSecondary};
-  `}
-`;
-
-const WarningHeader = styled(Flex)`
-  ${({ theme }) => css`
-    padding: ${theme.paddingLG}px ${theme.paddingXL}px;
-    border-bottom: 1px solid ${theme.colorBorderSecondary};
-  `}
-`;
-
-const WarningBody = styled.div`
-  ${({ theme }) => css`
-    padding: ${theme.paddingXL}px;
-  `}
-`;
-
-const UrlDisplay = styled(Flex)`
-  ${({ theme }) => css`
-    background-color: ${theme.colorFillQuaternary};
-    border-radius: ${theme.borderRadiusSM}px;
-    padding: ${theme.paddingSM}px ${theme.padding}px;
-    margin-bottom: ${theme.margin}px;
-  `}
-`;
-
-const UrlText = styled(Typography.Text)`
-  ${({ theme }) => css`
-    font-family: ${theme.fontFamilyCode};
-    font-size: ${theme.fontSize}px;
-    word-break: break-all;
-  `}
-`;
-
-const WarningFooter = styled(Flex)`
-  ${({ theme }) => css`
-    padding: ${theme.padding}px ${theme.paddingXL}px;
-    background-color: ${theme.colorFillAlter};
-    border-top: 1px solid ${theme.colorBorderSecondary};
-  `}
-`;
-
-const WarningTitle = styled(Typography.Title)`
-  && {
-    margin: 0;
-  }
-`;
 
 export default function RedirectWarning() {
   const theme = useTheme();
@@ -117,37 +57,100 @@ export default function RedirectWarning() {
 
   if (!targetUrl) {
     return (
-      <PageContainer justify="center" align="center">
-        <WarningCard>
-          <WarningBody>
+      <Flex
+        justify="center"
+        align="center"
+        css={css`
+          height: calc(100vh - 64px);
+          background-color: ${theme.colorBgLayout};
+          padding: ${theme.padding}px;
+        `}
+      >
+        <Card>
+          <div
+            css={css`
+              padding: ${theme.paddingXL}px;
+            `}
+          >
             <Typography.Text type="danger">
               {t('Missing URL parameter')}
             </Typography.Text>
-          </WarningBody>
-        </WarningCard>
-      </PageContainer>
+          </div>
+        </Card>
+      </Flex>
     );
   }
 
   return (
-    <PageContainer justify="center" align="center">
-      <WarningCard>
-        <WarningHeader align="center" gap="middle">
+    <Flex
+      justify="center"
+      align="center"
+      css={css`
+        height: calc(100vh - 64px);
+        background-color: ${theme.colorBgLayout};
+        padding: ${theme.padding}px;
+      `}
+    >
+      <Card
+        css={css`
+          max-width: 520px;
+          width: 100%;
+          box-shadow: ${theme.boxShadowSecondary};
+        `}
+      >
+        <Flex
+          align="center"
+          gap="middle"
+          css={css`
+            padding: ${theme.paddingLG}px ${theme.paddingXL}px;
+            border-bottom: 1px solid ${theme.colorBorderSecondary};
+          `}
+        >
           <Icons.WarningOutlined iconColor={theme.colorWarning} iconSize="xl" />
-          <WarningTitle level={4}>{t('External link warning')}</WarningTitle>
-        </WarningHeader>
+          <Typography.Title
+            level={4}
+            css={css`
+              && {
+                margin: 0;
+              }
+            `}
+          >
+            {t('External link warning')}
+          </Typography.Title>
+        </Flex>
 
-        <WarningBody>
+        <div
+          css={css`
+            padding: ${theme.paddingXL}px;
+          `}
+        >
           <Typography.Paragraph type="secondary">
             {t(
               'This link will take you to an external website. We cannot guarantee the safety of external destinations.',
             )}
           </Typography.Paragraph>
 
-          <UrlDisplay align="center" gap="small">
+          <Flex
+            align="center"
+            gap="small"
+            css={css`
+              background-color: ${theme.colorFillQuaternary};
+              border-radius: ${theme.borderRadiusSM}px;
+              padding: ${theme.paddingSM}px ${theme.padding}px;
+              margin-bottom: ${theme.margin}px;
+            `}
+          >
             <Icons.LinkOutlined iconColor={theme.colorTextTertiary} />
-            <UrlText>{targetUrl}</UrlText>
-          </UrlDisplay>
+            <Typography.Text
+              css={css`
+                font-family: ${theme.fontFamilyCode};
+                font-size: ${theme.fontSize}px;
+                word-break: break-all;
+              `}
+            >
+              {targetUrl}
+            </Typography.Text>
+          </Flex>
 
           <Flex align="center" gap="small">
             <Checkbox
@@ -161,15 +164,23 @@ export default function RedirectWarning() {
           <Typography.Text type="secondary">
             {t('Only proceed if you trust the destination or its source.')}
           </Typography.Text>
-        </WarningBody>
+        </div>
 
-        <WarningFooter justify="flex-end" gap="small">
+        <Flex
+          justify="flex-end"
+          gap="small"
+          css={css`
+            padding: ${theme.padding}px ${theme.paddingXL}px;
+            background-color: ${theme.colorFillAlter};
+            border-top: 1px solid ${theme.colorBorderSecondary};
+          `}
+        >
           <Button onClick={handleReturn}>{t('Return to Superset')}</Button>
           <Button type="primary" onClick={handleContinue}>
             {t('Continue')}
           </Button>
-        </WarningFooter>
-      </WarningCard>
-    </PageContainer>
+        </Flex>
+      </Card>
+    </Flex>
   );
 }

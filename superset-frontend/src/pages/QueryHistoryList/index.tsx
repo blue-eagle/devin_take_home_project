@@ -20,7 +20,7 @@ import { useMemo, useState, useCallback, ReactElement, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { t } from '@apache-superset/core/translation';
 import { QueryState, SupersetClient } from '@superset-ui/core';
-import { css, styled, useTheme } from '@apache-superset/core/theme';
+import { css, useTheme } from '@apache-superset/core/theme';
 import {
   createFetchRelated,
   createFetchDistinct,
@@ -35,7 +35,6 @@ import { commonMenuData } from 'src/features/home/commonMenuData';
 import {
   ListView,
   ListViewFilterOperator as FilterOperator,
-  type ListViewProps,
   type ListViewFilters,
 } from 'src/components';
 import CodeSyntaxHighlighter, {
@@ -53,53 +52,10 @@ import { extendedDayjs } from '@superset-ui/core/utils/dates';
 const PAGE_SIZE = 25;
 const SQL_PREVIEW_MAX_LINES = 4;
 
-const TopAlignedListView = styled(ListView)<ListViewProps<QueryObject>>`
-  table .ant-table-cell {
-    vertical-align: top;
-  }
-`;
-
-const StyledCodeSyntaxHighlighter = styled(CodeSyntaxHighlighter)`
-  height: ${({ theme }) => theme.sizeUnit * 26}px;
-  overflow: hidden !important; /* needed to override inline styles */
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  /* Ensure the syntax highlighter content respects the container constraints */
-  & > div {
-    height: 100%;
-    overflow: hidden;
-  }
-
-  pre {
-    height: 100% !important;
-    overflow: hidden !important;
-    margin: 0 !important;
-  }
-`;
-
 interface QueryListProps {
   addDangerToast: (msg: string, config?: any) => any;
   addSuccessToast: (msg: string, config?: any) => any;
 }
-
-const StyledTableLabel = styled.div`
-  .count {
-    margin-left: 5px;
-    color: ${({ theme }) => theme.colorPrimary};
-    text-decoration: underline;
-    cursor: pointer;
-  }
-`;
-
-const StyledPopoverItem = styled.div`
-  color: ${({ theme }) => theme.colorText};
-`;
-
-const TimerLabel = styled(Label)`
-  text-align: left;
-  font-family: ${({ theme }) => theme.fontFamilyCode};
-`;
 
 function QueryList({ addDangerToast }: QueryListProps) {
   const {
@@ -267,9 +223,16 @@ function QueryList({ addDangerToast }: QueryListProps) {
                 )
               : '00:00:00.000';
           return (
-            <TimerLabel type={timerType} role="timer">
+            <Label
+              type={timerType}
+              role="timer"
+              css={css`
+                text-align: left;
+                font-family: ${theme.fontFamilyCode};
+              `}
+            >
               {timerTime}
-            </TimerLabel>
+            </Label>
           );
         },
         id: 'duration',
@@ -308,7 +271,16 @@ function QueryList({ addDangerToast }: QueryListProps) {
 
           if (names.length) {
             return (
-              <StyledTableLabel>
+              <div
+                css={css`
+                  .count {
+                    margin-left: 5px;
+                    color: ${theme.colorPrimary};
+                    text-decoration: underline;
+                    cursor: pointer;
+                  }
+                `}
+              >
                 <span>{main}</span>
                 <Popover
                   placement="right"
@@ -317,14 +289,21 @@ function QueryList({ addDangerToast }: QueryListProps) {
                   content={
                     <>
                       {names.map((name: string) => (
-                        <StyledPopoverItem key={name}>{name}</StyledPopoverItem>
+                        <div
+                          key={name}
+                          css={css`
+                            color: ${theme.colorText};
+                          `}
+                        >
+                          {name}
+                        </div>
                       ))}
                     </>
                   }
                 >
                   <span className="count">(+{names.length})</span>
                 </Popover>
-              </StyledTableLabel>
+              </div>
             );
           }
 
@@ -375,15 +354,32 @@ function QueryList({ addDangerToast }: QueryListProps) {
             }}
             style={{ cursor: 'pointer' }}
           >
-            <StyledCodeSyntaxHighlighter
+            <CodeSyntaxHighlighter
               language="sql"
               customStyle={{
                 cursor: 'pointer',
                 userSelect: 'none',
               }}
+              css={css`
+                height: ${theme.sizeUnit * 26}px;
+                overflow: hidden !important;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+
+                & > div {
+                  height: 100%;
+                  overflow: hidden;
+                }
+
+                pre {
+                  height: 100% !important;
+                  overflow: hidden !important;
+                  margin: 0 !important;
+                }
+              `}
             >
               {shortenSQL(original.sql, SQL_PREVIEW_MAX_LINES)}
-            </StyledCodeSyntaxHighlighter>
+            </CodeSyntaxHighlighter>
           </div>
         ),
         size: 'xxl',
@@ -497,7 +493,7 @@ function QueryList({ addDangerToast }: QueryListProps) {
           show
         />
       )}
-      <TopAlignedListView
+      <ListView
         className="query-history-list-view"
         columns={columns}
         count={queryCount}
@@ -511,6 +507,11 @@ function QueryList({ addDangerToast }: QueryListProps) {
         refreshData={() => {}}
         addDangerToast={addDangerToast}
         addSuccessToast={addSuccessToast}
+        css={css`
+          table .ant-table-cell {
+            vertical-align: top;
+          }
+        `}
       />
     </>
   );
