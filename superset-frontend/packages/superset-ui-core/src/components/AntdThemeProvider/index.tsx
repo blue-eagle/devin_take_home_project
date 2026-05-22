@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { ConfigProvider, type ConfigProviderProps } from 'antd';
+import {
+  ConfigProvider,
+  type ConfigProviderProps,
+  theme as antdTheme,
+} from 'antd';
+
+export { antdTheme };
 
 export const AntdThemeProvider = ({
   children,

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { theme } from 'antd';
+import { antdTheme as theme } from '@superset-ui/core/components';
 
 /**
  * Superset-specific custom tokens that extend Ant Design's token system.

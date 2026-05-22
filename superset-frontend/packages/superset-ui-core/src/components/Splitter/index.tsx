@@ -16,18 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  TimePicker as AntdTimePicker,
-  type TimePickerProps,
-  type TimeRangePickerProps,
-} from '@superset-ui/core/components';
 
-const commonCss = { width: '100%' };
-
-export const TimePicker = (props: TimePickerProps) => (
-  <AntdTimePicker css={commonCss} {...props} />
-);
-
-export const TimeRangePicker = (props: TimeRangePickerProps) => (
-  <AntdTimePicker.RangePicker css={commonCss} {...props} />
-);
+export { Splitter } from 'antd';
+export type { SplitterProps } from 'antd/es/splitter';
