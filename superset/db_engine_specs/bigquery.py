@@ -667,8 +667,6 @@ class BigQueryEngineSpec(BaseEngineSpec):  # pylint: disable=too-many-public-met
         query_job = client.query(statement, job_config=job_config)
 
         # Format Bytes.
-        # TODO: Humanize in case more db engine specs need to be added,
-        # this should be made a function outside this scope.
         byte_division = 1024
         if hasattr(query_job, "total_bytes_processed"):
             query_bytes_processed = query_job.total_bytes_processed

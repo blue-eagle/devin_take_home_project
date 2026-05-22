@@ -474,7 +474,7 @@ test('getSliceDashboards with slice handles failure', async () => {
   expect(dispatch.mock.calls[0][0].type).toBe(SAVE_SLICE_FAILED);
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('getSlicePayload', () => {
   const sliceName = 'Test Slice';
   const formDataWithNativeFilters = {

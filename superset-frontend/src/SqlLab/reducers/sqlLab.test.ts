@@ -26,9 +26,9 @@ import { table, initialState as mockState } from '../fixtures';
 type SqlLabState = SqlLabRootState['sqlLab'];
 const initialState = mockState.sqlLab as unknown as SqlLabState;
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('sqlLabReducer', () => {
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Query editors actions', () => {
     let newState: SqlLabState;
     let defaultQueryEditor: SqlLabState['queryEditors'][number];
@@ -290,7 +290,7 @@ describe('sqlLabReducer', () => {
       expect(newState.destroyedQueryEditors).toEqual({});
     });
   });
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Tables', () => {
     let newState: SqlLabState;
     let newTable: any;
@@ -463,7 +463,7 @@ describe('sqlLabReducer', () => {
       expect(newState.activeSouthPaneTab).toBe(expandedTable.id);
     });
   });
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Run Query', () => {
     const DENORMALIZED_CHANGED_ON = '2023-06-26T07:53:05.439';
     const CHANGED_ON_TIMESTAMP = 1687765985439;
@@ -603,7 +603,7 @@ describe('sqlLabReducer', () => {
       expect(newState.queries['sync-query'].state).toBe(QueryState.Fetching);
     });
   });
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('CLEAR_INACTIVE_QUERIES', () => {
     let newState: any;
     let query: any;

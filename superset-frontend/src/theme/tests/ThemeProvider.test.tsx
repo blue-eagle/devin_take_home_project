@@ -65,7 +65,7 @@ const createWrapper =
     </SupersetThemeProvider>
   );
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('SupersetThemeProvider', () => {
   let mockThemeController: jest.Mocked<ThemeController>;
   let mockOnChangeCallback: jest.Mock;
@@ -106,7 +106,7 @@ describe('SupersetThemeProvider', () => {
     jest.clearAllMocks();
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Provider Initialization', () => {
     test('should render children within theme provider wrapper', () => {
       render(
@@ -159,7 +159,7 @@ describe('SupersetThemeProvider', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Theme State Updates', () => {
     test('should update theme state when controller notifies change', () => {
       const wrapper = createWrapper(mockThemeController);
@@ -200,7 +200,7 @@ describe('SupersetThemeProvider', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Theme Actions', () => {
     test('should call setTheme when invoked', () => {
       const wrapper = createWrapper(mockThemeController);

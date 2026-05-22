@@ -60,7 +60,6 @@ def gen_filter(
 def load_data(tbl_name: str, database: Database, sample: bool = False) -> None:
     pdf = read_example_data("examples://birth_names2.json.gz", compression="gzip")
 
-    # TODO(bkyryliuk): move load examples data into the pytest fixture
     if database.backend == "presto":
         pdf.ds = pd.to_datetime(pdf.ds, unit="ms")
         pdf.ds = pdf.ds.dt.strftime("%Y-%m-%d %H:%M%:%S")
@@ -78,7 +77,6 @@ def load_data(tbl_name: str, database: Database, sample: bool = False) -> None:
             if_exists="replace",
             chunksize=500,
             dtype={
-                # TODO(bkyryliuk): use TIMESTAMP type for presto
                 "ds": DateTime if database.backend != "presto" else String(255),
                 "gender": String(16),
                 "state": String(10),

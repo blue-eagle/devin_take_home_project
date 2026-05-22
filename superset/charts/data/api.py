@@ -256,7 +256,7 @@ class ChartDataRestApi(ChartRestApi):
                 )
             )
 
-        # TODO: support CSV, SQL query and other non-JSON types
+        # Async queries only support JSON results for now.
         # Don't use async queries when cache is disabled (cache_timeout=-1)
         # as async queries depend on caching to retrieve results
         cache_timeout = query_context.get_cache_timeout()
@@ -356,7 +356,7 @@ class ChartDataRestApi(ChartRestApi):
                 )
             )
 
-        # TODO: support CSV, SQL query and other non-JSON types
+        # Async queries only support JSON results for now.
         # Don't use async queries when cache is disabled (cache_timeout=-1)
         # as async queries depend on caching to retrieve results
         cache_timeout = query_context.get_cache_timeout()
@@ -733,7 +733,6 @@ class ChartDataRestApi(ChartRestApi):
             logger.info("Using expected_rows from frontend: %d", expected_rows)
 
         # Execute streaming command
-        # TODO: Make chunk size configurable via SUPERSET_CONFIG
         chunk_size = 1024
         command = StreamingCSVExportCommand(query_context, chunk_size)
         command.validate()

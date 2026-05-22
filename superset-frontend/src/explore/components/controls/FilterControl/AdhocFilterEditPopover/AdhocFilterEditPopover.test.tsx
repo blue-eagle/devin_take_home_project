@@ -86,7 +86,7 @@ const renderPopover = (props: Partial<typeof defaultProps> = {}) =>
     },
   );
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('AdhocFilterEditPopover', () => {
   test('renders simple tab content by default', () => {
     renderPopover();

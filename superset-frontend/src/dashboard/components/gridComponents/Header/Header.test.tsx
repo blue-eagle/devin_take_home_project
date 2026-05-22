@@ -29,7 +29,7 @@ import {
 import { mockStoreWithTabs } from 'spec/fixtures/mockStore';
 import Header from './Header';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('Header', () => {
   interface HeaderTestProps {
     id: string;

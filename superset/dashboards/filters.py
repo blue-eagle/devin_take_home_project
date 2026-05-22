@@ -171,7 +171,7 @@ class DashboardAccessFilter(BaseFilter):  # pylint: disable=too-few-public-metho
                 if r["type"] == GuestTokenResourceType.DASHBOARD.value
             ]
 
-            # TODO (embedded): only use uuid filter once uuids are rolled out
+            # Supports both integer IDs and UUIDs during migration
             condition = (
                 Dashboard.embedded.any(
                     EmbeddedDashboard.uuid.in_(embedded_dashboard_ids)

@@ -183,9 +183,6 @@ class SecurityRestApi(BaseSupersetApi):
                     raise SupersetGenericErrorException(
                         message="Guest token validator hook not callable"
                     )
-            # TODO: Add generic validation:
-            # make sure username doesn't reference an existing user
-            # check rls rules for validity?
             token = self.appbuilder.sm.create_guest_access_token(
                 body["user"], body["resources"], body["rls"]
             )

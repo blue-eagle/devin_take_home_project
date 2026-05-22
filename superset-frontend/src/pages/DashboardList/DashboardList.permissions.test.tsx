@@ -169,7 +169,7 @@ const renderWithPermissions = async (
   return result;
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('DashboardList - Permission-based UI Tests', () => {
   beforeEach(() => {
     fetchMock.clearHistory().removeRoutes();

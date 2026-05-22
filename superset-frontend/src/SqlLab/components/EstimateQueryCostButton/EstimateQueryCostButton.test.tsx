@@ -53,7 +53,7 @@ const setup = (props: Partial<EstimateQueryCostButtonProps>, store?: Store) =>
     },
   );
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('EstimateQueryCostButton', () => {
   test('renders EstimateQueryCostButton', async () => {
     const { queryByLabelText } = setup({}, mockStore(initialState));

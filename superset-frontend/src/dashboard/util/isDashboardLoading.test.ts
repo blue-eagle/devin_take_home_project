@@ -18,7 +18,7 @@
  */
 import isDashboardLoading, { ChartLoadTimestamps } from './isDashboardLoading';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('isDashboardLoading', () => {
   test('returns false when no charts are loading', () => {
     const charts: Record<string, ChartLoadTimestamps> = {

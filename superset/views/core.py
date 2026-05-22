@@ -244,8 +244,8 @@ class Superset(BaseSupersetView):
         `self.generate_json` receives this input and returns different
         payloads based on the request args in the first block
 
-        TODO: form_data should not be loaded twice from cache
-          (also loaded in `check_explore_cache_perms`)
+        Note: form_data is loaded from cache here and also in
+        `check_explore_cache_perms`.
         """
         try:
             cached = cache_manager.cache.get(cache_key)
@@ -306,7 +306,7 @@ class Superset(BaseSupersetView):
         `self.generate_json` receives this input and returns different
         payloads based on the request args in the first block
 
-        TODO: break into one endpoint for each return shape"""
+        This endpoint handles multiple return shapes."""
 
         response_type = ChartDataResultFormat.JSON.value
         responses: list[ChartDataResultFormat | ChartDataResultType] = list(
@@ -340,7 +340,7 @@ class Superset(BaseSupersetView):
             )
             force = request.args.get("force") == "true"
 
-            # TODO: support CSV, SQL query and other non-JSON types
+            # Async queries only support JSON results for now
             if (
                 is_feature_enabled("GLOBAL_ASYNC_QUERIES")
                 and response_type == ChartDataResultFormat.JSON

@@ -146,7 +146,7 @@ const addNewRuleDefaultProps: RowLevelSecurityModalProps = {
   onHide: NOOP,
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('Rule modal', () => {
   async function renderAndWait(props: RowLevelSecurityModalProps) {
     const mounted = act(async () => {

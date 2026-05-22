@@ -24,8 +24,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import DraggableNewComponent from 'src/dashboard/components/gridComponents/new/DraggableNewComponent';
 import { CHART_TYPE } from 'src/dashboard/util/componentTypes';
 
-// TODO: rewrite to rtl
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to RTL and remove describe block
 describe('DraggableNewComponent', () => {
   const props = {
     id: 'id',

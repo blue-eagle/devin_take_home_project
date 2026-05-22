@@ -38,7 +38,6 @@ export const ZoomConfigsChart: FC<ZoomConfigsChartProps> = ({
     if (!ref.current) {
       return undefined;
     }
-    // TODO check if this can be applied here
     if (value === null || value === undefined) {
       return undefined;
     }
@@ -153,8 +152,7 @@ export const ZoomConfigsChart: FC<ZoomConfigsChartProps> = ({
       onDrag.call(this, dataIndex, 1);
     };
 
-    // TODO listen to resize event and redraw chart
-    // TODO rearrange the draghandlers when the chart range changes
+    // Resize and range-change re-rendering is not yet implemented.
     chart.setOption({
       graphic: createDragGraphicOptions({
         data,
@@ -167,9 +165,7 @@ export const ZoomConfigsChart: FC<ZoomConfigsChartProps> = ({
     // chart.on('click', 'series', (params) => {
     //   const clickedData: number[] = params.data as number[];
     //   const zoomLevel: number = clickedData[2];
-    //   // TODO we have to set a flag on value that indicates, which zoomLevel should be active
-    //   // TODO maybe it's better to add a callback to the map that triggers when the zoom
-    //   //      in the map changes. This can then be displayed on the zoom chart.
+    //   // Active-zoom-level indicator and map zoom-change callback are not yet implemented.
     // });
 
     return () => {

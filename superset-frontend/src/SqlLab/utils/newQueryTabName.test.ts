@@ -29,7 +29,7 @@ const emptyEditor = {
   remoteId: null,
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('newQueryTabName', () => {
   test("should return default title if queryEditor's length is 0", () => {
     const defaultTitle = 'default title';

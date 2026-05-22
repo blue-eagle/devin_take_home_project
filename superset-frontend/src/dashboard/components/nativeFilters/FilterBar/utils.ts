@@ -54,7 +54,6 @@ export const checkIsMissingRequiredValue = (
 
   const value = filterState?.value;
 
-  // TODO: this property should be unhardcoded
   return value === null || value === undefined;
 };
 

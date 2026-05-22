@@ -94,7 +94,7 @@ const mockUser = {
   ],
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('UsersList', () => {
   async function renderAndWait() {
     const mounted = act(async () => {

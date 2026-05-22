@@ -31,10 +31,8 @@ from superset.utils.core import AnnotationType, get_user
 def filter_chart_annotations(chart_config: dict[str, Any]) -> None:
     """
     Mutating the chart's config params to keep only the annotations of
-    type FORMULA.
-    TODO:
-      handle annotation dependencies on either other charts or
-      annotation layers objects.
+    type FORMULA. Annotation dependencies on other charts or
+    annotation layers are not yet handled.
     """
     params = chart_config.get("params", {})
     als = params.get("annotation_layers", [])
@@ -70,7 +68,6 @@ def import_chart(
 
     filter_chart_annotations(config)
 
-    # TODO (betodealmeida): move this logic to import_from_dict
     config["params"] = json.dumps(config["params"])
 
     # migrate old viz types to new ones

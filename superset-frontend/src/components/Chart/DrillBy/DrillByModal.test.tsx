@@ -301,7 +301,7 @@ test('should render "Edit chart" enabled with can_explore permission', async () 
   expect(screen.getByRole('button', { name: 'Edit chart' })).toBeEnabled();
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('Embedded mode behavior', () => {
   // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
   const { isEmbedded } = require('src/dashboard/util/isEmbedded');
@@ -378,7 +378,7 @@ describe('Embedded mode behavior', () => {
   });
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('Table view with pagination', () => {
   beforeEach(() => {
     // Mock a large dataset response for pagination testing

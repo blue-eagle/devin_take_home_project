@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 query_timeout = current_app.config[
     "SQLLAB_ASYNC_TIME_LIMIT_SEC"
-]  # TODO: new config key
+]
 
 
 def set_form_data(form_data: dict[str, Any]) -> None:

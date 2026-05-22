@@ -33,7 +33,7 @@ jest.mock('src/components/MessageToasts/withToasts', () => ({
   }),
 }));
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('EncryptedField', () => {
   // Test utilities
   const createMockDb = (
@@ -102,7 +102,7 @@ describe('EncryptedField', () => {
     jest.clearAllMocks();
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Engine-to-Field Mapping', () => {
     test.each(supportedEngines)(
       'resolves field name for %s engine → %s field',
@@ -143,7 +143,7 @@ describe('EncryptedField', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Parameter Value Processing', () => {
     const testCases = [
       {
@@ -199,7 +199,7 @@ describe('EncryptedField', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Conditional Rendering Logic', () => {
     test('shows upload selector in create mode', () => {
       const props = { ...defaultProps, isEditMode: false, editNewDb: false };
@@ -245,7 +245,7 @@ describe('EncryptedField', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Upload Option State Management', () => {
     test('defaults to upload option', () => {
       const props = { ...defaultProps, isEditMode: false };
@@ -274,7 +274,7 @@ describe('EncryptedField', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Form Integration Contract', () => {
     test.each(supportedEngines)(
       'calls onParametersChange with correct field name for %s engine',
@@ -321,7 +321,7 @@ describe('EncryptedField', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Error Boundaries', () => {
     test('renders gracefully when database prop is missing', () => {
       const props = { ...defaultProps, db: undefined };
@@ -347,7 +347,7 @@ describe('EncryptedField', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Accessibility', () => {
     test('provides proper form labels and attributes', () => {
       const props = { ...defaultProps, isEditMode: true };

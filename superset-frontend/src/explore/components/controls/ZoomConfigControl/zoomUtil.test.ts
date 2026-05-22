@@ -35,9 +35,9 @@ const zoomConfigValues = {
   })),
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('zoomUtil', () => {
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('computeConfigValues', () => {
     test('computes fixed values', () => {
       const height = 100;
@@ -114,7 +114,7 @@ describe('zoomUtil', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('zoomConfigsToData', () => {
     test('returns correct output', () => {
       const result = zoomConfigsToData(zoomConfigValues);
@@ -124,7 +124,7 @@ describe('zoomUtil', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('toFixedConfig', () => {
     const configs: ZoomConfigs['configs'] = {
       width: 100,
@@ -150,7 +150,7 @@ describe('zoomUtil', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('toLinearConfig', () => {
     const configs: ZoomConfigs['configs'] = {
       width: 100,
@@ -177,7 +177,7 @@ describe('zoomUtil', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('toExpConfig', () => {
     const configs: ZoomConfigs['configs'] = {
       width: 100,

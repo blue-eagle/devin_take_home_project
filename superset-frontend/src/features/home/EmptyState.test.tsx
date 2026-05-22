@@ -21,7 +21,7 @@ import { render, screen } from 'spec/helpers/testing-library';
 import EmptyState, { EmptyStateProps } from './EmptyState';
 import { WelcomeTable } from './types';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('EmptyState', () => {
   const variants: EmptyStateProps[] = [
     {

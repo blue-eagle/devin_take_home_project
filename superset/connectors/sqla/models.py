@@ -200,7 +200,7 @@ class BaseDatasource(
     id = Column(Integer, primary_key=True)
     description = Column(Text)
     default_endpoint = Column(Text)
-    is_featured = Column(Boolean, default=False)  # TODO deprecating
+    is_featured = Column(Boolean, default=False)  # deprecated
     filter_select_enabled = Column(Boolean, default=True)
     offset = Column(Integer, default=0)
     _cache_timeout = Column("cache_timeout", Integer)
@@ -472,7 +472,7 @@ class BaseDatasource(
             "database": self.database.data,  # pylint: disable=no-member
             "parent": {"name": self.database.data["name"]},  # pylint: disable=no-member
             "default_endpoint": self.default_endpoint,
-            "filter_select": self.filter_select_enabled,  # TODO deprecate
+            "filter_select": self.filter_select_enabled,  # deprecated alias
             "filter_select_enabled": self.filter_select_enabled,
             "name": self.name,
             "datasource_name": self.datasource_name,
@@ -491,8 +491,7 @@ class BaseDatasource(
             "columns": [cast(DatasetColumnData, o.data) for o in self.columns],
             "metrics": [cast(DatasetMetricData, o.data) for o in self.metrics],
             "folders": self.folders,
-            # TODO deprecate, move logic to JS
-            "order_by_choices": self.order_by_choices,
+            "order_by_choices": self.order_by_choices,  # deprecated; prefer JS-side sorting
             "owners": [owner.id for owner in self.owners],
             "verbose_map": self.verbose_map,
             "select_star": self.select_star,

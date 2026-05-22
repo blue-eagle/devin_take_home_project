@@ -127,7 +127,6 @@ const TableElement = ({ table, ...props }: TableElementProps) => {
     }
   }, [hasMetadataError, hasExtendedMetadataError, dispatch]);
 
-  // TODO: migrate syncTable logic by SIP-93
   const syncTableMetadata = useEffectEvent(() => {
     const { initialized } = table;
     // if not a valid number, wait for backend to assign one

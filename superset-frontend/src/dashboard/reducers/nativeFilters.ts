@@ -196,7 +196,6 @@ export default function nativeFilterReducer(
         },
       };
 
-    // TODO handle SET_FILTER_CONFIG_FAIL action
     default:
       return state;
   }

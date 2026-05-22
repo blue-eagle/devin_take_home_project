@@ -29,7 +29,7 @@ import {
 } from 'src/SqlLab/constants';
 import { queries, defaultQueryEditor } from '../fixtures';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('reduxStateToLocalStorageHelper', () => {
   const queriesObj: Record<string, any> = {};
   beforeEach(() => {

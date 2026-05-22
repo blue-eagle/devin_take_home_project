@@ -29,7 +29,7 @@ beforeAll(() => {
   setupAGGridModules();
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('DataTablesPane', () => {
   // Collapsed/expanded state depends on local storage
   // We need to clear it manually - otherwise initial state would depend on the order of tests

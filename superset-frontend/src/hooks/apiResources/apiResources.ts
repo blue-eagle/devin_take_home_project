@@ -73,9 +73,8 @@ const initialState: LoadingState = {
  *
  * Note: You likely want {useApiV1Resource} instead of this!
  *
- * TODO Store the state in redux or something, share state between hook instances.
- *
- * TODO Include a function in the returned resource object to refresh the data.
+ * State is local to each hook instance; consider lifting to Redux for sharing.
+ * A refresh function on the returned resource object would also be useful.
  *
  * A core design decision here is composition > configuration,
  * and every hook should only have one job.

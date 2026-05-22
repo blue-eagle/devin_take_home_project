@@ -24,7 +24,7 @@ import {
   getCrossFilterIndicator,
 } from './selectors';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('getCrossFilterIndicator', () => {
   const chartId = 123;
   const chartLayoutItems = [

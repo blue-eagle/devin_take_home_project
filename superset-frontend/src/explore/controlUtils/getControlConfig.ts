@@ -67,8 +67,7 @@ export const getControlConfig = function getControlConfig(
   const controlPanelConfig = getChartControlPanelRegistry().get(vizType) || {};
   return getMemoizedControlConfig(
     controlKey,
-    // TODO: the ChartControlPanelRegistry is incorrectly typed and needs to
-    // be fixed
+    // Registry returns a generic type; cast to ControlPanelConfig.
     controlPanelConfig as ControlPanelConfig,
   );
 };

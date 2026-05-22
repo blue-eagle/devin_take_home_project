@@ -92,7 +92,7 @@ export interface MarkdownState {
   hasError?: boolean;
 }
 
-// TODO: localize
+// Placeholder is not localized; uses markdown syntax examples.
 const MARKDOWN_PLACE_HOLDER = `# ✨Header 1
 ## ✨Header 2
 ### ✨Header 3

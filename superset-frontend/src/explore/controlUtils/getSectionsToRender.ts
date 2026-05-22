@@ -110,7 +110,7 @@ export function getSectionsToRender(
   datasourceType: DatasourceType,
 ) {
   const controlPanelConfig =
-    // TODO: update `chartControlPanelRegistry` type to use ControlPanelConfig
+    // Registry returns a generic type; cast to ControlPanelConfig.
     (getChartControlPanelRegistry().get(vizType) as ControlPanelConfig) || {};
   return getMemoizedSectionsToRender(datasourceType, controlPanelConfig);
 }

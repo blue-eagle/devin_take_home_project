@@ -18,7 +18,7 @@
  */
 import { cacheWrapper } from 'src/utils/cacheWrapper';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('cacheWrapper', () => {
   const fnResult = 'fnResult';
   const fn = jest.fn<string, [number, number]>().mockReturnValue(fnResult);
@@ -42,7 +42,7 @@ describe('cacheWrapper', () => {
     expect(fn).toHaveBeenCalledWith(1, 2);
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('subsequent calls', () => {
     test('returns the correct value without fn being called multiple times', () => {
       const returnedValue1 = wrappedFn(1, 2);
@@ -61,7 +61,7 @@ describe('cacheWrapper', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('with custom keyFn', () => {
     let cache: Map<string, any>;
 

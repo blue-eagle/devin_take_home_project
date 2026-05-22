@@ -151,11 +151,7 @@ def test_db(sqlalchemy_uri: str, raw_engine_kwargs: str | None = None) -> None:
     It's useful for people developing DB engine specs and/or SQLAlchemy dialects, and
     also to test new versions of DB API 2.0 drivers.
 
-    TODO:
-
-      - implement SSH tunneling
-      - implement server certificates
-
+    SSH tunneling and server certificates are not yet supported.
     """
     console = Console()
     console.clear()

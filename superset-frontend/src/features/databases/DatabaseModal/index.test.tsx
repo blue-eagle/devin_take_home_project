@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// TODO: These tests should be made atomic in separate files
+// These tests should be split into separate files for better isolation.
 
 import fetchMock from 'fetch-mock';
 import {
@@ -74,7 +74,7 @@ const databaseFixture: DatabaseObject = {
   driver: 'psycopg2',
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('DatabaseModal', () => {
   beforeEach(() => {
     fetchMock.post(DATABASE_CONNECT_ENDPOINT, {
@@ -326,7 +326,7 @@ describe('DatabaseModal', () => {
       useRedux: true,
     });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Visual: New database connection', () => {
     test('renders the initial load of Step 1 correctly', async () => {
       setup();
@@ -381,7 +381,7 @@ describe('DatabaseModal', () => {
 
       const modal = screen.getByRole('dialog');
       const footer = modal.querySelector('.ant-modal-footer');
-      // ---------- TODO (lyndsiWilliams): Selector options, can't seem to get these to render properly.
+      // Selector options do not render in this test environment.
 
       // renderAvailableSelector() => <Alert> - Supported databases alert
       const alertIcon = screen.getAllByRole('img', { name: /info-circle/i });
@@ -1082,7 +1082,7 @@ describe('DatabaseModal', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Functional: Create new database', () => {
     test('directs databases to the appropriate form (dynamic vs. SQL Alchemy)', async () => {
       setup();
@@ -1117,7 +1117,7 @@ describe('DatabaseModal', () => {
       expect(sqlAlchemyFormStepText).toBeInTheDocument();
     });
 
-    // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+    // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
     describe('SQL Alchemy form flow', () => {
       test('enters step 2 of 2 when proper database is selected', async () => {
         setup();
@@ -1132,7 +1132,7 @@ describe('DatabaseModal', () => {
       });
 
       test('runs fetchResource when "Connect" is clicked', () => {
-        /* ---------- 🐞 TODO (lyndsiWilliams): function mock is not currently working 🐞 ----------
+        /* ---------- Function mock is not working ----------
 
         // Mock useSingleViewResource
         const mockUseSingleViewResource = jest.fn();
@@ -1148,7 +1148,7 @@ describe('DatabaseModal', () => {
         expect.anything();
       });
 
-      // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+      // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
       describe('step 2 component interaction', () => {
         test('properly interacts with textboxes', async () => {
           setup();
@@ -1176,7 +1176,7 @@ describe('DatabaseModal', () => {
         });
 
         test('runs testDatabaseConnection when "TEST CONNECTION" is clicked', () => {
-          /* ---------- 🐞 TODO (lyndsiWilliams): function mock is not currently working 🐞 ----------
+          /* ---------- Function mock is not working ----------
 
           // Mock testDatabaseConnection
           const mockTestDatabaseConnection = jest.fn();
@@ -1195,7 +1195,7 @@ describe('DatabaseModal', () => {
         });
       });
 
-      // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+      // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
       describe('SSH Tunnel Form interaction', () => {
         test('properly interacts with SSH Tunnel form textboxes for dynamic form', async () => {
           setup();
@@ -1341,7 +1341,7 @@ describe('DatabaseModal', () => {
       });
     });
 
-    // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+    // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
     describe('Dynamic form flow', () => {
       test('enters step 2 of 3 when proper database is selected', async () => {
         setup();
@@ -1405,7 +1405,7 @@ describe('DatabaseModal', () => {
       });
     });
 
-    // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+    // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
     describe('Import database flow', () => {
       test('imports a file', async () => {
         setup();
@@ -1429,7 +1429,7 @@ describe('DatabaseModal', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('DatabaseModal w/ Deeplinking Engine', () => {
     test('enters step 2 of 3 when proper database is selected', async () => {
       setup({ dbEngine: 'PostgreSQL' });
@@ -1438,7 +1438,7 @@ describe('DatabaseModal', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('DatabaseModal w/ GSheet Engine', () => {
     test('enters step 2 of 2 when proper database is selected', async () => {
       setup({ dbEngine: 'Google Sheets' });
@@ -1508,7 +1508,7 @@ describe('DatabaseModal', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('DatabaseModal w errors as objects', () => {
     jest.mock('src/views/CRUD/hooks', () => ({
       ...jest.requireActual('src/views/CRUD/hooks'),
@@ -1524,7 +1524,7 @@ describe('DatabaseModal', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('DatabaseModal w errors as strings', () => {
     jest.mock('src/views/CRUD/hooks', () => ({
       ...jest.requireActual('src/views/CRUD/hooks'),
@@ -1562,7 +1562,7 @@ describe('DatabaseModal', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('DatabaseModal w Extensions', () => {
     beforeAll(() => {
       const extensionsRegistry = getExtensionsRegistry();
@@ -1664,7 +1664,7 @@ test('validates fix by testing all form field types clear validation errors', ()
   expect(mockClearError).toHaveBeenCalledTimes(actionTypesToTest.length);
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('dbReducer', () => {
   test('it will reset state to null', () => {
     const action: DBReducerActionType = { type: ActionType.Reset };

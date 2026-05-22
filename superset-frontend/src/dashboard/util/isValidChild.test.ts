@@ -36,9 +36,9 @@ const getIndentation = (depth: number) =>
     .fill('')
     .join('-');
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('isValidChild', () => {
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('valid calls', () => {
     // these are representations of nested structures for easy testing
     //  [ROOT (depth 0) > GRID (depth 1) > HEADER (depth 2)]
@@ -116,7 +116,7 @@ describe('isValidChild', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('invalid calls', () => {
     // In order to assert that a parent > child hierarchy at a given depth is invalid
     // we also define some valid hierarchies in doing so. we indicate which
@@ -127,7 +127,7 @@ describe('isValidChild', () => {
       [ROOT, [MARKDOWN]],
       [ROOT, GRID, [TAB]],
       [ROOT, GRID, TABS, [ROW]],
-      // [ROOT, GRID, TABS, TAB, [TABS]], // @TODO this needs to be fixed
+      // [ROOT, GRID, TABS, TAB, [TABS]], // known invalid: nested TABS inside TAB
       [ROOT, GRID, ROW, [TABS]],
       [ROOT, GRID, ROW, [TAB]],
       [ROOT, GRID, ROW, [DIVIDER]],

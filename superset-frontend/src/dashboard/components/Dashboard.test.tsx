@@ -48,7 +48,7 @@ jest.mock('src/dashboard/util/getRelatedCharts');
 
 const mockGetRelatedCharts = getRelatedCharts as jest.Mock;
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('Dashboard', () => {
   const mockAddSlice = jest.fn();
   const mockRemoveSlice = jest.fn();
@@ -118,7 +118,7 @@ describe('Dashboard', () => {
     expect(screen.getByText('Test')).toBeInTheDocument();
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('layout changes', () => {
     const layoutWithExtraChart = {
       ...props.layout,
@@ -160,7 +160,7 @@ describe('Dashboard', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('filter updates', () => {
     test('should not call refresh when in editMode', () => {
       const { rerender } = renderDashboard({ activeFilters: OVERRIDE_FILTERS });

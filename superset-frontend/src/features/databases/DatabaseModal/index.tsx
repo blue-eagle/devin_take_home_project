@@ -702,9 +702,8 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   const history = useHistory();
 
   const dbModel: DatabaseForm =
-    // TODO: we need a centralized engine in one place
-
-    // first try to match both engine and driver
+    // Match the engine/driver from available databases.
+    // First try to match both engine and driver
     availableDbs?.databases?.find(
       (available: {
         engine: string | undefined;

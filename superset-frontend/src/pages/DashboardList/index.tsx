@@ -214,7 +214,7 @@ function DashboardList(props: DashboardListProps) {
     addSuccessToast(t('Dashboard imported'));
   };
 
-  // TODO: Fix usage of localStorage keying on the user id
+  // Uses user-id-keyed localStorage; see dangerouslyGetItemDoNotUse.
   const userKey = dangerouslyGetItemDoNotUse(user?.userId?.toString(), null);
 
   const canCreate = hasPerm('can_write');

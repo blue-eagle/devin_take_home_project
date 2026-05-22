@@ -27,7 +27,7 @@ import {
 import type { DropResult } from 'src/dashboard/components/dnd/dragDroppableConfig';
 import type { DashboardComponentMap } from 'src/dashboard/types';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('newEntitiesFromDrop', () => {
   test('should return a new Entity of appropriate type, and add it to the drop target children', () => {
     const result = newEntitiesFromDrop({

@@ -131,7 +131,7 @@ jest.mock('@superset-ui/core', () => ({
 
 const mockedIsFeatureEnabled = isFeatureEnabled as jest.Mock;
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('Header Report Dropdown', () => {
   beforeAll(() => {
     mockedIsFeatureEnabled.mockImplementation(

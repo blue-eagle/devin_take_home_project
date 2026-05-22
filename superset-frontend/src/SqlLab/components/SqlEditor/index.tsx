@@ -623,7 +623,7 @@ const SqlEditor: FC<Props> = ({
     return () => {
       window.removeEventListener('beforeunload', onBeforeUnload);
     };
-    // TODO: Remove useEffectEvent deps once https://github.com/facebook/react/pull/25881 is released
+    // useEffectEvent deps can be removed once React ships useEvent.
   }, [onBeforeUnload, loadQueryEditor, isActive]);
 
   useEffect(() => {

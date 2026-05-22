@@ -39,7 +39,7 @@ def can_access_databases(view_menu_name: str) -> set[str]:
 
 
 class DatabaseFilter(BaseFilter):  # pylint: disable=too-few-public-methods
-    # TODO(bogdan): consider caching.
+    # Consider caching this query for performance.
 
     def apply(self, query: Query, value: Any) -> Query:
         """

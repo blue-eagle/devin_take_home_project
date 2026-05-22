@@ -198,7 +198,7 @@ test('should render the columns', async () => {
   );
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('DatasourcePanel', () => {
   beforeAll(() => {
     jest.setTimeout(30000);

@@ -153,7 +153,7 @@ fetchMock.post(
   'http://api/v1/chart/data?form_data=%7B%22slice_id%22%3A318%7D',
   { body: {} },
 );
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('ExploreChartHeader', () => {
   jest.setTimeout(15000); // ✅ Applies to all tests in this suite
 
@@ -574,7 +574,7 @@ describe('ExploreChartHeader', () => {
   });
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('Additional actions tests', () => {
   jest.setTimeout(15000); // ✅ Applies to all tests in this suite
 
@@ -737,7 +737,7 @@ describe('Additional actions tests', () => {
     expect(props.actions.redirectSQLLab).toHaveBeenCalledTimes(1);
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Export All Data', () => {
     let spyDownloadAsImage: jest.SpyInstance;
     let spyExportChart: jest.SpyInstance;

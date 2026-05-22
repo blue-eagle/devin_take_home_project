@@ -36,7 +36,7 @@ const sumValueAdhocMetric = new AdhocMetric({
   aggregate: AGGREGATES.SUM,
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('FilterDefinitionOption', () => {
   test('renders a StyledColumnOption given a column', async () => {
     render(<FilterDefinitionOption option={{ column_name: 'a_column' }} />);

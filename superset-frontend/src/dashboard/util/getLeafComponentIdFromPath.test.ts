@@ -20,7 +20,7 @@ import getLeafComponentIdFromPath from 'src/dashboard/util/getLeafComponentIdFro
 import { filterId } from 'spec/fixtures/mockSliceEntities';
 import { dashboardFilters } from 'spec/fixtures/mockDashboardFilters';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('getLeafComponentIdFromPath', () => {
   const path = dashboardFilters[filterId].directPathToFilter;
   const leaf = path.slice().pop();

@@ -58,7 +58,7 @@ export interface Chart {
   };
   is_managed_externally: boolean;
 
-  // TODO: Update API spec to describe `dashboards` key
+  // `dashboards` is returned by the API but not described in the spec.
   dashboards: ChartLinkedDashboard[];
 }
 

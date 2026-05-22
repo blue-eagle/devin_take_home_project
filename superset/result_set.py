@@ -191,9 +191,8 @@ class SupersetResultSet:
         if pa_data:  # pylint: disable=too-many-nested-blocks
             for i, column in enumerate(column_names):
                 if pa.types.is_nested(pa_data[i].type):
-                    # TODO: revisit nested column serialization once nested types
-                    #  are added as a natively supported column type in Superset
-                    #  (superset.utils.core.GenericDataType).
+                    # Nested types are not natively supported in GenericDataType;
+                    #  stringify to ensure serialization.
                     stringified_arr = stringify_values(array[column])
                     pa_data[i] = pa.array(stringified_arr.tolist())
 

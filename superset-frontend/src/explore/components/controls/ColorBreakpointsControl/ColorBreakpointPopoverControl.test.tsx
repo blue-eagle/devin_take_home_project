@@ -50,7 +50,7 @@ const renderComponent = (
   props: Partial<ColorBreakpointsPopoverControlProps> = {},
 ) => render(<ColorBreakpointPopoverControl {...createProps()} {...props} />);
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('ColorBreakpointPopoverControl', () => {
   beforeEach(() => {
     jest.clearAllMocks();

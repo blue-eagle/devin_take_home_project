@@ -19,9 +19,9 @@
 
 import { ThemeObject } from './types';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('Theme Types', () => {
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('ThemeObject', () => {
     test('should accept valid theme objects', () => {
       const validTheme: ThemeObject = {
@@ -98,7 +98,7 @@ describe('Theme Types', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Theme JSON Data', () => {
     test('should parse valid JSON data', () => {
       const theme: ThemeObject = {
@@ -123,7 +123,7 @@ describe('Theme Types', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Type Guards', () => {
     test('should identify system themes', () => {
       const isSystemTheme = (theme: ThemeObject): boolean =>

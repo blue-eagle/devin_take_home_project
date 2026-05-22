@@ -18,7 +18,7 @@
  */
 import { controlPanel as controlPanelConfig } from './controlPanel';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('TimeTable Control Panel', () => {
   test('should have required control panel structure', () => {
     expect(controlPanelConfig).toBeDefined();

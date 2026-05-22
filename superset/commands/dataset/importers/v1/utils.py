@@ -134,7 +134,6 @@ def import_dataset(  # noqa: C901
             "Dataset doesn't exist and user doesn't have permission to create datasets"
         )
 
-    # TODO (betodealmeida): move this logic to import_from_dict
     config = config.copy()
     for key in JSON_KEYS:
         if config.get(key) is not None:

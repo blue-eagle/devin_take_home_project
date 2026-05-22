@@ -45,7 +45,7 @@ test('useDashboard excludes thumbnail_url from request', async () => {
   fetchMock.clearHistory().removeRoutes();
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('useDashboardDatasets', () => {
   const mockDatasets = [
     {

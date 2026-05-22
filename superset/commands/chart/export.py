@@ -58,8 +58,6 @@ class ExportChartsCommand(ExportModelsCommand):
             include_defaults=True,
             export_uuids=True,
         )
-        # TODO (betodealmeida): move this logic to export_to_dict once this
-        #  becomes the default export endpoint
         payload = {
             key: value for key, value in payload.items() if key not in REMOVE_KEYS
         }

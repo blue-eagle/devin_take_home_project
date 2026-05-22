@@ -74,7 +74,7 @@ const renderComponent = (props: Partial<TestProps> = {}) =>
     },
   );
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('AdhocFilterControl', () => {
   test('should render with default props', () => {
     renderComponent();

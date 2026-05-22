@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// TODO: Replace to react-use-event-hook once https://github.com/facebook/react/pull/25881 is released
+// Polyfill for useEvent; replace with react-use-event-hook once
+// https://github.com/facebook/react/pull/25881 is released.
 import useEventCallback from 'use-event-callback';
 
 declare type Fn<ARGS extends any[], R> = (...args: ARGS) => R;

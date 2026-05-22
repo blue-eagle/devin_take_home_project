@@ -66,7 +66,7 @@ const DatabaseConnectionForm = ({
               Object.keys(parameters.properties).includes(key) ||
               key === 'database_name',
           ).map(field =>
-            // @ts-expect-error TODO: fix ComponentClass for SSHTunnelSwitchComponent not having call signature.
+            // @ts-expect-error SSHTunnelSwitchComponent ComponentClass lacks call signature.
             FORM_FIELD_MAP[field]({
               required: parameters.required?.includes(field),
               changeMethods: {

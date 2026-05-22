@@ -74,7 +74,7 @@ jest.mock('src/dashboard/util/permissionUtils', () => ({
   isUserAdmin: () => true,
 }));
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('GroupsList', () => {
   const renderComponent = async () => {
     await act(async () => {

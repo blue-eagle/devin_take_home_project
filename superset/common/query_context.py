@@ -57,8 +57,8 @@ class QueryContext:
 
     _processor: QueryContextProcessor
 
-    # TODO: Type datasource and query_object dictionary with TypedDict when it becomes
-    #  a vanilla python type https://github.com/python/mypy/issues/5288
+    # TypedDict cannot express datasource/query_object dicts cleanly yet.
+    # See https://github.com/python/mypy/issues/5288
     def __init__(  # pylint: disable=too-many-arguments
         self,
         *,

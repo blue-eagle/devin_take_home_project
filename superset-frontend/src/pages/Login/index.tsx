@@ -111,9 +111,8 @@ export default function Login() {
   const authRegistration: boolean =
     bootstrapData.common.conf.AUTH_USER_REGISTRATION;
 
-  // TODO: This is a temporary solution for showing login errors after form submission.
-  // Should be replaced with proper SPA-style authentication (JSON API with error responses)
-  // when Flask-AppBuilder is updated or we implement a custom login endpoint.
+  // Temporary: detect server-side login errors by checking flash messages in the DOM.
+  // Replace with a JSON login endpoint when Flask-AppBuilder supports it.
   useEffect(() => {
     const loginAttempted = sessionStorage.getItem('login_attempted');
 

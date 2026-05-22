@@ -31,7 +31,7 @@ const setup = (
     useRedux: true,
   });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('ExploreResultsButton', () => {
   test('renders', async () => {
     setup(jest.fn(), {

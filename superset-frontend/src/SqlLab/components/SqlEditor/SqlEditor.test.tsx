@@ -156,7 +156,7 @@ const createStore = (initState: object) =>
       getDefaultMiddleware().concat(api.middleware, logAction),
   });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('SqlEditor', () => {
   beforeAll(() => {
     jest.setTimeout(30000);
@@ -348,7 +348,7 @@ describe('SqlEditor', () => {
     ).toBeInTheDocument();
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('with EstimateQueryCost enabled', () => {
     beforeEach(() => {
       mockIsFeatureEnabled.mockImplementation(
@@ -425,7 +425,7 @@ describe('SqlEditor', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('with SqllabBackendPersistence enabled', () => {
     beforeEach(() => {
       mockIsFeatureEnabled.mockImplementation(

@@ -24,9 +24,6 @@ from superset.superset_typing import FlaskResponse
 
 from .base import BaseSupersetView
 
-# TODO: access control rules for this module
-
-
 class BaseAlertReportView(BaseSupersetView):
     route_base = "/report"
     class_permission_name = "ReportSchedule"

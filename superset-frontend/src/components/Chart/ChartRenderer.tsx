@@ -244,9 +244,8 @@ class ChartRenderer extends Component<ChartRendererProps, ChartRendererState> {
       onChartStateChange: this.props.onChartStateChange,
     };
 
-    // TODO: queriesResponse comes from Redux store but it's being edited by
-    // the plugins, hence we need to clone it to avoid state mutation
-    // until we change the reducers to use Redux Toolkit with Immer
+    // Clone Redux store data because plugins mutate it in-place.
+    // Once reducers use Redux Toolkit with Immer this clone can be removed.
     this.mutableQueriesResponse = cloneDeep(this.props.queriesResponse);
   }
 

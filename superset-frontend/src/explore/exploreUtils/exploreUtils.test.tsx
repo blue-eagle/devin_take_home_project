@@ -33,7 +33,7 @@ import {
   SupersetClient,
 } from '@superset-ui/core';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('exploreUtils', () => {
   const { location } = window;
   const formData: QueryFormData = {
@@ -44,7 +44,7 @@ describe('exploreUtils', () => {
     expect(uri1.toString()).toBe(uri2.toString());
   }
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('getExploreUrl', () => {
     test('generates proper base url', () => {
       // This assertion is to show clearly the value of location.href
@@ -132,7 +132,7 @@ describe('exploreUtils', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('domain sharding', () => {
     let stub: jest.ReplaceProperty<typeof hostNamesConfig.availableDomains>;
     const availableDomains = [
@@ -199,7 +199,7 @@ describe('exploreUtils', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('buildV1ChartDataPayload', () => {
     test('generate valid request payload despite no registered buildQuery', async () => {
       const v1RequestPayload = await buildV1ChartDataPayload({
@@ -211,7 +211,7 @@ describe('exploreUtils', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('getQuerySettings', () => {
     beforeAll(() => {
       getChartMetadataRegistry()
@@ -261,7 +261,7 @@ describe('exploreUtils', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('getSimpleSQLExpression', () => {
     test('returns empty string when subject is undefined', () => {
       expect(getSimpleSQLExpression(undefined, '=', 10)).toBe('');
@@ -299,7 +299,7 @@ describe('exploreUtils', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('.exploreChart()', () => {
     test('postForm', () => {
       const postFormSpy = jest.spyOn(SupersetClient, 'postForm');

@@ -24,9 +24,9 @@
  * by testing the expected bootstrap data structure
  */
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('Theme Bootstrap Data', () => {
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('when UI theme administration is enabled', () => {
     const mockBootstrapData = {
       theme: {
@@ -53,7 +53,7 @@ describe('Theme Bootstrap Data', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('when UI theme administration is disabled', () => {
     const mockBootstrapData = {
       theme: {
@@ -72,7 +72,7 @@ describe('Theme Bootstrap Data', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('edge cases', () => {
     test('should handle missing theme gracefully', () => {
       const mockBootstrapData = {
@@ -103,7 +103,7 @@ describe('Theme Bootstrap Data', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('permissions integration', () => {
     test('should respect admin-only access for system themes', () => {
       const mockBootstrapData = {

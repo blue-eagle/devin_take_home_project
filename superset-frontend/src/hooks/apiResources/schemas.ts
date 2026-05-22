@@ -43,7 +43,7 @@ const schemaApi = api.injectEndpoints({
       providesTags: [{ type: 'Schemas', id: 'LIST' }],
       query: ({ dbId, catalog, forceRefresh }) => ({
         endpoint: `/api/v1/database/${dbId}/schemas/`,
-        // TODO: Would be nice to add pagination in a follow-up. Needs endpoint changes.
+        // Pagination is not supported by this endpoint yet.
         urlParams: {
           force: forceRefresh,
           ...(catalog !== undefined && { catalog }),

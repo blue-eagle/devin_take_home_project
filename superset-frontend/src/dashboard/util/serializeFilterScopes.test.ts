@@ -44,7 +44,7 @@ const mockDashboardFilters = {
   },
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('serializeFilterScopes', () => {
   test('should serialize dashboard filter scopes correctly', () => {
     const result = serializeFilterScopes(mockDashboardFilters);

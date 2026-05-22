@@ -35,7 +35,7 @@ const mockDropResult = (
   dragging: { id: string },
 ): DropResult => ({ source, destination, dragging }) as unknown as DropResult;
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('dropOverflowsParent', () => {
   test('returns true if a parent does NOT have adequate width for child', () => {
     const dropResult = mockDropResult({ id: '_' }, { id: 'a' }, { id: 'z' });

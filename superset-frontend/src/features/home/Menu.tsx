@@ -306,8 +306,7 @@ export function Menu({
       );
     } else if (isFrontendRoute(window.location.pathname)) {
       // ---------------------------------------------------------------------------------
-      // TODO: deprecate this once Theme is fully rolled out
-      // Kept as is for backwards compatibility with the old theme system / superset_config.py
+      // Legacy brand rendering for backward compat with old theme system / superset_config.py.
       link = (
         <GenericLink className="navbar-brand" to={brand.path}>
           <StyledImage

@@ -27,9 +27,9 @@ import {
   ColumnDefinition,
 } from 'src/utils/common';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('utils/common', () => {
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('optionFromValue', () => {
     test('converts values as expected', () => {
       expect(optionFromValue(false)).toEqual({
@@ -52,7 +52,7 @@ describe('utils/common', () => {
       expect(optionFromValue(5)).toEqual({ value: 5, label: '5' });
     });
   });
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('prepareCopyToClipboardTabularData', () => {
     test('converts empty array', () => {
       const data: TabularDataRow[] = [];
@@ -84,7 +84,7 @@ describe('utils/common', () => {
       );
     });
   });
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('applyFormattingToTabularData', () => {
     test('does not mutate empty array', () => {
       const data: TabularDataRow[] = [];

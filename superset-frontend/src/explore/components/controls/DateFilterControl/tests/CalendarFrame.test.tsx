@@ -22,7 +22,7 @@ import { CalendarFrame } from '../components/CalendarFrame';
 import { PreviousCalendarWeek, PreviousCalendarQuarter } from '../types';
 import { CALENDAR_RANGE_OPTIONS } from '../utils/constants';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('CalendarFrame', () => {
   test('calls onChange with PreviousCalendarWeek if value is not in CALENDAR_RANGE_SET', () => {
     const mockOnChange = jest.fn();

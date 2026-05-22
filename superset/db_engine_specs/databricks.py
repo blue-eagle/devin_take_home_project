@@ -765,5 +765,5 @@ class DatabricksPythonConnectorEngineSpec(DatabricksDynamicBaseEngineSpec):
         return uri, connect_args
 
 
-# TODO: remove once we've upgraded to SQLAlchemy>=2.0 and databricks-sql-python>=3.x
+# Required until SQLAlchemy>=2.0 and databricks-sql-python>=3.x
 monkeypatch_dialect()

@@ -909,9 +909,8 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
         template_processor: Optional[BaseTemplateProcessor] = None,  # pylint: disable=unused-argument
         include_global_guest_rls: bool = True,  # pylint: disable=unused-argument
     ) -> list[TextClause]:
-        # TODO: We should refactor this mixin and remove this method
-        # as it exists in the BaseDatasource and is not applicable
-        # for datasources of type query
+        # Stub: exists in BaseDatasource but is not applicable
+        # for datasources of type query.
         return []
 
     def _process_sql_expression(  # pylint: disable=too-many-arguments

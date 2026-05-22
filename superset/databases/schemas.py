@@ -323,7 +323,7 @@ class DatabaseParametersSchemaMixin:  # pylint: disable=too-few-public-methods
         the constructed SQLAlchemy URI to be passed.
         """
         parameters = data.pop("parameters", {})
-        # TODO(AAfghahi) standardize engine.
+
         engine = (
             data.pop("engine", None)
             or parameters.pop("engine", None)

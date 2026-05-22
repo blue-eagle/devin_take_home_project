@@ -54,7 +54,7 @@ const testReducer = layoutReducer as (
   action: any,
 ) => DashboardLayout;
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('dashboardLayout reducer', () => {
   test('should return initial state for unrecognized actions', () => {
     expect(testReducer(undefined, {})).toEqual({});

@@ -19,7 +19,7 @@
 import { DataRecordFilters } from '@superset-ui/core';
 import getEffectiveExtraFilters from 'src/dashboard/util/charts/getEffectiveExtraFilters';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('getEffectiveExtraFilters', () => {
   test('should create valid filters', () => {
     const result = getEffectiveExtraFilters({

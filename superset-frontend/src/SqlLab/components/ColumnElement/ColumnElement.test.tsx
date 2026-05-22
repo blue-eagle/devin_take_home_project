@@ -21,7 +21,7 @@ import { render } from 'spec/helpers/testing-library';
 import ColumnElement from 'src/SqlLab/components/ColumnElement';
 import { table } from 'src/SqlLab/fixtures';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('ColumnElement', () => {
   test('is valid with props', () => {
     expect(isValidElement(<ColumnElement column={table.columns[0]} />)).toBe(

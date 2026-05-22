@@ -80,7 +80,7 @@ type PageProps = {
   idOrSlug: string;
 };
 
-// TODO: move to Dashboard.jsx when it's refactored to functional component
+// Defined here because Dashboard.jsx is still a class component.
 const selectRelevantDatamask = createSelector(
   (state: RootState) => state.dataMask, // the first argument accesses relevant data from global state
   dataMask => getRelevantDataMask(dataMask, 'ownState'), // the second parameter conducts the transformation
@@ -91,7 +91,7 @@ const selectChartConfiguration = (state: RootState) =>
 const selectNativeFilters = (state: RootState) => state.nativeFilters.filters;
 const selectDataMask = (state: RootState) => state.dataMask;
 const selectAllSliceIds = (state: RootState) => state.dashboardState.sliceIds;
-// TODO: move to Dashboard.jsx when it's refactored to functional component
+// Defined here because Dashboard.jsx is still a class component.
 const selectActiveFilters = createSelector(
   [
     selectChartConfiguration,

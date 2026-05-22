@@ -45,7 +45,7 @@ const getKnownControlConfig = (controlKey: string, vizType: string) =>
 const getKnownControlState = (...args: Parameters<typeof getControlState>) =>
   getControlState(...args) as Exclude<ReturnType<typeof getControlState>, null>;
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('controlUtils', () => {
   const state: ControlPanelState = {
     datasource: {
@@ -94,7 +94,7 @@ describe('controlUtils', () => {
       .remove('test-chart-override');
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('getControlConfig', () => {
     test('returns a valid spatial controlConfig', () => {
       const spatialControl = getControlConfig('color_scheme', 'test-chart');
@@ -131,7 +131,7 @@ describe('controlUtils', () => {
     );
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('applyMapStateToPropsToControl,', () => {
     test('applies state to props as expected', () => {
       let control = getKnownControlConfig('all_columns', 'table');
@@ -140,7 +140,7 @@ describe('controlUtils', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('getControlState', () => {
     test('to still have the functions', () => {
       const control = getKnownControlState('metrics', 'table', state, 'a');
@@ -190,7 +190,7 @@ describe('controlUtils', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('validateControl', () => {
     test('validates the control, returns an error if empty', () => {
       const control = getControlState('metric', 'table', state, null);
@@ -207,7 +207,7 @@ describe('controlUtils', () => {
     });
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('findControlItem', () => {
     test('find control as a string', () => {
       const controlItem = findControlItem(

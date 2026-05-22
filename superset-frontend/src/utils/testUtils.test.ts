@@ -19,7 +19,7 @@
 
 import { testWithId } from './testUtils';
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('testUtils', () => {
   test('testWithId with prefix only', () => {
     expect(testWithId('prefix')()).toEqual({ 'data-test': 'prefix' });

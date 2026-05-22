@@ -141,7 +141,7 @@ export const DynamicPluginProvider: FC<{ children?: ReactNode }> = ({
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       fetchAll,
       loading: isFeatureEnabled(FeatureFlag.DynamicPlugins),
-      // TODO: Write fetchByKeys
+
     }),
   );
 

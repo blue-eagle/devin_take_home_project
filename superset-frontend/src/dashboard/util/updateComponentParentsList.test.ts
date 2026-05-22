@@ -30,7 +30,7 @@ type LayoutComponent = {
   [key: string]: unknown;
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('updateComponentParentsList', () => {
   const emptyLayout: Record<string, LayoutComponent> = {
     GRID_ID: {
@@ -103,7 +103,7 @@ describe('updateComponentParentsList', () => {
   });
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('updateComponentParentsList with bad inputs', () => {
   test('should handle invalid parameters and not throw error', () => {
     updateComponentParentsList({

@@ -148,8 +148,6 @@ def get_columns_description(
     schema: str | None,
     query: str,
 ) -> list[ResultSetColumnType]:
-    # TODO(villebro): refactor to use same code that's used by
-    #  sql_lab.py:execute_sql_statements
     db_engine_spec = database.db_engine_spec
     try:
         with database.get_raw_connection(catalog=catalog, schema=schema) as conn:

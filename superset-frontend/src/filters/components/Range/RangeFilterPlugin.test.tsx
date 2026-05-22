@@ -84,7 +84,7 @@ const rangeProps = {
   appSection: AppSection.Dashboard,
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('RangeFilterPlugin', () => {
   const setDataMask = jest.fn();
   const getWrapper = (props: any = {}) =>
@@ -260,7 +260,7 @@ describe('RangeFilterPlugin', () => {
     expect(inputs[0]).toHaveValue('10');
   });
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+  // eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
   describe('Range Display Modes', () => {
     test('should render only the slider in slider mode', () => {
       getWrapper({

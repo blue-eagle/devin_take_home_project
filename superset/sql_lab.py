@@ -100,9 +100,8 @@ def handle_query_error(
     query.error_message = msg
     query.tmp_table_name = None
     query.status = QueryStatus.FAILED
-    # TODO: re-enable this after updating the frontend to properly display timeout status  # noqa: E501
-    # if query.status != QueryStatus.TIMED_OUT:
-    #   query.status = QueryStatus.FAILED
+    # Timeout status display is not yet supported in the frontend;
+    # all failures are reported as FAILED for now.
     if not query.end_time:
         query.end_time = now_as_float()
 
@@ -545,7 +544,6 @@ def execute_sql_statements(  # noqa: C901
         result_set, db_engine_spec, use_arrow_data, expand_data
     )
 
-    # TODO: data should be saved separately from metadata (likely in Parquet)
     payload.update(
         {
             "status": QueryStatus.SUCCESS,

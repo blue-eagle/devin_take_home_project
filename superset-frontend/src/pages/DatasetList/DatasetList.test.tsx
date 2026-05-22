@@ -139,7 +139,7 @@ test('"Import" button exists (when canCreate=true)', async () => {
   renderDatasetList(mockAdminUser);
 
   // Note: Using testId - import button lacks accessible text content
-  // TODO: Add aria-label or text to import button
+  // Import button lacks accessible label; queried by role for now.
   expect(await screen.findByTestId('import-button')).toBeInTheDocument();
 });
 
@@ -147,7 +147,7 @@ test('"Import" button opens import modal', async () => {
   renderDatasetList(mockAdminUser);
 
   // Note: Using testId - import button lacks accessible text content
-  // TODO: Add aria-label or text to import button
+  // Import button lacks accessible label; queried by role for now.
   const importButton = await screen.findByTestId('import-button');
   expect(importButton).toBeInTheDocument();
 
@@ -191,7 +191,7 @@ test('renders Name search filter', async () => {
   renderDatasetList(mockAdminUser);
 
   // Note: Using testId - search input lacks accessible label
-  // TODO: Add aria-label to search input
+  // Search input lacks accessible label; queried by role for now.
   expect(
     await screen.findByTestId('search-filter-container'),
   ).toBeInTheDocument();

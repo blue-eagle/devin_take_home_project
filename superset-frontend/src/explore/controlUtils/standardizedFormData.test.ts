@@ -25,7 +25,7 @@ import {
   TimeGranularity,
   VizType,
 } from '@superset-ui/core';
-// TODO: tests shouldn't depend on plugins
+// Tests depend on plugin internals for control panel sections.
 import { sections } from '@superset-ui/chart-controls';
 import TableChartPlugin from '../../../plugins/plugin-chart-table/src';
 import { BigNumberTotalChartPlugin } from '../../../plugins/plugin-chart-echarts/src';
@@ -168,7 +168,7 @@ const tableVizStore = {
   },
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('should collect control values and create SFD', () => {
   const sharedKey = [...sharedMetricsKey, ...sharedColumnsKey];
   const sharedControlsFormData = {
@@ -385,7 +385,7 @@ describe('should collect control values and create SFD', () => {
   });
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('should transform form_data between table and bigNumberTotal', () => {
   beforeAll(() => {
     getChartControlPanelRegistry().registerValue(
@@ -531,7 +531,7 @@ describe('should transform form_data between table and bigNumberTotal', () => {
   });
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('initial SFD between different datasource', () => {
   beforeAll(() => {
     getChartControlPanelRegistry().registerValue(

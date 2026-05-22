@@ -33,7 +33,7 @@ interface LogEventAction {
   };
 }
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('logger middleware', () => {
   const dashboardId = 123;
   const next: jest.Mock = jest.fn();

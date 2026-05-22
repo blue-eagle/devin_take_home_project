@@ -73,8 +73,7 @@ export const HorizontalOverflowFilterControlTitleBox = styled(
 `;
 
 export const AllFilterControlContainer = styled(Form)`
-  // TODO this is a hack related to having form items inside others which is not
-  // normal antd-expected usage
+  // Nested form items require override to prevent double margin from antd.
   .ant-form-item .ant-form-item {
     margin-bottom: 0 !important;
   }

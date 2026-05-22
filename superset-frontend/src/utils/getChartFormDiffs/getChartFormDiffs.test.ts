@@ -26,7 +26,7 @@ jest.mock('../sanitizeFormData', () => ({
   }),
 }));
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('alterForComparison', () => {
   test.each([
     [null, null],
@@ -44,7 +44,7 @@ describe('alterForComparison', () => {
   });
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('isEqualish', () => {
   test('returns true for semantically equal values with different formats', () => {
     expect(isEqualish('', null)).toBe(true);
@@ -60,7 +60,7 @@ describe('isEqualish', () => {
   });
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('getChartFormDiffs', () => {
   test('returns diffs for changed values', () => {
     const original = { metric: 'count', adhoc_filters: [] };

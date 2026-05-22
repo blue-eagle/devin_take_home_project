@@ -270,7 +270,7 @@ const getOptionDataTest = (
 ) =>
   `${prefix}-${String(value ?? 'undefined').replace(/[^a-zA-Z0-9_-]/g, '-')}`;
 
-// TODO: Rename the filter plugins and remove this mapping
+// Maps legacy filter plugin display names to user-friendly names.
 const FILTER_TYPE_NAME_MAPPING = {
   [t('Select filter')]: t('Value'),
   [t('Range filter')]: t('Numerical range'),
@@ -561,7 +561,7 @@ const FiltersConfigForm = (
     ],
   );
 
-  // TODO: refreshHandler changes itself because of the dependencies. Needs refactor.
+  // refreshHandler identity changes on every render due to its dependencies.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => refreshHandler(), [dependenciesText]);
 

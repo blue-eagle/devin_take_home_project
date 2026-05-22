@@ -41,8 +41,7 @@ from superset.views.dashboard.mixin import DashboardMixin
 class DashboardModelView(DashboardMixin, SupersetModelView, DeleteMixin):  # pylint: disable=too-many-ancestors
     route_base = "/dashboard"
     datamodel = SQLAInterface(DashboardModel)
-    # TODO disable api_read and api_delete (used by cypress)
-    # once we move to ChartRestModelApi
+    # api_read and api_delete are still used by Cypress E2E tests
     class_permission_name = "Dashboard"
     method_permission_name = MODEL_VIEW_RW_METHOD_PERMISSION_MAP
 

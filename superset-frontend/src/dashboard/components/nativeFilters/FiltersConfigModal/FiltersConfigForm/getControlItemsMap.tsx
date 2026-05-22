@@ -128,7 +128,7 @@ export default function getControlItemsMap({
             }
             rules={[
               {
-                required: mainControlItem.config?.required && !removed, // TODO: need to move ColumnSelect settings to controlPanel for all filters
+                required: mainControlItem.config?.required && !removed,
                 message: t('Column is required'),
               },
             ]}

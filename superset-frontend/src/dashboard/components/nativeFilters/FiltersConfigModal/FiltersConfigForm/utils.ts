@@ -77,8 +77,8 @@ export const getControlItems = (
     [],
   ) as CustomControlItem[]) ?? [];
 
-// TODO: add column_types field to Dataset
-// We return true if column_types is undefined or empty as a precaution against backend failing to return column_types
+// Returns true if column_types is undefined or empty as a precaution
+// against the backend omitting the field.
 export const hasTemporalColumns = (
   dataset: Dataset & { column_types: GenericDataType[] },
 ) => {

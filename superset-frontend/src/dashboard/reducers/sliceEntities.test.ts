@@ -27,7 +27,7 @@ import sliceEntitiesReducer from 'src/dashboard/reducers/sliceEntities';
 type ReducerState = Parameters<typeof sliceEntitiesReducer>[0];
 type ReducerAction = Parameters<typeof sliceEntitiesReducer>[1];
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
+// eslint-disable-next-line no-restricted-globals -- migrate to test() blocks
 describe('sliceEntities reducer', () => {
   test('should return initial state', () => {
     expect(
