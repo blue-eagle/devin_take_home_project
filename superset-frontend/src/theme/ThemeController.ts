@@ -28,6 +28,7 @@ import {
   normalizeThemeConfig,
 } from '@apache-superset/core/theme';
 import { makeApi } from '@superset-ui/core';
+import { logging } from '@apache-superset/core/utils';
 import type {
   BootstrapThemeData,
   BootstrapThemeDataConfig,
@@ -48,7 +49,7 @@ export class LocalStorageAdapter implements ThemeStorage {
     try {
       return localStorage.getItem(key);
     } catch (error) {
-      console.warn('Failed to read from localStorage:', error);
+      logging.warn('Failed to read from localStorage:', error);
       return null;
     }
   }
@@ -57,7 +58,7 @@ export class LocalStorageAdapter implements ThemeStorage {
     try {
       localStorage.setItem(key, value);
     } catch (error) {
-      console.warn('Failed to write to localStorage:', error);
+      logging.warn('Failed to write to localStorage:', error);
     }
   }
 
@@ -65,7 +66,7 @@ export class LocalStorageAdapter implements ThemeStorage {
     try {
       localStorage.removeItem(key);
     } catch (error) {
-      console.warn('Failed to remove from localStorage:', error);
+      logging.warn('Failed to remove from localStorage:', error);
     }
   }
 }
@@ -152,7 +153,7 @@ export class ThemeController {
       this.applyTheme(initialTheme);
     } catch (error) {
       // Corrupted dev override or CRUD theme in storage - clear and retry with defaults
-      console.warn(
+      logging.warn(
         'Failed to apply stored theme, clearing invalid overrides:',
         error,
       );
@@ -280,7 +281,7 @@ export class ThemeController {
       }
       return null;
     } catch (error) {
-      console.error('Failed to create dashboard theme provider:', error);
+      logging.error('Failed to create dashboard theme provider:', error);
       return null;
     }
   }
@@ -396,7 +397,7 @@ export class ThemeController {
           this.notifyListeners();
         }
       } catch (error) {
-        console.error('Failed to load CRUD theme:', error);
+        logging.error('Failed to load CRUD theme:', error);
         this.dashboardCrudTheme = null;
         this.notifyListeners();
       }
@@ -475,7 +476,7 @@ export class ThemeController {
       const storedId = this.storage.getItem(STORAGE_KEYS.APPLIED_THEME_ID);
       return storedId ? parseInt(storedId, 10) : null;
     } catch (error) {
-      console.warn('Failed to get applied theme ID:', error);
+      logging.warn('Failed to get applied theme ID:', error);
       return null;
     }
   }
@@ -491,7 +492,7 @@ export class ThemeController {
         this.storage.removeItem(STORAGE_KEYS.APPLIED_THEME_ID);
       }
     } catch (error) {
-      console.warn('Failed to set applied theme ID:', error);
+      logging.warn('Failed to set applied theme ID:', error);
     }
   }
 
@@ -556,7 +557,7 @@ export class ThemeController {
         if (newTheme) this.updateTheme(newTheme);
       }
     } catch (error) {
-      console.error('Failed to handle system theme change:', error);
+      logging.error('Failed to handle system theme change:', error);
     }
   };
 
@@ -652,7 +653,7 @@ export class ThemeController {
       this.mediaQuery = window.matchMedia(MEDIA_QUERY_DARK_SCHEME);
       this.mediaQuery.addEventListener('change', this.handleSystemThemeChange);
     } catch (error) {
-      console.warn('Failed to initialize media query listener:', error);
+      logging.warn('Failed to initialize media query listener:', error);
     }
   }
 
@@ -783,7 +784,7 @@ export class ThemeController {
 
       return null;
     } catch (error) {
-      console.warn('Failed to load saved theme mode:', error);
+      logging.warn('Failed to load saved theme mode:', error);
       return null;
     }
   }
@@ -854,7 +855,7 @@ export class ThemeController {
         ?.fontUrls as string[] | undefined;
       this.loadFonts(fontUrls);
     } catch (error) {
-      console.error('Failed to apply theme:', error);
+      logging.error('Failed to apply theme:', error);
       // Re-throw the error so updateTheme can handle fallback logic
       throw error;
     }
@@ -908,7 +909,7 @@ export class ThemeController {
     try {
       this.storage.setItem(this.modeStorageKey, this.currentMode);
     } catch (error) {
-      console.warn('Failed to persist theme mode:', error);
+      logging.warn('Failed to persist theme mode:', error);
     }
   }
 
@@ -920,7 +921,7 @@ export class ThemeController {
       try {
         callback(this.globalTheme);
       } catch (error) {
-        console.error('Error in theme change callback:', error);
+        logging.error('Error in theme change callback:', error);
       }
     });
   }
@@ -935,7 +936,7 @@ export class ThemeController {
         ? ThemeMode.DARK
         : ThemeMode.DEFAULT;
     } catch (error) {
-      console.warn('Failed to detect system theme preference:', error);
+      logging.warn('Failed to detect system theme preference:', error);
       return ThemeMode.DEFAULT;
     }
   }
@@ -947,7 +948,7 @@ export class ThemeController {
     try {
       this.crudThemeId = this.storage.getItem(STORAGE_KEYS.CRUD_THEME_ID);
     } catch (error) {
-      console.warn('Failed to load CRUD theme ID:', error);
+      logging.warn('Failed to load CRUD theme ID:', error);
       this.crudThemeId = null;
     }
   }
@@ -962,7 +963,7 @@ export class ThemeController {
         this.devThemeOverride = JSON.parse(stored);
       }
     } catch (error) {
-      console.warn('Failed to load dev theme override:', error);
+      logging.warn('Failed to load dev theme override:', error);
       this.devThemeOverride = null;
     }
   }
@@ -989,7 +990,7 @@ export class ThemeController {
       const themeConfig = JSON.parse(result.json_data);
 
       if (!themeConfig || typeof themeConfig !== 'object') {
-        console.error(`Invalid theme configuration for theme ${themeId}`);
+        logging.error(`Invalid theme configuration for theme ${themeId}`);
         return null;
       }
 
@@ -998,7 +999,7 @@ export class ThemeController {
       // Runtime errors will be caught by applyThemeWithRecovery()
       return themeConfig;
     } catch (error) {
-      console.error('Failed to fetch CRUD theme:', error);
+      logging.error('Failed to fetch CRUD theme:', error);
       return null;
     }
   }
@@ -1044,7 +1045,7 @@ export class ThemeController {
       }
     } catch (error) {
       // Log for debugging but don't fail - fallback to cached theme will be used
-      console.warn('Failed to fetch system default theme:', error);
+      logging.warn('Failed to fetch system default theme:', error);
     }
 
     return null;

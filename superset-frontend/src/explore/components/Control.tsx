@@ -23,6 +23,7 @@ import {
   ControlComponentProps as BaseControlComponentProps,
 } from '@superset-ui/chart-controls';
 import { JsonValue, QueryFormData, usePrevious } from '@superset-ui/core';
+import { logging } from '@apache-superset/core/utils';
 import { styled } from '@apache-superset/core/theme';
 import { ErrorBoundary } from 'src/components';
 import { ExploreActions } from 'src/explore/actions/exploreActions';
@@ -103,8 +104,7 @@ export default function Control(props: ControlProps) {
       ? controlMap[type as keyof typeof controlMap]
       : type;
   if (!ControlComponent) {
-    // eslint-disable-next-line no-console
-    console.warn(`Unknown controlType: ${type}`);
+    logging.warn(`Unknown controlType: ${type}`);
     return null;
   }
 

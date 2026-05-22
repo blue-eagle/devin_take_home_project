@@ -18,6 +18,7 @@
  */
 import { getChartDataRequest } from 'src/components/Chart/chartAction';
 import { QueryFormData } from '@superset-ui/core';
+import { logging } from '@apache-superset/core/utils';
 
 export interface FetchTopNValuesParams {
   datasource: string;
@@ -77,7 +78,7 @@ export async function fetchTopNValues({
       metricValue: row[metric],
     }));
   } catch (error) {
-    console.error('Error fetching top N values:', error);
+    logging.error('Error fetching top N values:', error);
     throw error;
   }
 }

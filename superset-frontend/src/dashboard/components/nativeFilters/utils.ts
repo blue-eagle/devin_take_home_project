@@ -17,6 +17,7 @@
  * under the License.
  */
 import { t } from '@apache-superset/core/translation';
+import { logging } from '@apache-superset/core/utils';
 import {
   AdhocFilter,
   Behavior,
@@ -250,7 +251,7 @@ export function getFilterScope(
     if (target) {
       targets.push(target);
     } else {
-      console.warn(`Invalid filter scope key format: ${scopeKey}`);
+      logging.warn(`Invalid filter scope key format: ${scopeKey}`);
     }
   });
 

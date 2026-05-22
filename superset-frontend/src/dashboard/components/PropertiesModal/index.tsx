@@ -36,6 +36,7 @@ import {
   SupersetClient,
   getClientErrorObject,
 } from '@superset-ui/core';
+import { logging } from '@apache-superset/core/utils';
 
 import withToasts from 'src/components/MessageToasts/withToasts';
 import {
@@ -417,7 +418,7 @@ const PropertiesModal = ({
         onHide();
         addSuccessToast(t('Dashboard properties updated'));
       } catch (error) {
-        console.error('Apply failed:', error);
+        logging.error('Apply failed:', error);
       } finally {
         setIsApplying(false);
       }

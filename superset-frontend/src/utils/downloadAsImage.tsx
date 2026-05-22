@@ -21,6 +21,7 @@ import domToImage from 'dom-to-image-more';
 import { kebabCase } from 'lodash';
 import { t } from '@apache-superset/core/translation';
 import { SupersetTheme } from '@apache-superset/core/theme';
+import { logging } from '@apache-superset/core/utils';
 import { addWarningToast } from 'src/components/MessageToasts/actions';
 import type { AgGridContainerElement } from '@superset-ui/core/components';
 
@@ -435,7 +436,7 @@ export default function downloadAsImageOptimized(
         link.href = dataUrl;
         link.click();
       } catch (error) {
-        console.error('Creating image failed', error);
+        logging.error('Creating image failed', error);
         addWarningToast(
           t('Image download failed, please refresh and try again.'),
         );
@@ -484,7 +485,7 @@ export default function downloadAsImageOptimized(
       link.href = dataUrl;
       link.click();
     } catch (error) {
-      console.error('Creating image failed', error);
+      logging.error('Creating image failed', error);
       addWarningToast(
         t('Image download failed, please refresh and try again.'),
       );

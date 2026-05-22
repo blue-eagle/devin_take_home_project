@@ -25,6 +25,7 @@ import {
   JsonObject,
   getClientErrorObject,
 } from '@superset-ui/core';
+import { logging } from '@apache-superset/core/utils';
 
 import {
   createErrorHandler,
@@ -892,7 +893,7 @@ export function useDatabaseValidation() {
           });
         }
 
-        console.error('Unexpected error during validation:', error);
+        logging.error('Unexpected error during validation:', error);
         setIsValidating(false);
         setHasValidated(true);
         return {};

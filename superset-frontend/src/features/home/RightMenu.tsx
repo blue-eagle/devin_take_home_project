@@ -29,6 +29,7 @@ import {
   isFeatureEnabled,
   FeatureFlag,
 } from '@superset-ui/core';
+import { logging } from '@apache-superset/core/utils';
 import {
   styled,
   css,
@@ -354,7 +355,7 @@ const RightMenu = ({
       window.localStorage.removeItem('redux');
       window.sessionStorage.removeItem('login_attempted');
     } catch (error) {
-      console.warn('Failed to clear storage on logout:', error);
+      logging.warn('Failed to clear storage on logout:', error);
     }
   };
 
