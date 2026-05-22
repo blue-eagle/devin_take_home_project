@@ -103,9 +103,9 @@ export type ExtraNativeFilter = {
   filterType?: string;
   columnName?: string;
   columnLabel?: string;
-  filterValues?: Array<any> | [];
+  filterValues?: Array<string | number | null | undefined> | [];
   nativeFilterId?: string | null;
-  optionFilterValues?: Array<any> | [];
+  optionFilterValues?: Array<{ value: string | number; label: string }> | [];
 };
 
 export type Extra = {

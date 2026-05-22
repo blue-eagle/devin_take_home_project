@@ -20,7 +20,7 @@ import { QueryState } from '@superset-ui/core';
 import sqlLabReducer from 'src/SqlLab/reducers/sqlLab';
 import * as actions from 'src/SqlLab/actions/sqlLab';
 import type { SqlLabAction } from 'src/SqlLab/actions/sqlLab';
-import type { SqlLabRootState } from 'src/SqlLab/types';
+import type { SqlLabRootState, Table } from 'src/SqlLab/types';
 import { table, initialState as mockState } from '../fixtures';
 
 type SqlLabState = SqlLabRootState['sqlLab'];
@@ -293,9 +293,9 @@ describe('sqlLabReducer', () => {
   // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
   describe('Tables', () => {
     let newState: SqlLabState;
-    let newTable: any;
+    let newTable: Table & Record<string, unknown>;
     beforeEach(() => {
-      newTable = { ...table };
+      newTable = { ...table } as Table & Record<string, unknown>;
       const action = {
         type: actions.MERGE_TABLE,
         table: newTable,
@@ -467,8 +467,16 @@ describe('sqlLabReducer', () => {
   describe('Run Query', () => {
     const DENORMALIZED_CHANGED_ON = '2023-06-26T07:53:05.439';
     const CHANGED_ON_TIMESTAMP = 1687765985439;
-    let newState: any;
-    let query: any;
+    let newState: SqlLabState;
+    let query: {
+      id: string;
+      progress: number;
+      changed_on: string;
+      startDttm: number;
+      state: string;
+      cached: boolean;
+      sqlEditorId: string;
+    };
     beforeEach(() => {
       newState = { ...initialState };
       query = {
@@ -605,8 +613,16 @@ describe('sqlLabReducer', () => {
   });
   // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
   describe('CLEAR_INACTIVE_QUERIES', () => {
-    let newState: any;
-    let query: any;
+    let newState: SqlLabState;
+    let query: {
+      id: string;
+      changed_on: number;
+      startDttm: number;
+      state: QueryState;
+      progress: number;
+      resultsKey: string;
+      cached: boolean;
+    };
     beforeEach(() => {
       query = {
         id: 'abcd',

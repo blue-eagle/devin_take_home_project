@@ -39,7 +39,13 @@ import {
 } from '@superset-ui/core/components';
 import { logging } from '@apache-superset/core/utils';
 import { t } from '@apache-superset/core/translation';
-import { DatasourceType, isDefined, SupersetClient } from '@superset-ui/core';
+import {
+  DatasourceType,
+  isDefined,
+  SupersetClient,
+  type QueryFormData,
+  type Dataset,
+} from '@superset-ui/core';
 import { Alert } from '@apache-superset/core/components';
 import {
   css,
@@ -51,14 +57,20 @@ import { Radio } from '@superset-ui/core/components/Radio';
 import { GRID_COLUMN_COUNT } from 'src/dashboard/util/constants';
 import { canUserEditDashboard } from 'src/dashboard/util/permissionUtils';
 import { setSaveChartModalVisibility } from 'src/explore/actions/saveModalActions';
-import { SaveActionType, ChartStatusType } from 'src/explore/types';
+import {
+  SaveActionType,
+  ChartStatusType,
+  ExplorePageState,
+  TabNode,
+  TabTreeNode,
+} from 'src/explore/types';
 import { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
+import { Slice } from 'src/types/Chart';
 import {
   removeChartState,
   updateChartState,
 } from 'src/dashboard/actions/dashboardState';
 import { Dashboard } from 'src/types/Dashboard';
-import { TabNode, TabTreeNode } from '../types';
 import { CHART_WIDTH, CHART_HEIGHT } from 'src/dashboard/constants';
 
 // Session storage key for recent dashboard
@@ -66,13 +78,13 @@ const SK_DASHBOARD_ID = 'save_chart_recent_dashboard';
 
 interface SaveModalProps extends RouteComponentProps {
   addDangerToast: (msg: string) => void;
-  actions: Record<string, any>;
-  form_data?: Record<string, any>;
+  actions: Record<string, (...args: unknown[]) => unknown>;
+  form_data?: QueryFormData;
   user: UserWithPermissionsAndRoles;
   alert?: string;
   sliceName?: string;
-  slice?: Record<string, any>;
-  datasource?: Record<string, any>;
+  slice?: Slice;
+  datasource?: Dataset;
   dashboardId: '' | number | null;
   isVisible: boolean;
   dispatch: Dispatch;
@@ -194,7 +206,7 @@ class SaveModal extends Component<SaveModalProps, SaveModalState> {
     this.props.dispatch(setSaveChartModalVisibility(false));
   }
 
-  handleRedirect = (windowLocationSearch: string, chart: any) => {
+  handleRedirect = (windowLocationSearch: string, chart: { id: number }) => {
     const searchParams = new URLSearchParams(windowLocationSearch);
     searchParams.delete('form_data_key');
     searchParams.set('slice_id', chart.id.toString());
@@ -813,11 +825,11 @@ class SaveModal extends Component<SaveModalProps, SaveModalState> {
 }
 
 interface StateProps {
-  datasource: any;
-  slice: any;
+  datasource: Dataset;
+  slice: Slice;
   user: UserWithPermissionsAndRoles;
-  dashboards: any;
-  alert: any;
+  dashboards: unknown[];
+  alert: string;
   isVisible: boolean;
 }
 
@@ -825,7 +837,15 @@ function mapStateToProps({
   explore,
   saveModal,
   user,
-}: Record<string, any>): StateProps {
+}: {
+  explore: ExplorePageState['explore'];
+  saveModal: {
+    dashboards: unknown[];
+    saveModalAlert: string;
+    isVisible: boolean;
+  };
+  user: UserWithPermissionsAndRoles;
+}): StateProps {
   return {
     datasource: explore.datasource,
     slice: explore.slice,
