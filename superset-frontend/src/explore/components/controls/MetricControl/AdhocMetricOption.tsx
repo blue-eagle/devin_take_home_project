@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PureComponent } from 'react';
+import React, { useCallback } from 'react';
 import { Metric } from '@superset-ui/core';
 import { OptionControlLabel } from 'src/explore/components/controls/OptionControls';
 import { DndItemType } from 'src/explore/components/DndItemType';
@@ -42,40 +42,38 @@ interface AdhocMetricOptionProps {
   datasourceWarningMessage?: string;
 }
 
-class AdhocMetricOption extends PureComponent<AdhocMetricOptionProps> {
-  constructor(props: AdhocMetricOptionProps) {
-    super(props);
-    this.onRemoveMetric = this.onRemoveMetric.bind(this);
-  }
+const AdhocMetricOption: React.FC<AdhocMetricOptionProps> = React.memo(
+  ({
+    adhocMetric,
+    onMetricEdit,
+    onRemoveMetric,
+    columns = [],
+    savedMetricsOptions = [],
+    savedMetric = {} as SavedMetricTypeDef,
+    datasource,
+    onMoveLabel,
+    onDropLabel,
+    index = 0,
+    type,
+    multi,
+    datasourceWarningMessage,
+  }) => {
+    const handleRemoveMetric = useCallback(
+      (e?: React.MouseEvent): void => {
+        e?.stopPropagation();
+        onRemoveMetric?.(index);
+      },
+      [onRemoveMetric, index],
+    );
 
-  onRemoveMetric(e?: React.MouseEvent): void {
-    e?.stopPropagation();
-    this.props.onRemoveMetric?.(this.props.index ?? 0);
-  }
-
-  render() {
-    const {
-      adhocMetric,
-      onMetricEdit,
-      columns,
-      savedMetricsOptions,
-      savedMetric = {} as SavedMetricTypeDef,
-      datasource,
-      onMoveLabel,
-      onDropLabel,
-      index,
-      type,
-      multi,
-      datasourceWarningMessage,
-    } = this.props;
     const withCaret = !(savedMetric as SavedMetricTypeDef).error_text;
 
     return (
       <AdhocMetricPopoverTrigger
         adhocMetric={adhocMetric}
         onMetricEdit={onMetricEdit}
-        columns={columns ?? []}
-        savedMetricsOptions={savedMetricsOptions ?? []}
+        columns={columns}
+        savedMetricsOptions={savedMetricsOptions}
         savedMetric={savedMetric}
         datasource={datasource!}
       >
@@ -84,10 +82,10 @@ class AdhocMetricOption extends PureComponent<AdhocMetricOptionProps> {
           savedMetric={savedMetric as any}
           adhocMetric={adhocMetric}
           label={adhocMetric.label}
-          onRemove={() => this.onRemoveMetric()}
+          onRemove={() => handleRemoveMetric()}
           onMoveLabel={onMoveLabel}
           onDropLabel={onDropLabel}
-          index={index ?? 0}
+          index={index}
           type={type ?? DndItemType.AdhocMetricOption}
           withCaret={withCaret}
           isFunction
@@ -96,7 +94,7 @@ class AdhocMetricOption extends PureComponent<AdhocMetricOptionProps> {
         />
       </AdhocMetricPopoverTrigger>
     );
-  }
-}
+  },
+);
 
 export default AdhocMetricOption;
