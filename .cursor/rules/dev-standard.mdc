@@ -20,9 +20,11 @@ Apache Superset is a data visualization platform with Flask/Python backend and R
 
 ### Testing Strategy Migration
 - **Prefer unit tests** over integration tests
-- **Prefer integration tests** over Cypress end-to-end tests
-- **Cypress is last resort** - Actively moving away from Cypress
+- **Prefer integration tests** over end-to-end tests
+- **Use Playwright for E2E tests** - Migrating from Cypress
+- **Cypress is deprecated** - Will be removed once migration is completed
 - **Use Jest + React Testing Library** for component testing
+- **Use `test()` instead of `describe()`** - Follow [avoid nesting when testing](https://kentcdodds.com/blog/avoid-nesting-when-youre-testing) principles
 
 ### Backend Type Safety
 - **Add type hints** - All new Python code needs proper typing
