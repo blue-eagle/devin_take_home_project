@@ -107,77 +107,74 @@ const setup = (overrides = {}) => (
   </Provider>
 );
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('OAuth2RedirectMessage Component', () => {
-  test('renders without crashing and displays the correct initial UI elements', () => {
-    const { getByText } = render(setup());
+test('OAuth2RedirectMessage Component renders without crashing and displays the correct initial UI elements', () => {
+  const { getByText } = render(setup());
 
-    expect(getByText(/Authorization needed/i)).toBeInTheDocument();
-    expect(getByText(/provide authorization/i)).toBeInTheDocument();
+  expect(getByText(/Authorization needed/i)).toBeInTheDocument();
+  expect(getByText(/provide authorization/i)).toBeInTheDocument();
+});
+
+test('OAuth2RedirectMessage Component renders the authorization link pointing at the OAuth2 URL', () => {
+  const { getByText } = render(setup());
+
+  const linkElement = getByText(/provide authorization/i).closest('a');
+  expect(linkElement).toHaveAttribute('href', 'https://example.com');
+  expect(linkElement).toHaveAttribute('target', '_blank');
+});
+
+test('OAuth2RedirectMessage Component closes the BroadcastChannel on unmount', () => {
+  const { unmount } = render(setup());
+
+  expect((global as any).BroadcastChannel).toHaveBeenCalledWith('oauth');
+  unmount();
+  expect(channelCloseMock).toHaveBeenCalled();
+});
+
+test('OAuth2RedirectMessage Component dispatches reRunQuery action when a message with correct tab ID is received for SQL Lab', async () => {
+  render(setup());
+
+  simulateBroadcastMessage({ tabId: 'tabId' });
+
+  await waitFor(() => {
+    expect(reRunQuery).toHaveBeenCalledWith({ sql: 'SELECT * FROM table' });
   });
+});
 
-  test('renders the authorization link pointing at the OAuth2 URL', () => {
-    const { getByText } = render(setup());
+test('OAuth2RedirectMessage Component dispatches reRunQuery action when storage event has matching tab ID', async () => {
+  render(setup());
 
-    const linkElement = getByText(/provide authorization/i).closest('a');
-    expect(linkElement).toHaveAttribute('href', 'https://example.com');
-    expect(linkElement).toHaveAttribute('target', '_blank');
+  simulateStorageMessage({ tabId: 'tabId' });
+
+  await waitFor(() => {
+    expect(reRunQuery).toHaveBeenCalledWith({ sql: 'SELECT * FROM table' });
   });
+});
 
-  test('closes the BroadcastChannel on unmount', () => {
-    const { unmount } = render(setup());
+test('OAuth2RedirectMessage Component dispatches triggerQuery action for explore source upon receiving a correct message', async () => {
+  render(setup({ source: 'explore' }));
 
-    expect((global as any).BroadcastChannel).toHaveBeenCalledWith('oauth');
-    unmount();
-    expect(channelCloseMock).toHaveBeenCalled();
+  simulateBroadcastMessage({ tabId: 'tabId' });
+
+  await waitFor(() => {
+    expect(triggerQuery).toHaveBeenCalledWith(true, 123);
   });
+});
 
-  test('dispatches reRunQuery action when a message with correct tab ID is received for SQL Lab', async () => {
-    render(setup());
+test('OAuth2RedirectMessage Component dispatches onRefresh action for dashboard source upon receiving a correct message', async () => {
+  render(setup({ source: 'dashboard' }));
 
-    simulateBroadcastMessage({ tabId: 'tabId' });
+  simulateBroadcastMessage({ tabId: 'tabId' });
 
-    await waitFor(() => {
-      expect(reRunQuery).toHaveBeenCalledWith({ sql: 'SELECT * FROM table' });
-    });
+  await waitFor(() => {
+    // Chart IDs are converted to numbers by the component via chartList.map(Number)
+    expect(onRefresh).toHaveBeenCalledWith([1, 2], true, 0, 'dashboard-id');
   });
+});
 
-  test('dispatches reRunQuery action when storage event has matching tab ID', async () => {
-    render(setup());
+test('OAuth2RedirectMessage Component ignores messages with a mismatched tab ID', () => {
+  render(setup());
 
-    simulateStorageMessage({ tabId: 'tabId' });
+  simulateBroadcastMessage({ tabId: 'someOtherTab' });
 
-    await waitFor(() => {
-      expect(reRunQuery).toHaveBeenCalledWith({ sql: 'SELECT * FROM table' });
-    });
-  });
-
-  test('dispatches triggerQuery action for explore source upon receiving a correct message', async () => {
-    render(setup({ source: 'explore' }));
-
-    simulateBroadcastMessage({ tabId: 'tabId' });
-
-    await waitFor(() => {
-      expect(triggerQuery).toHaveBeenCalledWith(true, 123);
-    });
-  });
-
-  test('dispatches onRefresh action for dashboard source upon receiving a correct message', async () => {
-    render(setup({ source: 'dashboard' }));
-
-    simulateBroadcastMessage({ tabId: 'tabId' });
-
-    await waitFor(() => {
-      // Chart IDs are converted to numbers by the component via chartList.map(Number)
-      expect(onRefresh).toHaveBeenCalledWith([1, 2], true, 0, 'dashboard-id');
-    });
-  });
-
-  test('ignores messages with a mismatched tab ID', () => {
-    render(setup());
-
-    simulateBroadcastMessage({ tabId: 'someOtherTab' });
-
-    expect(reRunQuery).not.toHaveBeenCalled();
-  });
+  expect(reRunQuery).not.toHaveBeenCalled();
 });

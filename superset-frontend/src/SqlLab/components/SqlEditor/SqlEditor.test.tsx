@@ -156,308 +156,297 @@ const createStore = (initState: object) =>
       getDefaultMiddleware().concat(api.middleware, logAction),
   });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('SqlEditor', () => {
-  beforeAll(() => {
-    jest.setTimeout(30000);
+beforeAll(() => {
+  jest.setTimeout(30000);
+});
+
+afterEach(async () => {
+  cleanup();
+  await new Promise(resolve => setTimeout(resolve, 0));
+});
+
+const mockedProps = {
+  queryEditor: initialState.sqlLab.queryEditors[0],
+  tables: [table],
+  getHeight: () => '100px',
+  editorQueries: [],
+  dataPreviewQueries: [],
+  defaultQueryLimit: 1000,
+  maxRow: 100000,
+  displayLimit: 100,
+  saveQueryWarning: '',
+  scheduleQueryWarning: '',
+};
+
+beforeEach(() => {
+  store = createStore(mockInitialState);
+  actions = [];
+
+  (ResultSet as unknown as jest.Mock).mockClear();
+  (ResultSet as unknown as jest.Mock).mockImplementation(() => (
+    <div data-test="mock-result-set" />
+  ));
+});
+
+afterEach(() => {
+  act(() => {
+    store.dispatch(api.util.resetApiState());
   });
+});
 
-  afterEach(async () => {
-    cleanup();
-    await new Promise(resolve => setTimeout(resolve, 0));
-  });
+test('SqlEditor does not render SqlEditor if no db selected', async () => {
+  const queryEditor = initialState.sqlLab.queryEditors[2];
+  const { findByText } = setup({ ...mockedProps, queryEditor }, store);
+  expect(
+    await findByText('Select a database to write a query'),
+  ).toBeInTheDocument();
+});
 
-  const mockedProps = {
-    queryEditor: initialState.sqlLab.queryEditors[0],
-    tables: [table],
-    getHeight: () => '100px',
-    editorQueries: [],
-    dataPreviewQueries: [],
-    defaultQueryLimit: 1000,
-    maxRow: 100000,
-    displayLimit: 100,
-    saveQueryWarning: '',
-    scheduleQueryWarning: '',
-  };
+test('SqlEditor renders db unavailable message', async () => {
+  const queryEditor = initialState.sqlLab.queryEditors[1];
+  const { findByText } = setup({ ...mockedProps, queryEditor }, store);
+  expect(
+    await findByText(
+      'The database that was used to generate this query could not be found',
+    ),
+  ).toBeInTheDocument();
+});
 
-  beforeEach(() => {
-    store = createStore(mockInitialState);
-    actions = [];
+// Update other similar tests with timeouts
+test('SqlEditor render an EditorWrapper', async () => {
+  const { findByTestId, unmount } = setup(mockedProps, store);
 
-    (ResultSet as unknown as jest.Mock).mockClear();
-    (ResultSet as unknown as jest.Mock).mockImplementation(() => (
-      <div data-test="mock-result-set" />
-    ));
-  });
+  await waitFor(
+    () => expect(findByTestId('react-ace')).resolves.toBeInTheDocument(),
+    { timeout: 10000 },
+  );
 
-  afterEach(() => {
-    act(() => {
-      store.dispatch(api.util.resetApiState());
-    });
-  });
+  unmount();
+}, 15000);
 
-  test('does not render SqlEditor if no db selected', async () => {
-    const queryEditor = initialState.sqlLab.queryEditors[2];
-    const { findByText } = setup({ ...mockedProps, queryEditor }, store);
-    expect(
-      await findByText('Select a database to write a query'),
-    ).toBeInTheDocument();
-  });
+test('SqlEditor skip rendering an EditorWrapper when the current tab is inactive', async () => {
+  const { queryByTestId } = setup(
+    {
+      ...mockedProps,
+      queryEditor: initialState.sqlLab.queryEditors[1],
+    },
+    store,
+  );
+  expect(queryByTestId('react-ace')).not.toBeInTheDocument();
+});
 
-  test('renders db unavailable message', async () => {
-    const queryEditor = initialState.sqlLab.queryEditors[1];
-    const { findByText } = setup({ ...mockedProps, queryEditor }, store);
-    expect(
-      await findByText(
-        'The database that was used to generate this query could not be found',
-      ),
-    ).toBeInTheDocument();
-  });
+test('SqlEditor avoids rerendering EditorLeftBar and ResultSet while typing', async () => {
+  const { findByTestId } = setup(mockedProps, store);
+  const editor = await findByTestId('react-ace');
+  const sql = 'select *';
+  const renderCountForSouthPane = (ResultSet as unknown as jest.Mock).mock.calls
+    .length;
+  expect(ResultSet).toHaveBeenCalledTimes(renderCountForSouthPane);
+  fireEvent.change(editor, { target: { value: sql } });
+  expect(ResultSet).toHaveBeenCalledTimes(renderCountForSouthPane);
+});
 
-  // Update other similar tests with timeouts
-  test('render an EditorWrapper', async () => {
-    const { findByTestId, unmount } = setup(mockedProps, store);
-
-    await waitFor(
-      () => expect(findByTestId('react-ace')).resolves.toBeInTheDocument(),
-      { timeout: 10000 },
-    );
-
-    unmount();
-  }, 15000);
-
-  test('skip rendering an EditorWrapper when the current tab is inactive', async () => {
-    const { queryByTestId } = setup(
-      {
-        ...mockedProps,
-        queryEditor: initialState.sqlLab.queryEditors[1],
-      },
-      store,
-    );
-    expect(queryByTestId('react-ace')).not.toBeInTheDocument();
-  });
-
-  test('avoids rerendering EditorLeftBar and ResultSet while typing', async () => {
-    const { findByTestId } = setup(mockedProps, store);
-    const editor = await findByTestId('react-ace');
-    const sql = 'select *';
-    const renderCountForSouthPane = (ResultSet as unknown as jest.Mock).mock
-      .calls.length;
-    expect(ResultSet).toHaveBeenCalledTimes(renderCountForSouthPane);
-    fireEvent.change(editor, { target: { value: sql } });
-    expect(ResultSet).toHaveBeenCalledTimes(renderCountForSouthPane);
-  });
-
-  test('renders sql from unsaved change', async () => {
-    const expectedSql = 'SELECT updated_column\nFROM updated_table\nWHERE';
-    store = createStore({
-      ...initialState,
-      sqlLab: {
-        ...initialState.sqlLab,
-        databases: {
-          2023: {
-            allow_ctas: false,
-            allow_cvas: false,
-            allow_dml: false,
-            allow_file_upload: false,
-            allow_run_async: false,
-            backend: 'postgresql',
-            database_name: 'examples',
-            expose_in_sqllab: true,
-            force_ctas_schema: null,
-            id: 1,
-          },
-        },
-        unsavedQueryEditor: {
-          id: defaultQueryEditor.id,
-          dbId: 2023,
-          sql: expectedSql,
+test('SqlEditor renders sql from unsaved change', async () => {
+  const expectedSql = 'SELECT updated_column\nFROM updated_table\nWHERE';
+  store = createStore({
+    ...initialState,
+    sqlLab: {
+      ...initialState.sqlLab,
+      databases: {
+        2023: {
+          allow_ctas: false,
+          allow_cvas: false,
+          allow_dml: false,
+          allow_file_upload: false,
+          allow_run_async: false,
+          backend: 'postgresql',
+          database_name: 'examples',
+          expose_in_sqllab: true,
+          force_ctas_schema: null,
+          id: 1,
         },
       },
-    });
-    const { findByTestId } = setup(mockedProps, store);
-
-    const editor = await findByTestId('react-ace');
-    expect(editor).toHaveValue(expectedSql);
+      unsavedQueryEditor: {
+        id: defaultQueryEditor.id,
+        dbId: 2023,
+        sql: expectedSql,
+      },
+    },
   });
+  const { findByTestId } = setup(mockedProps, store);
 
-  test('render a SouthPane', async () => {
-    const { findByTestId } = setup(mockedProps, store);
-    expect(await findByTestId('mock-result-set')).toBeInTheDocument();
-  });
+  const editor = await findByTestId('react-ace');
+  expect(editor).toHaveValue(expectedSql);
+});
 
-  test('runs query action with ctas false', async () => {
-    store = createStore({
-      ...initialState,
-      sqlLab: {
-        ...initialState.sqlLab,
-        databases: {
-          5667: {
-            allow_ctas: false,
-            allow_cvas: false,
-            allow_dml: false,
-            allow_file_upload: false,
-            allow_run_async: true,
-            backend: 'postgresql',
-            database_name: 'examples',
-            expose_in_sqllab: true,
-            force_ctas_schema: null,
-            id: 1,
-          },
-        },
-        unsavedQueryEditor: {
-          id: defaultQueryEditor.id,
-          dbId: 5667,
-          sql: 'expectedSql',
+test('SqlEditor render a SouthPane', async () => {
+  const { findByTestId } = setup(mockedProps, store);
+  expect(await findByTestId('mock-result-set')).toBeInTheDocument();
+});
+
+test('SqlEditor runs query action with ctas false', async () => {
+  store = createStore({
+    ...initialState,
+    sqlLab: {
+      ...initialState.sqlLab,
+      databases: {
+        5667: {
+          allow_ctas: false,
+          allow_cvas: false,
+          allow_dml: false,
+          allow_file_upload: false,
+          allow_run_async: true,
+          backend: 'postgresql',
+          database_name: 'examples',
+          expose_in_sqllab: true,
+          force_ctas_schema: null,
+          id: 1,
         },
       },
-    });
-    const { findByTestId } = setup(mockedProps, store);
-    const runButton = await findByTestId('run-query-action');
-    fireEvent.click(runButton);
-    await waitFor(() =>
-      expect(actions).toContainEqual({
-        type: 'START_QUERY',
-        query: expect.objectContaining({
-          ctas: false,
-          sqlEditorId: defaultQueryEditor.id,
+      unsavedQueryEditor: {
+        id: defaultQueryEditor.id,
+        dbId: 5667,
+        sql: 'expectedSql',
+      },
+    },
+  });
+  const { findByTestId } = setup(mockedProps, store);
+  const runButton = await findByTestId('run-query-action');
+  fireEvent.click(runButton);
+  await waitFor(() =>
+    expect(actions).toContainEqual({
+      type: 'START_QUERY',
+      query: expect.objectContaining({
+        ctas: false,
+        sqlEditorId: defaultQueryEditor.id,
+      }),
+    }),
+  );
+});
+
+test('SqlEditor render a Limit Dropdown', async () => {
+  const defaultQueryLimit = 101;
+  const updatedProps = { ...mockedProps, defaultQueryLimit };
+  const { findByText } = setup(updatedProps, store);
+  fireEvent.click(await findByText('Limit'));
+  expect(await findByText('10 000')).toBeInTheDocument();
+});
+
+test('SqlEditor renders an Extension if provided', async () => {
+  const extensionsRegistry = getExtensionsRegistry();
+
+  extensionsRegistry.set('sqleditor.extension.form', () => (
+    <>sqleditor.extension.form extension component</>
+  ));
+
+  setupCodeOverrides();
+  const { findByText } = setup(mockedProps, store);
+  expect(
+    await findByText('sqleditor.extension.form extension component'),
+  ).toBeInTheDocument();
+});
+
+beforeEach(() => {
+  mockIsFeatureEnabled.mockImplementation(
+    featureFlag => featureFlag === FeatureFlag.EstimateQueryCost,
+  );
+});
+afterEach(() => {
+  mockIsFeatureEnabled.mockClear();
+});
+
+test('SqlEditor with EstimateQueryCost enabled sends the catalog and schema to the endpoint', async () => {
+  const estimateApi = 'http://localhost/api/v1/sqllab/estimate/';
+  fetchMock.post(estimateApi, {});
+
+  store = createStore({
+    ...initialState,
+    sqlLab: {
+      ...initialState.sqlLab,
+      databases: {
+        2023: {
+          allow_ctas: false,
+          allow_cvas: false,
+          allow_dml: false,
+          allow_file_upload: false,
+          allow_run_async: false,
+          backend: 'postgresql',
+          database_name: 'examples',
+          expose_in_sqllab: true,
+          force_ctas_schema: null,
+          id: 1,
+          allows_cost_estimate: true,
+        },
+      },
+      unsavedQueryEditor: {
+        id: defaultQueryEditor.id,
+        dbId: 2023,
+        sql: 'SELECT * FROM t',
+        schema: 'public',
+        catalog: 'prod',
+      },
+    },
+  });
+  const { findByLabelText } = setup(mockedProps, store);
+  const button = await findByLabelText('Estimate cost');
+  expect(button).toBeInTheDocument();
+
+  // click button
+  fireEvent.click(button);
+  await waitFor(() => {
+    expect(fetchMock.callHistory.lastCall()?.url).toEqual(estimateApi);
+    expect(fetchMock.callHistory.lastCall()?.options).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({
+          database_id: 2023,
+          catalog: 'prod',
+          schema: 'public',
+          sql: 'SELECT * FROM t',
+          template_params: {},
         }),
+        cache: 'default',
+        credentials: 'same-origin',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          'x-csrftoken': '1234',
+        },
+        method: 'post',
+        mode: 'same-origin',
+        redirect: 'follow',
+        signal: undefined,
       }),
     );
   });
+});
 
-  test('render a Limit Dropdown', async () => {
-    const defaultQueryLimit = 101;
-    const updatedProps = { ...mockedProps, defaultQueryLimit };
-    const { findByText } = setup(updatedProps, store);
-    fireEvent.click(await findByText('Limit'));
-    expect(await findByText('10 000')).toBeInTheDocument();
-  });
+beforeEach(() => {
+  mockIsFeatureEnabled.mockImplementation(
+    featureFlag => featureFlag === FeatureFlag.SqllabBackendPersistence,
+  );
+});
+afterEach(() => {
+  mockIsFeatureEnabled.mockClear();
+});
 
-  test('renders an Extension if provided', async () => {
-    const extensionsRegistry = getExtensionsRegistry();
-
-    extensionsRegistry.set('sqleditor.extension.form', () => (
-      <>sqleditor.extension.form extension component</>
-    ));
-
-    setupCodeOverrides();
-    const { findByText } = setup(mockedProps, store);
-    expect(
-      await findByText('sqleditor.extension.form extension component'),
-    ).toBeInTheDocument();
-  });
-
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-  describe('with EstimateQueryCost enabled', () => {
-    beforeEach(() => {
-      mockIsFeatureEnabled.mockImplementation(
-        featureFlag => featureFlag === FeatureFlag.EstimateQueryCost,
-      );
-    });
-    afterEach(() => {
-      mockIsFeatureEnabled.mockClear();
-    });
-
-    test('sends the catalog and schema to the endpoint', async () => {
-      const estimateApi = 'http://localhost/api/v1/sqllab/estimate/';
-      fetchMock.post(estimateApi, {});
-
-      store = createStore({
-        ...initialState,
-        sqlLab: {
-          ...initialState.sqlLab,
-          databases: {
-            2023: {
-              allow_ctas: false,
-              allow_cvas: false,
-              allow_dml: false,
-              allow_file_upload: false,
-              allow_run_async: false,
-              backend: 'postgresql',
-              database_name: 'examples',
-              expose_in_sqllab: true,
-              force_ctas_schema: null,
-              id: 1,
-              allows_cost_estimate: true,
-            },
-          },
-          unsavedQueryEditor: {
-            id: defaultQueryEditor.id,
-            dbId: 2023,
-            sql: 'SELECT * FROM t',
-            schema: 'public',
-            catalog: 'prod',
-          },
-        },
-      });
-      const { findByLabelText } = setup(mockedProps, store);
-      const button = await findByLabelText('Estimate cost');
-      expect(button).toBeInTheDocument();
-
-      // click button
-      fireEvent.click(button);
-      await waitFor(() => {
-        expect(fetchMock.callHistory.lastCall()?.url).toEqual(estimateApi);
-        expect(fetchMock.callHistory.lastCall()?.options).toEqual(
-          expect.objectContaining({
-            body: JSON.stringify({
-              database_id: 2023,
-              catalog: 'prod',
-              schema: 'public',
-              sql: 'SELECT * FROM t',
-              template_params: {},
-            }),
-            cache: 'default',
-            credentials: 'same-origin',
-            headers: {
-              accept: 'application/json',
-              'content-type': 'application/json',
-              'x-csrftoken': '1234',
-            },
-            method: 'post',
-            mode: 'same-origin',
-            redirect: 'follow',
-            signal: undefined,
-          }),
-        );
-      });
-    });
-  });
-
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-  describe('with SqllabBackendPersistence enabled', () => {
-    beforeEach(() => {
-      mockIsFeatureEnabled.mockImplementation(
-        featureFlag => featureFlag === FeatureFlag.SqllabBackendPersistence,
-      );
-    });
-    afterEach(() => {
-      mockIsFeatureEnabled.mockClear();
-    });
-
-    test('should render loading state when its Editor is not loaded', async () => {
-      const switchTabApi = `glob:*/tabstateview/${defaultQueryEditor.id}/activate`;
-      fetchMock.post(switchTabApi, {});
-      const { getByTestId } = setup(
-        {
-          ...mockedProps,
-          queryEditor: {
-            ...mockedProps.queryEditor,
-            loaded: false,
-          },
-        },
-        store,
-      );
-      const indicator = getByTestId('sqlEditor-loading');
-      expect(indicator).toBeInTheDocument();
-      await waitFor(() =>
-        expect(
-          fetchMock.callHistory.calls('glob:*/tabstateview/*').length,
-        ).toBe(1),
-      );
-      // it will be called from EditorAutoSync
-      expect(fetchMock.callHistory.calls(switchTabApi).length).toBe(0);
-    });
-  });
+test('SqlEditor with SqllabBackendPersistence enabled should render loading state when its Editor is not loaded', async () => {
+  const switchTabApi = `glob:*/tabstateview/${defaultQueryEditor.id}/activate`;
+  fetchMock.post(switchTabApi, {});
+  const { getByTestId } = setup(
+    {
+      ...mockedProps,
+      queryEditor: {
+        ...mockedProps.queryEditor,
+        loaded: false,
+      },
+    },
+    store,
+  );
+  const indicator = getByTestId('sqlEditor-loading');
+  expect(indicator).toBeInTheDocument();
+  await waitFor(() =>
+    expect(fetchMock.callHistory.calls('glob:*/tabstateview/*').length).toBe(1),
+  );
+  // it will be called from EditorAutoSync
+  expect(fetchMock.callHistory.calls(switchTabApi).length).toBe(0);
 });

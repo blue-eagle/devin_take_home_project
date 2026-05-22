@@ -55,145 +55,139 @@ const setup = (queryEditor: QueryEditor, store?: Store) =>
     ...(store && { store }),
   });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('SqlEditorTabHeader', () => {
-  test('renders name', () => {
-    const { queryByText } = setup(defaultQueryEditor, mockStore(initialState));
-    expect(queryByText(defaultQueryEditor.name)).toBeInTheDocument();
-    expect(queryByText(extraQueryEditor1.name)).not.toBeInTheDocument();
-    expect(queryByText(extraQueryEditor2.name)).not.toBeInTheDocument();
-  });
+test('SqlEditorTabHeader renders name', () => {
+  const { queryByText } = setup(defaultQueryEditor, mockStore(initialState));
+  expect(queryByText(defaultQueryEditor.name)).toBeInTheDocument();
+  expect(queryByText(extraQueryEditor1.name)).not.toBeInTheDocument();
+  expect(queryByText(extraQueryEditor2.name)).not.toBeInTheDocument();
+});
 
-  test('renders name from unsaved changes', () => {
-    const expectedTitle = 'updated title';
-    const { queryByText } = setup(
-      defaultQueryEditor,
-      mockStore({
-        ...initialState,
-        sqlLab: {
-          ...initialState.sqlLab,
-          unsavedQueryEditor: {
-            id: defaultQueryEditor.id,
-            name: expectedTitle,
-          },
-        },
-      }),
-    );
-    expect(queryByText(expectedTitle)).toBeInTheDocument();
-    expect(queryByText(defaultQueryEditor.name)).not.toBeInTheDocument();
-    expect(queryByText(extraQueryEditor1.name)).not.toBeInTheDocument();
-    expect(queryByText(extraQueryEditor2.name)).not.toBeInTheDocument();
-  });
-
-  test('renders current name for unrelated unsaved changes', () => {
-    const unrelatedTitle = 'updated title';
-    const { queryByText } = setup(
-      defaultQueryEditor,
-      mockStore({
-        ...initialState,
-        sqlLab: {
-          ...initialState.sqlLab,
-          unsavedQueryEditor: {
-            id: `${defaultQueryEditor.id}-other`,
-            name: unrelatedTitle,
-          },
-        },
-      }),
-    );
-    expect(queryByText(defaultQueryEditor.name)).toBeInTheDocument();
-    expect(queryByText(unrelatedTitle)).not.toBeInTheDocument();
-    expect(queryByText(extraQueryEditor1.name)).not.toBeInTheDocument();
-    expect(queryByText(extraQueryEditor2.name)).not.toBeInTheDocument();
-  });
-
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-  describe('with dropdown menus', () => {
-    let store = mockStore();
-    beforeEach(async () => {
-      store = mockStore(initialState);
-      const { getByTestId } = setup(defaultQueryEditor, store);
-      const dropdown = getByTestId('dropdown-trigger');
-
-      userEvent.click(dropdown);
-    });
-
-    test('should dispatch removeQueryEditor action', async () => {
-      await waitFor(() =>
-        expect(screen.getByTestId('close-tab-menu-option')).toBeInTheDocument(),
-      );
-
-      fireEvent.click(screen.getByTestId('close-tab-menu-option'));
-
-      const actions = store.getActions();
-      await waitFor(() =>
-        expect(actions[0]).toEqual({
-          type: REMOVE_QUERY_EDITOR,
-          queryEditor: defaultQueryEditor,
-        }),
-      );
-    });
-
-    test('should dispatch queryEditorSetTitle action', async () => {
-      await waitFor(() =>
-        expect(screen.getByTestId('close-tab-menu-option')).toBeInTheDocument(),
-      );
-      const expectedTitle = 'typed text';
-      const mockPrompt = jest
-        .spyOn(window, 'prompt')
-        .mockImplementation(() => expectedTitle);
-      fireEvent.click(screen.getByTestId('rename-tab-menu-option'));
-
-      const actions = store.getActions();
-      await waitFor(() =>
-        expect(actions[0]).toEqual({
-          type: QUERY_EDITOR_SET_TITLE,
+test('SqlEditorTabHeader renders name from unsaved changes', () => {
+  const expectedTitle = 'updated title';
+  const { queryByText } = setup(
+    defaultQueryEditor,
+    mockStore({
+      ...initialState,
+      sqlLab: {
+        ...initialState.sqlLab,
+        unsavedQueryEditor: {
+          id: defaultQueryEditor.id,
           name: expectedTitle,
-          queryEditor: expect.objectContaining({
-            id: defaultQueryEditor.id,
-          }),
-        }),
-      );
-      mockPrompt.mockClear();
-    });
+        },
+      },
+    }),
+  );
+  expect(queryByText(expectedTitle)).toBeInTheDocument();
+  expect(queryByText(defaultQueryEditor.name)).not.toBeInTheDocument();
+  expect(queryByText(extraQueryEditor1.name)).not.toBeInTheDocument();
+  expect(queryByText(extraQueryEditor2.name)).not.toBeInTheDocument();
+});
 
-    test('should dispatch removeAllOtherQueryEditors action', async () => {
-      await waitFor(() =>
-        expect(screen.getByTestId('close-tab-menu-option')).toBeInTheDocument(),
-      );
-      fireEvent.click(screen.getByTestId('close-all-other-menu-option'));
+test('SqlEditorTabHeader renders current name for unrelated unsaved changes', () => {
+  const unrelatedTitle = 'updated title';
+  const { queryByText } = setup(
+    defaultQueryEditor,
+    mockStore({
+      ...initialState,
+      sqlLab: {
+        ...initialState.sqlLab,
+        unsavedQueryEditor: {
+          id: `${defaultQueryEditor.id}-other`,
+          name: unrelatedTitle,
+        },
+      },
+    }),
+  );
+  expect(queryByText(defaultQueryEditor.name)).toBeInTheDocument();
+  expect(queryByText(unrelatedTitle)).not.toBeInTheDocument();
+  expect(queryByText(extraQueryEditor1.name)).not.toBeInTheDocument();
+  expect(queryByText(extraQueryEditor2.name)).not.toBeInTheDocument();
+});
 
-      const actions = store.getActions();
-      await waitFor(() =>
-        expect(actions).toEqual([
-          {
-            type: REMOVE_QUERY_EDITOR,
-            queryEditor: initialState.sqlLab.queryEditors[1],
-          },
-          {
-            type: REMOVE_QUERY_EDITOR,
-            queryEditor: initialState.sqlLab.queryEditors[2],
-          },
-        ]),
-      );
-    });
+let store = mockStore();
+beforeEach(async () => {
+  store = mockStore(initialState);
+  const { getByTestId } = setup(defaultQueryEditor, store);
+  const dropdown = getByTestId('dropdown-trigger');
 
-    test('should dispatch cloneQueryToNewTab action', async () => {
-      await waitFor(() =>
-        expect(screen.getByTestId('close-tab-menu-option')).toBeInTheDocument(),
-      );
-      fireEvent.click(screen.getByTestId('clone-tab-menu-option'));
+  userEvent.click(dropdown);
+});
 
-      const actions = store.getActions();
-      await waitFor(() =>
-        expect(actions[0]).toEqual({
-          type: ADD_QUERY_EDITOR,
-          queryEditor: expect.objectContaining({
-            name: `Copy of ${defaultQueryEditor.name}`,
-            sql: defaultQueryEditor.sql,
-            autorun: false,
-          }),
-        }),
-      );
-    });
-  });
+test('SqlEditorTabHeader with dropdown menus should dispatch removeQueryEditor action', async () => {
+  await waitFor(() =>
+    expect(screen.getByTestId('close-tab-menu-option')).toBeInTheDocument(),
+  );
+
+  fireEvent.click(screen.getByTestId('close-tab-menu-option'));
+
+  const actions = store.getActions();
+  await waitFor(() =>
+    expect(actions[0]).toEqual({
+      type: REMOVE_QUERY_EDITOR,
+      queryEditor: defaultQueryEditor,
+    }),
+  );
+});
+
+test('SqlEditorTabHeader with dropdown menus should dispatch queryEditorSetTitle action', async () => {
+  await waitFor(() =>
+    expect(screen.getByTestId('close-tab-menu-option')).toBeInTheDocument(),
+  );
+  const expectedTitle = 'typed text';
+  const mockPrompt = jest
+    .spyOn(window, 'prompt')
+    .mockImplementation(() => expectedTitle);
+  fireEvent.click(screen.getByTestId('rename-tab-menu-option'));
+
+  const actions = store.getActions();
+  await waitFor(() =>
+    expect(actions[0]).toEqual({
+      type: QUERY_EDITOR_SET_TITLE,
+      name: expectedTitle,
+      queryEditor: expect.objectContaining({
+        id: defaultQueryEditor.id,
+      }),
+    }),
+  );
+  mockPrompt.mockClear();
+});
+
+test('SqlEditorTabHeader with dropdown menus should dispatch removeAllOtherQueryEditors action', async () => {
+  await waitFor(() =>
+    expect(screen.getByTestId('close-tab-menu-option')).toBeInTheDocument(),
+  );
+  fireEvent.click(screen.getByTestId('close-all-other-menu-option'));
+
+  const actions = store.getActions();
+  await waitFor(() =>
+    expect(actions).toEqual([
+      {
+        type: REMOVE_QUERY_EDITOR,
+        queryEditor: initialState.sqlLab.queryEditors[1],
+      },
+      {
+        type: REMOVE_QUERY_EDITOR,
+        queryEditor: initialState.sqlLab.queryEditors[2],
+      },
+    ]),
+  );
+});
+
+test('SqlEditorTabHeader with dropdown menus should dispatch cloneQueryToNewTab action', async () => {
+  await waitFor(() =>
+    expect(screen.getByTestId('close-tab-menu-option')).toBeInTheDocument(),
+  );
+  fireEvent.click(screen.getByTestId('clone-tab-menu-option'));
+
+  const actions = store.getActions();
+  await waitFor(() =>
+    expect(actions[0]).toEqual({
+      type: ADD_QUERY_EDITOR,
+      queryEditor: expect.objectContaining({
+        name: `Copy of ${defaultQueryEditor.name}`,
+        sql: defaultQueryEditor.sql,
+        autorun: false,
+      }),
+    }),
+  );
 });

@@ -1,137 +1,96 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+const mockBootstrapData = {
+  theme: {
+    default: { colors: { primary: '#1890ff' } },
+    dark: { colors: { primary: '#000000' } },
+    enableUiThemeAdministration: true,
+  },
+};
 
-/**
- * Tests for theme bootstrap data loading logic
- *
- * These tests validate the behavior of get_theme_bootstrap_data() in base.py
- * by testing the expected bootstrap data structure
- */
+test('Theme Bootstrap Data when UI theme administration is enabled should load themes from database when available', () => {
+  // This tests that when enableUiThemeAdministration is true,
+  // the system attempts to load themes from the database
+  expect(mockBootstrapData.theme.enableUiThemeAdministration).toBe(true);
+  expect(mockBootstrapData.theme.default).toBeDefined();
+  expect(mockBootstrapData.theme.dark).toBeDefined();
+});
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('Theme Bootstrap Data', () => {
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-  describe('when UI theme administration is enabled', () => {
-    const mockBootstrapData = {
-      theme: {
-        default: { colors: { primary: '#1890ff' } },
-        dark: { colors: { primary: '#000000' } },
-        enableUiThemeAdministration: true,
-      },
-    };
+test('Theme Bootstrap Data when UI theme administration is enabled should have proper theme structure', () => {
+  expect(mockBootstrapData.theme).toHaveProperty('default');
+  expect(mockBootstrapData.theme).toHaveProperty('dark');
+  expect(mockBootstrapData.theme).toHaveProperty('enableUiThemeAdministration');
+});
 
-    test('should load themes from database when available', () => {
-      // This tests that when enableUiThemeAdministration is true,
-      // the system attempts to load themes from the database
-      expect(mockBootstrapData.theme.enableUiThemeAdministration).toBe(true);
-      expect(mockBootstrapData.theme.default).toBeDefined();
-      expect(mockBootstrapData.theme.dark).toBeDefined();
-    });
+const mockBootstrapDataDisabled = {
+  theme: {
+    default: { colors: { primary: '#1890ff' } },
+    dark: { colors: { primary: '#000000' } },
+    enableUiThemeAdministration: false,
+  },
+};
 
-    test('should have proper theme structure', () => {
-      expect(mockBootstrapData.theme).toHaveProperty('default');
-      expect(mockBootstrapData.theme).toHaveProperty('dark');
-      expect(mockBootstrapData.theme).toHaveProperty(
-        'enableUiThemeAdministration',
-      );
-    });
-  });
+test('Theme Bootstrap Data when UI theme administration is disabled should use config-based themes', () => {
+  // When enableUiThemeAdministration is false,
+  // themes should come from configuration files
+  expect(mockBootstrapDataDisabled.theme.enableUiThemeAdministration).toBe(
+    false,
+  );
+  expect(mockBootstrapDataDisabled.theme.default).toBeDefined();
+  expect(mockBootstrapDataDisabled.theme.dark).toBeDefined();
+});
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-  describe('when UI theme administration is disabled', () => {
-    const mockBootstrapData = {
-      theme: {
-        default: { colors: { primary: '#1890ff' } },
-        dark: { colors: { primary: '#000000' } },
-        enableUiThemeAdministration: false,
-      },
-    };
+test('Theme Bootstrap Data edge cases should handle missing theme gracefully', () => {
+  const mockBootstrapData = {
+    theme: {
+      default: {},
+      dark: {},
+      enableUiThemeAdministration: true,
+    },
+  };
 
-    test('should use config-based themes', () => {
-      // When enableUiThemeAdministration is false,
-      // themes should come from configuration files
-      expect(mockBootstrapData.theme.enableUiThemeAdministration).toBe(false);
-      expect(mockBootstrapData.theme.default).toBeDefined();
-      expect(mockBootstrapData.theme.dark).toBeDefined();
-    });
-  });
+  // Empty theme objects should be valid
+  expect(mockBootstrapData.theme.default).toEqual({});
+  expect(mockBootstrapData.theme.dark).toEqual({});
+});
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-  describe('edge cases', () => {
-    test('should handle missing theme gracefully', () => {
-      const mockBootstrapData = {
-        theme: {
-          default: {},
-          dark: {},
-          enableUiThemeAdministration: true,
-        },
-      };
+test('Theme Bootstrap Data edge cases should handle invalid theme settings', () => {
+  const mockBootstrapData = {
+    theme: {
+      default: {},
+      dark: {},
+      enableUiThemeAdministration: false,
+    },
+  };
 
-      // Empty theme objects should be valid
-      expect(mockBootstrapData.theme.default).toEqual({});
-      expect(mockBootstrapData.theme.dark).toEqual({});
-    });
+  // Should fall back to defaults when settings are invalid
+  expect(mockBootstrapData.theme.enableUiThemeAdministration).toBeDefined();
+  expect(mockBootstrapData.theme.enableUiThemeAdministration).toBe(false);
+});
 
-    test('should handle invalid theme settings', () => {
-      const mockBootstrapData = {
-        theme: {
-          default: {},
-          dark: {},
-          enableUiThemeAdministration: false,
-        },
-      };
+test('Theme Bootstrap Data permissions integration should respect admin-only access for system themes', () => {
+  const mockBootstrapData = {
+    theme: {
+      default: {},
+      dark: {},
+      enableUiThemeAdministration: true,
+    },
+  };
 
-      // Should fall back to defaults when settings are invalid
-      expect(mockBootstrapData.theme.enableUiThemeAdministration).toBeDefined();
-      expect(mockBootstrapData.theme.enableUiThemeAdministration).toBe(false);
-    });
-  });
+  // When UI theme administration is enabled,
+  // only admins should be able to modify system themes
+  expect(mockBootstrapData.theme.enableUiThemeAdministration).toBe(true);
+});
 
-  // eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-  describe('permissions integration', () => {
-    test('should respect admin-only access for system themes', () => {
-      const mockBootstrapData = {
-        theme: {
-          default: {},
-          dark: {},
-          enableUiThemeAdministration: true,
-        },
-      };
+test('Theme Bootstrap Data permissions integration should allow all users to view themes', () => {
+  const mockBootstrapData = {
+    theme: {
+      default: { colors: { primary: '#1890ff' } },
+      dark: { colors: { primary: '#000000' } },
+      enableUiThemeAdministration: true,
+    },
+  };
 
-      // When UI theme administration is enabled,
-      // only admins should be able to modify system themes
-      expect(mockBootstrapData.theme.enableUiThemeAdministration).toBe(true);
-    });
-
-    test('should allow all users to view themes', () => {
-      const mockBootstrapData = {
-        theme: {
-          default: { colors: { primary: '#1890ff' } },
-          dark: { colors: { primary: '#000000' } },
-          enableUiThemeAdministration: true,
-        },
-      };
-
-      // All users should be able to see theme data in bootstrap
-      expect(mockBootstrapData.theme).toBeDefined();
-      expect(mockBootstrapData.theme.default).toBeDefined();
-      expect(mockBootstrapData.theme.dark).toBeDefined();
-    });
-  });
+  // All users should be able to see theme data in bootstrap
+  expect(mockBootstrapData.theme).toBeDefined();
+  expect(mockBootstrapData.theme.default).toBeDefined();
+  expect(mockBootstrapData.theme.dark).toBeDefined();
 });

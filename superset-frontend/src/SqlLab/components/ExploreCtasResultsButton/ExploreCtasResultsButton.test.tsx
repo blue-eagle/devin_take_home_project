@@ -47,48 +47,45 @@ const setup = (props: Partial<ExploreCtasResultsButtonProps>, store?: Store) =>
     },
   );
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('ExploreCtasResultsButton', () => {
-  const postFormSpy = jest.spyOn(SupersetClientClass.prototype, 'postForm');
-  postFormSpy.mockImplementation(jest.fn());
+const postFormSpy = jest.spyOn(SupersetClientClass.prototype, 'postForm');
+postFormSpy.mockImplementation(jest.fn());
 
-  test('renders', async () => {
-    const { queryByText } = setup({}, mockStore(initialState));
+test('ExploreCtasResultsButton renders', async () => {
+  const { queryByText } = setup({}, mockStore(initialState));
 
-    expect(queryByText('Explore')).toBeInTheDocument();
-  });
+  expect(queryByText('Explore')).toBeInTheDocument();
+});
 
-  test('visualize results', async () => {
-    const { getByText } = setup({}, mockStore(initialState));
+test('ExploreCtasResultsButton visualize results', async () => {
+  const { getByText } = setup({}, mockStore(initialState));
 
-    postFormSpy.mockClear();
-    fetchMock.clearHistory().removeRoutes();
-    fetchMock.post(getOrCreateTableEndpoint, { result: { table_id: 1234 } });
+  postFormSpy.mockClear();
+  fetchMock.clearHistory().removeRoutes();
+  fetchMock.post(getOrCreateTableEndpoint, { result: { table_id: 1234 } });
 
-    fireEvent.click(getByText('Explore'));
+  fireEvent.click(getByText('Explore'));
 
-    await waitFor(() => {
-      expect(postFormSpy).toHaveBeenCalledTimes(1);
-      expect(postFormSpy).toHaveBeenCalledWith('http://localhost/explore/', {
-        form_data:
-          '{"datasource":"1234__table","metrics":["count"],"groupby":[],"viz_type":"table","since":"100 years ago","all_columns":[],"row_limit":1000}',
-      });
+  await waitFor(() => {
+    expect(postFormSpy).toHaveBeenCalledTimes(1);
+    expect(postFormSpy).toHaveBeenCalledWith('http://localhost/explore/', {
+      form_data:
+        '{"datasource":"1234__table","metrics":["count"],"groupby":[],"viz_type":"table","since":"100 years ago","all_columns":[],"row_limit":1000}',
     });
   });
+});
 
-  test('visualize results fails', async () => {
-    const { getByText } = setup({}, mockStore(initialState));
+test('ExploreCtasResultsButton visualize results fails', async () => {
+  const { getByText } = setup({}, mockStore(initialState));
 
-    postFormSpy.mockClear();
-    fetchMock.clearHistory().removeRoutes();
-    fetchMock.post(getOrCreateTableEndpoint, {
-      throws: new Error('Unexpected all to v1 API'),
-    });
+  postFormSpy.mockClear();
+  fetchMock.clearHistory().removeRoutes();
+  fetchMock.post(getOrCreateTableEndpoint, {
+    throws: new Error('Unexpected all to v1 API'),
+  });
 
-    fireEvent.click(getByText('Explore'));
+  fireEvent.click(getByText('Explore'));
 
-    await waitFor(() => {
-      expect(postFormSpy).toHaveBeenCalledTimes(0);
-    });
+  await waitFor(() => {
+    expect(postFormSpy).toHaveBeenCalledTimes(0);
   });
 });

@@ -208,44 +208,41 @@ test('Clicking on checkbox when resetConfig:false', () => {
   expect(setNativeFilterFieldValues).not.toHaveBeenCalled();
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('ColumnSelect filterValues behavior', () => {
-  beforeEach(() => {
-    (getControlItems as jest.Mock).mockReturnValue([
-      {
-        name: 'groupby',
-        config: { label: 'Column', multiple: false, required: false },
-      },
-    ]);
-  });
+beforeEach(() => {
+  (getControlItems as jest.Mock).mockReturnValue([
+    {
+      name: 'groupby',
+      config: { label: 'Column', multiple: false, required: false },
+    },
+  ]);
+});
 
-  test('only renders filterable columns when doesColumnMatchFilterType returns true', () => {
-    (doesColumnMatchFilterType as jest.Mock).mockReturnValue(true);
-    const props = {
-      ...createProps(),
-      formFilter: { filterType: 'filterType' },
-    };
-    // @ts-expect-error: bypass incomplete formFilter type for test
-    const element = getControlItemsMap(props).mainControlItems.groupby
-      .element as React.ReactElement;
-    render(element);
-    expect(screen.getByText('col1')).toBeInTheDocument();
-    expect(screen.getByText('col3')).toBeInTheDocument();
-    expect(screen.queryByText('col2')).not.toBeInTheDocument();
-  });
+test('ColumnSelect filterValues behavior only renders filterable columns when doesColumnMatchFilterType returns true', () => {
+  (doesColumnMatchFilterType as jest.Mock).mockReturnValue(true);
+  const props = {
+    ...createProps(),
+    formFilter: { filterType: 'filterType' },
+  };
+  // @ts-expect-error: bypass incomplete formFilter type for test
+  const element = getControlItemsMap(props).mainControlItems.groupby
+    .element as React.ReactElement;
+  render(element);
+  expect(screen.getByText('col1')).toBeInTheDocument();
+  expect(screen.getByText('col3')).toBeInTheDocument();
+  expect(screen.queryByText('col2')).not.toBeInTheDocument();
+});
 
-  test('renders no columns when doesColumnMatchFilterType returns false', () => {
-    (doesColumnMatchFilterType as jest.Mock).mockReturnValue(false);
-    const props = {
-      ...createProps(),
-      formFilter: { filterType: 'filterType' },
-    };
-    // @ts-expect-error: bypass incomplete formFilter type for test
-    const element = getControlItemsMap(props).mainControlItems.groupby
-      .element as React.ReactElement;
-    render(element);
-    expect(screen.queryByText('col1')).not.toBeInTheDocument();
-    expect(screen.queryByText('col3')).not.toBeInTheDocument();
-    expect(screen.queryByText('col2')).not.toBeInTheDocument();
-  });
+test('ColumnSelect filterValues behavior renders no columns when doesColumnMatchFilterType returns false', () => {
+  (doesColumnMatchFilterType as jest.Mock).mockReturnValue(false);
+  const props = {
+    ...createProps(),
+    formFilter: { filterType: 'filterType' },
+  };
+  // @ts-expect-error: bypass incomplete formFilter type for test
+  const element = getControlItemsMap(props).mainControlItems.groupby
+    .element as React.ReactElement;
+  render(element);
+  expect(screen.queryByText('col1')).not.toBeInTheDocument();
+  expect(screen.queryByText('col3')).not.toBeInTheDocument();
+  expect(screen.queryByText('col2')).not.toBeInTheDocument();
 });

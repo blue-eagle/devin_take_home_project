@@ -105,33 +105,35 @@ jest.mock('@superset-ui/core', () => ({
 
 const mockedIsFeatureEnabled = isFeatureEnabled as jest.Mock;
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('canUserEditDashboard', () => {
-  test('allows owners to edit', () => {
-    expect(canUserEditDashboard(dashboard, ownerUser)).toEqual(true);
-  });
-  test('allows admin users to edit regardless of ownership', () => {
-    expect(canUserEditDashboard(dashboard, adminUser)).toEqual(true);
-  });
-  test('rejects non-owners', () => {
-    expect(canUserEditDashboard(dashboard, outsiderUser)).toEqual(false);
-  });
-  test('rejects nonexistent users', () => {
-    expect(canUserEditDashboard(dashboard, null)).toEqual(false);
-  });
-  test('rejects missing roles', () => {
-    // in redux, when there is no user, the user is actually set to an empty object,
-    // so we need to handle missing roles as well as a missing user.s
-    expect(canUserEditDashboard(dashboard, {})).toEqual(false);
-  });
-  test('rejects "admins" if the admin role does not have edit rights for some reason', () => {
-    expect(
-      canUserEditDashboard(dashboard, {
-        ...adminUser,
-        roles: { Admin: [] },
-      }),
-    ).toEqual(false);
-  });
+test('canUserEditDashboard allows owners to edit', () => {
+  expect(canUserEditDashboard(dashboard, ownerUser)).toEqual(true);
+});
+
+test('canUserEditDashboard allows admin users to edit regardless of ownership', () => {
+  expect(canUserEditDashboard(dashboard, adminUser)).toEqual(true);
+});
+
+test('canUserEditDashboard rejects non-owners', () => {
+  expect(canUserEditDashboard(dashboard, outsiderUser)).toEqual(false);
+});
+
+test('canUserEditDashboard rejects nonexistent users', () => {
+  expect(canUserEditDashboard(dashboard, null)).toEqual(false);
+});
+
+test('canUserEditDashboard rejects missing roles', () => {
+  // in redux, when there is no user, the user is actually set to an empty object,
+  // so we need to handle missing roles as well as a missing user.s
+  expect(canUserEditDashboard(dashboard, {})).toEqual(false);
+});
+
+test('canUserEditDashboard rejects "admins" if the admin role does not have edit rights for some reason', () => {
+  expect(
+    canUserEditDashboard(dashboard, {
+      ...adminUser,
+      roles: { Admin: [] },
+    }),
+  ).toEqual(false);
 });
 
 test('isUserAdmin returns true for admin user', () => {
@@ -186,52 +188,46 @@ test('userHasPermission returns true if user has permission', () => {
   ).toEqual(true);
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('canUserSaveAsDashboard with RBAC feature flag disabled', () => {
-  beforeAll(() => {
-    mockedIsFeatureEnabled.mockImplementation(
-      (featureFlag: FeatureFlag) => featureFlag !== FeatureFlag.DashboardRbac,
-    );
-  });
-
-  afterAll(() => {
-    mockedIsFeatureEnabled.mockRestore();
-  });
-
-  test('allows owners', () => {
-    expect(canUserSaveAsDashboard(dashboard, ownerUser)).toEqual(true);
-  });
-
-  test('allows admin users', () => {
-    expect(canUserSaveAsDashboard(dashboard, adminUser)).toEqual(true);
-  });
-
-  test('allows non-owners', () => {
-    expect(canUserSaveAsDashboard(dashboard, outsiderUser)).toEqual(true);
-  });
+beforeAll(() => {
+  mockedIsFeatureEnabled.mockImplementation(
+    (featureFlag: FeatureFlag) => featureFlag !== FeatureFlag.DashboardRbac,
+  );
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('canUserSaveAsDashboard with RBAC feature flag enabled', () => {
-  beforeAll(() => {
-    mockedIsFeatureEnabled.mockImplementation(
-      (featureFlag: FeatureFlag) => featureFlag === FeatureFlag.DashboardRbac,
-    );
-  });
+afterAll(() => {
+  mockedIsFeatureEnabled.mockRestore();
+});
 
-  afterAll(() => {
-    mockedIsFeatureEnabled.mockRestore();
-  });
+test('canUserSaveAsDashboard with RBAC feature flag disabled allows owners', () => {
+  expect(canUserSaveAsDashboard(dashboard, ownerUser)).toEqual(true);
+});
 
-  test('allows owners', () => {
-    expect(canUserSaveAsDashboard(dashboard, ownerUser)).toEqual(true);
-  });
+test('canUserSaveAsDashboard with RBAC feature flag disabled allows admin users', () => {
+  expect(canUserSaveAsDashboard(dashboard, adminUser)).toEqual(true);
+});
 
-  test('allows admin users', () => {
-    expect(canUserSaveAsDashboard(dashboard, adminUser)).toEqual(true);
-  });
+test('canUserSaveAsDashboard with RBAC feature flag disabled allows non-owners', () => {
+  expect(canUserSaveAsDashboard(dashboard, outsiderUser)).toEqual(true);
+});
 
-  test('reject non-owners', () => {
-    expect(canUserSaveAsDashboard(dashboard, outsiderUser)).toEqual(false);
-  });
+beforeAll(() => {
+  mockedIsFeatureEnabled.mockImplementation(
+    (featureFlag: FeatureFlag) => featureFlag === FeatureFlag.DashboardRbac,
+  );
+});
+
+afterAll(() => {
+  mockedIsFeatureEnabled.mockRestore();
+});
+
+test('canUserSaveAsDashboard with RBAC feature flag enabled allows owners', () => {
+  expect(canUserSaveAsDashboard(dashboard, ownerUser)).toEqual(true);
+});
+
+test('canUserSaveAsDashboard with RBAC feature flag enabled allows admin users', () => {
+  expect(canUserSaveAsDashboard(dashboard, adminUser)).toEqual(true);
+});
+
+test('canUserSaveAsDashboard with RBAC feature flag enabled reject non-owners', () => {
+  expect(canUserSaveAsDashboard(dashboard, outsiderUser)).toEqual(false);
 });

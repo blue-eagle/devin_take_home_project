@@ -112,179 +112,176 @@ const renderList = (props = {}, storeOverrides = {}) =>
     },
   );
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('SavedQueryList', () => {
-  beforeEach(() => {
-    fetchMock.clearHistory();
-  });
+beforeEach(() => {
+  fetchMock.clearHistory();
+});
 
-  test('renders', async () => {
-    renderList();
-    expect(await screen.findByText('Saved queries')).toBeInTheDocument();
-  });
+test('SavedQueryList renders', async () => {
+  renderList();
+  expect(await screen.findByText('Saved queries')).toBeInTheDocument();
+});
 
-  test('renders a ListView', async () => {
-    renderList();
-    expect(
-      await screen.findByTestId('saved_query-list-view'),
-    ).toBeInTheDocument();
-  });
+test('SavedQueryList renders a ListView', async () => {
+  renderList();
+  expect(
+    await screen.findByTestId('saved_query-list-view'),
+  ).toBeInTheDocument();
+});
 
-  test('renders query information', async () => {
-    renderList();
+test('SavedQueryList renders query information', async () => {
+  renderList();
 
-    // Wait for list to load
-    await screen.findByTestId('saved_query-list-view');
+  // Wait for list to load
+  await screen.findByTestId('saved_query-list-view');
 
-    // Wait for data to load
-    await waitFor(() => {
-      mockQueries.forEach(query => {
-        expect(screen.getByText(query.label)).toBeInTheDocument();
-        expect(
-          screen.getByText(query.database.database_name),
-        ).toBeInTheDocument();
-        expect(screen.getAllByText(query.schema)[0]).toBeInTheDocument();
-      });
+  // Wait for data to load
+  await waitFor(() => {
+    mockQueries.forEach(query => {
+      expect(screen.getByText(query.label)).toBeInTheDocument();
+      expect(
+        screen.getByText(query.database.database_name),
+      ).toBeInTheDocument();
+      expect(screen.getAllByText(query.schema)[0]).toBeInTheDocument();
     });
   });
+});
 
-  test('handles query deletion', async () => {
-    renderList();
+test('SavedQueryList handles query deletion', async () => {
+  renderList();
 
-    // Wait for list to load
-    await screen.findByTestId('saved_query-list-view');
+  // Wait for list to load
+  await screen.findByTestId('saved_query-list-view');
 
-    // Wait for data and find delete button
-    const deleteButtons = await screen.findAllByTestId('delete-action');
-    fireEvent.click(deleteButtons[0]);
+  // Wait for data and find delete button
+  const deleteButtons = await screen.findAllByTestId('delete-action');
+  fireEvent.click(deleteButtons[0]);
 
-    // Confirm deletion
-    const deleteInput = screen.getByTestId('delete-modal-input');
-    fireEvent.change(deleteInput, { target: { value: 'DELETE' } });
+  // Confirm deletion
+  const deleteInput = screen.getByTestId('delete-modal-input');
+  fireEvent.change(deleteInput, { target: { value: 'DELETE' } });
 
-    const confirmButton = screen.getByTestId('modal-confirm-button');
-    fireEvent.click(confirmButton);
+  const confirmButton = screen.getByTestId('modal-confirm-button');
+  fireEvent.click(confirmButton);
 
-    // Verify API call
-    await waitFor(() => {
-      expect(fetchMock.callHistory.calls(/saved_query\/0/)).toHaveLength(1);
-    });
+  // Verify API call
+  await waitFor(() => {
+    expect(fetchMock.callHistory.calls(/saved_query\/0/)).toHaveLength(1);
   });
+});
 
-  test('handles search filtering', async () => {
-    renderList();
+test('SavedQueryList handles search filtering', async () => {
+  renderList();
 
-    // Wait for list to load
-    await screen.findByTestId('saved_query-list-view');
+  // Wait for list to load
+  await screen.findByTestId('saved_query-list-view');
 
-    // Find and use search input
-    const searchInput = screen.getByTestId('filters-search');
-    fireEvent.change(searchInput, { target: { value: 'test query' } });
-    fireEvent.keyDown(searchInput, { key: 'Enter' });
+  // Find and use search input
+  const searchInput = screen.getByTestId('filters-search');
+  fireEvent.change(searchInput, { target: { value: 'test query' } });
+  fireEvent.keyDown(searchInput, { key: 'Enter' });
 
-    // Verify API call
-    await waitFor(() => {
-      const lastCall = fetchMock.callHistory.lastCall(/saved_query\/\?q/);
-      expect(lastCall).toBeDefined();
-      expect(lastCall?.url).toContain('order_column');
-      expect(lastCall?.url).toContain('page');
-    });
+  // Verify API call
+  await waitFor(() => {
+    const lastCall = fetchMock.callHistory.lastCall(/saved_query\/\?q/);
+    expect(lastCall).toBeDefined();
+    expect(lastCall?.url).toContain('order_column');
+    expect(lastCall?.url).toContain('page');
   });
+});
 
-  test('fetches data', async () => {
-    renderList();
-    await waitFor(() => {
-      const lastCall = fetchMock.callHistory.lastCall(/saved_query\/\?q/);
-      expect(lastCall).toBeDefined();
-      expect(lastCall?.url).toContain('order_column');
-      expect(lastCall?.url).toContain('page');
-    });
+test('SavedQueryList fetches data', async () => {
+  renderList();
+  await waitFor(() => {
+    const lastCall = fetchMock.callHistory.lastCall(/saved_query\/\?q/);
+    expect(lastCall).toBeDefined();
+    expect(lastCall?.url).toContain('order_column');
+    expect(lastCall?.url).toContain('page');
   });
+});
 
-  test('handles sorting', async () => {
-    renderList();
+test('SavedQueryList handles sorting', async () => {
+  renderList();
 
-    // Wait for list to load
-    await screen.findByTestId('saved_query-list-view');
+  // Wait for list to load
+  await screen.findByTestId('saved_query-list-view');
 
-    // Find and click sort header
-    const sortHeaders = screen.getAllByTestId('sort-header');
-    fireEvent.click(sortHeaders[0]);
+  // Find and click sort header
+  const sortHeaders = screen.getAllByTestId('sort-header');
+  fireEvent.click(sortHeaders[0]);
 
-    // Verify API call includes sorting
-    await waitFor(() => {
-      const url = new URL(
-        fetchMock.callHistory.lastCall(/saved_query\/\?q/)?.url as string,
-      );
-      const params = new URLSearchParams(url.search);
-      const qParam = params.get('q');
-      expect(qParam).toContain('order_column:label');
-    });
-  });
-
-  test('shows/hides elements based on permissions', async () => {
-    // Mock info response without write permission
-    fetchMock.removeRoute(queriesInfoEndpoint);
-    fetchMock.get(
-      queriesInfoEndpoint,
-      { permissions: ['can_read'] },
-      { name: queriesInfoEndpoint },
+  // Verify API call includes sorting
+  await waitFor(() => {
+    const url = new URL(
+      fetchMock.callHistory.lastCall(/saved_query\/\?q/)?.url as string,
     );
+    const params = new URLSearchParams(url.search);
+    const qParam = params.get('q');
+    expect(qParam).toContain('order_column:label');
+  });
+});
 
-    // Mock list response
-    fetchMock.removeRoute(queriesEndpoint);
-    fetchMock.get(
-      queriesEndpoint,
-      { result: mockQueries, count: mockQueries.length },
-      { name: queriesEndpoint },
-    );
+test('SavedQueryList shows/hides elements based on permissions', async () => {
+  // Mock info response without write permission
+  fetchMock.removeRoute(queriesInfoEndpoint);
+  fetchMock.get(
+    queriesInfoEndpoint,
+    { permissions: ['can_read'] },
+    { name: queriesInfoEndpoint },
+  );
 
+  // Mock list response
+  fetchMock.removeRoute(queriesEndpoint);
+  fetchMock.get(
+    queriesEndpoint,
+    { result: mockQueries, count: mockQueries.length },
+    { name: queriesEndpoint },
+  );
+
+  renderList();
+
+  // Wait for list to load
+  await screen.findByTestId('saved_query-list-view');
+
+  // Wait for data to load
+  await waitFor(() => {
+    expect(screen.getByText(mockQueries[0].label)).toBeInTheDocument();
+  });
+
+  // Verify delete buttons are not shown
+  expect(screen.queryByTestId('delete-action')).not.toBeInTheDocument();
+});
+
+test('SavedQueryList "+ Query" button pushes a router-relative path (subdirectory deployment)', async () => {
+  // Simulate SUPERSET_APP_ROOT=/superset. ensureAppRoot/makeUrl read
+  // applicationRoot() dynamically, so mocking it here makes the buggy code
+  // path (makeUrl() around history.push) produce '/superset/sqllab?new=true'
+  // instead of being a no-op. React Router's <Router basename> prefixes the
+  // app root on its own, so history.push MUST receive a path without the
+  // app-root prefix — otherwise navigation lands at /superset/superset/sqllab
+  // and shows a blank page (sc-103661).
+  const applicationRootSpy = jest
+    .spyOn(getBootstrapData, 'applicationRoot')
+    .mockReturnValue('/superset');
+
+  try {
     renderList();
 
-    // Wait for list to load
     await screen.findByTestId('saved_query-list-view');
 
-    // Wait for data to load
-    await waitFor(() => {
-      expect(screen.getByText(mockQueries[0].label)).toBeInTheDocument();
+    const queryButton = await screen.findByRole('button', {
+      name: /query/i,
     });
+    fireEvent.click(queryButton);
 
-    // Verify delete buttons are not shown
-    expect(screen.queryByTestId('delete-action')).not.toBeInTheDocument();
-  });
-
-  test('"+ Query" button pushes a router-relative path (subdirectory deployment)', async () => {
-    // Simulate SUPERSET_APP_ROOT=/superset. ensureAppRoot/makeUrl read
-    // applicationRoot() dynamically, so mocking it here makes the buggy code
-    // path (makeUrl() around history.push) produce '/superset/sqllab?new=true'
-    // instead of being a no-op. React Router's <Router basename> prefixes the
-    // app root on its own, so history.push MUST receive a path without the
-    // app-root prefix — otherwise navigation lands at /superset/superset/sqllab
-    // and shows a blank page (sc-103661).
-    const applicationRootSpy = jest
-      .spyOn(getBootstrapData, 'applicationRoot')
-      .mockReturnValue('/superset');
-
-    try {
-      renderList();
-
-      await screen.findByTestId('saved_query-list-view');
-
-      const queryButton = await screen.findByRole('button', {
-        name: /query/i,
-      });
-      fireEvent.click(queryButton);
-
-      await waitFor(() => {
-        // The MemoryRouter in renderList uses the default ('/') basename, so
-        // useLocation reflects exactly what history.push received. A correct
-        // router-relative push produces '/sqllab?new=true'; a buggy push that
-        // re-applied the app root would produce '/superset/sqllab?new=true'.
-        const location = screen.getByTestId('location-display').textContent;
-        expect(location).toBe('/sqllab?new=true');
-      });
-    } finally {
-      applicationRootSpy.mockRestore();
-    }
-  });
+    await waitFor(() => {
+      // The MemoryRouter in renderList uses the default ('/') basename, so
+      // useLocation reflects exactly what history.push received. A correct
+      // router-relative push produces '/sqllab?new=true'; a buggy push that
+      // re-applied the app root would produce '/superset/sqllab?new=true'.
+      const location = screen.getByTestId('location-display').textContent;
+      expect(location).toBe('/sqllab?new=true');
+    });
+  } finally {
+    applicationRootSpy.mockRestore();
+  }
 });

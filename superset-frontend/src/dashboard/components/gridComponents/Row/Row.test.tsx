@@ -255,77 +255,74 @@ test('should increment the depth of its children', () => {
   );
 });
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('visibility handling for intersection observers', () => {
-  const mockIntersectionObserver = jest.fn();
-  const mockObserve = jest.fn();
-  const mockDisconnect = jest.fn();
+const mockIntersectionObserver = jest.fn();
+const mockObserve = jest.fn();
+const mockDisconnect = jest.fn();
 
-  beforeAll(() => {
-    mockIntersectionObserver.mockReturnValue({
-      observe: mockObserve,
-      unobserve: jest.fn(),
-      disconnect: mockDisconnect,
-    });
-    window.IntersectionObserver = mockIntersectionObserver;
+beforeAll(() => {
+  mockIntersectionObserver.mockReturnValue({
+    observe: mockObserve,
+    unobserve: jest.fn(),
+    disconnect: mockDisconnect,
   });
+  window.IntersectionObserver = mockIntersectionObserver;
+});
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
-  afterAll(() => {
-    delete (window as any).IntersectionObserver;
-  });
+afterAll(() => {
+  delete (window as any).IntersectionObserver;
+});
 
-  test('should handle visibility prop changes without crashing', () => {
-    const { rerender } = setup({ isComponentVisible: true });
+test('visibility handling for intersection observers should handle visibility prop changes without crashing', () => {
+  const { rerender } = setup({ isComponentVisible: true });
 
-    expect(setup).not.toThrow();
+  expect(setup).not.toThrow();
 
-    expect(() => {
-      rerender(<Row {...props} isComponentVisible={false} />);
-    }).not.toThrow();
+  expect(() => {
+    rerender(<Row {...props} isComponentVisible={false} />);
+  }).not.toThrow();
 
-    expect(() => {
-      rerender(<Row {...props} isComponentVisible />);
-    }).not.toThrow();
-  });
+  expect(() => {
+    rerender(<Row {...props} isComponentVisible />);
+  }).not.toThrow();
+});
 
-  test('should create intersection observers when feature is enabled', () => {
-    setup({ isComponentVisible: true });
+test('visibility handling for intersection observers should create intersection observers when feature is enabled', () => {
+  setup({ isComponentVisible: true });
 
-    expect(mockIntersectionObserver).toHaveBeenCalledWith(
-      expect.any(Function),
-      expect.objectContaining({ rootMargin: expect.any(String) }),
-    );
-  });
+  expect(mockIntersectionObserver).toHaveBeenCalledWith(
+    expect.any(Function),
+    expect.objectContaining({ rootMargin: expect.any(String) }),
+  );
+});
 
-  test('should not create intersection observers when feature is disabled', () => {
-    const coreMock = jest.requireMock('@superset-ui/core');
-    coreMock.isFeatureEnabled.mockReturnValue(false);
+test('visibility handling for intersection observers should not create intersection observers when feature is disabled', () => {
+  const coreMock = jest.requireMock('@superset-ui/core');
+  coreMock.isFeatureEnabled.mockReturnValue(false);
 
-    jest.clearAllMocks();
-    setup({ isComponentVisible: true });
+  jest.clearAllMocks();
+  setup({ isComponentVisible: true });
 
-    expect(mockIntersectionObserver).not.toHaveBeenCalled();
+  expect(mockIntersectionObserver).not.toHaveBeenCalled();
 
-    coreMock.isFeatureEnabled.mockReturnValue(true);
-  });
+  coreMock.isFeatureEnabled.mockReturnValue(true);
+});
 
-  test('intersection observer callbacks handle entries without errors', () => {
-    const callback = ([entry]: [MockIntersectionObserverEntry]) => {
-      if (entry.isIntersecting) return true;
+test('visibility handling for intersection observers intersection observer callbacks handle entries without errors', () => {
+  const callback = ([entry]: [MockIntersectionObserverEntry]) => {
+    if (entry.isIntersecting) return true;
 
-      return false;
-    };
+    return false;
+  };
 
-    const intersectingEntry = { isIntersecting: true };
-    expect(() => callback([intersectingEntry])).not.toThrow();
-    expect(callback([intersectingEntry])).toBe(true);
+  const intersectingEntry = { isIntersecting: true };
+  expect(() => callback([intersectingEntry])).not.toThrow();
+  expect(callback([intersectingEntry])).toBe(true);
 
-    const nonIntersectingEntry = { isIntersecting: false };
-    expect(() => callback([nonIntersectingEntry])).not.toThrow();
-    expect(callback([nonIntersectingEntry])).toBe(false);
-  });
+  const nonIntersectingEntry = { isIntersecting: false };
+  expect(() => callback([nonIntersectingEntry])).not.toThrow();
+  expect(callback([nonIntersectingEntry])).toBe(false);
 });

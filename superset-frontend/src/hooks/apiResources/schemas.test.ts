@@ -52,182 +52,177 @@ const expectedResult3 = fakeApiResult3.result.map((value: string) => ({
   title: value,
 }));
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('useSchemas hook', () => {
-  beforeEach(() => {
-    fetchMock.clearHistory().removeRoutes();
-    store.dispatch(api.util.resetApiState());
+beforeEach(() => {
+  fetchMock.clearHistory().removeRoutes();
+  store.dispatch(api.util.resetApiState());
+});
+
+test('useSchemas hook returns api response mapping json result', async () => {
+  const expectDbId = 'db1';
+  const forceRefresh = false;
+  const schemaApiRoute = `glob:*/api/v1/database/${expectDbId}/schemas/*`;
+  fetchMock.get(schemaApiRoute, fakeApiResult);
+  const onSuccess = jest.fn();
+  const { result } = renderHook(
+    () =>
+      useSchemas({
+        dbId: expectDbId,
+        onSuccess,
+      }),
+    {
+      wrapper: createWrapper({
+        useRedux: true,
+        store,
+      }),
+    },
+  );
+  await waitFor(() =>
+    expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(1),
+  );
+  expect(result.current.data).toEqual(expectedResult);
+  expect(
+    fetchMock.callHistory.calls(
+      `end:/api/v1/database/${expectDbId}/schemas/?q=${rison.encode({
+        force: forceRefresh,
+      })}`,
+    ).length,
+  ).toBe(1);
+  expect(onSuccess).toHaveBeenCalledTimes(1);
+  act(() => {
+    result.current.refetch();
+  });
+  await waitFor(() =>
+    expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(2),
+  );
+  expect(
+    fetchMock.callHistory.calls(
+      `end:/api/v1/database/${expectDbId}/schemas/?q=${rison.encode({
+        force: true,
+      })}`,
+    ).length,
+  ).toBe(1);
+  expect(onSuccess).toHaveBeenCalledTimes(2);
+  expect(result.current.data).toEqual(expectedResult);
+});
+
+test('useSchemas hook returns cached data without api request', async () => {
+  const expectDbId = 'db1';
+  const schemaApiRoute = `glob:*/api/v1/database/${expectDbId}/schemas/*`;
+  fetchMock.get(schemaApiRoute, fakeApiResult);
+  const { result, rerender } = renderHook(
+    () =>
+      useSchemas({
+        dbId: expectDbId,
+      }),
+    {
+      wrapper: createWrapper({
+        useRedux: true,
+        store,
+      }),
+    },
+  );
+  await waitFor(() => expect(result.current.data).toEqual(expectedResult));
+  expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(1);
+  rerender();
+  await waitFor(() => expect(result.current.data).toEqual(expectedResult));
+  expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(1);
+});
+
+test('useSchemas hook returns refreshed data after expires', async () => {
+  const expectDbId = 'db1';
+  const schemaApiRoute = `glob:*/api/v1/database/*/schemas/*`;
+  fetchMock.get(schemaApiRoute, ({ url }) =>
+    url.includes(expectDbId) ? fakeApiResult : fakeApiResult2,
+  );
+  const onSuccess = jest.fn();
+  const { result, rerender } = renderHook(
+    ({ dbId }) =>
+      useSchemas({
+        dbId,
+        onSuccess,
+      }),
+    {
+      initialProps: { dbId: expectDbId },
+      wrapper: createWrapper({
+        useRedux: true,
+        store,
+      }),
+    },
+  );
+
+  await waitFor(() =>
+    expect(result.current.currentData).toEqual(expectedResult),
+  );
+  expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(1);
+  expect(onSuccess).toHaveBeenCalledTimes(1);
+
+  rerender({ dbId: 'db2' });
+  await waitFor(() =>
+    expect(result.current.currentData).toEqual(expectedResult2),
+  );
+  expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(2);
+  expect(onSuccess).toHaveBeenCalledTimes(2);
+
+  rerender({ dbId: expectDbId });
+  await waitFor(() =>
+    expect(result.current.currentData).toEqual(expectedResult),
+  );
+  expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(2);
+  expect(onSuccess).toHaveBeenCalledTimes(2);
+
+  // clean up cache
+  act(() => {
+    store.dispatch(api.util.invalidateTags(['Schemas']));
   });
 
-  test('returns api response mapping json result', async () => {
-    const expectDbId = 'db1';
-    const forceRefresh = false;
-    const schemaApiRoute = `glob:*/api/v1/database/${expectDbId}/schemas/*`;
-    fetchMock.get(schemaApiRoute, fakeApiResult);
-    const onSuccess = jest.fn();
-    const { result } = renderHook(
-      () =>
-        useSchemas({
-          dbId: expectDbId,
-          onSuccess,
-        }),
-      {
-        wrapper: createWrapper({
-          useRedux: true,
-          store,
-        }),
-      },
-    );
-    await waitFor(() =>
-      expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(1),
-    );
-    expect(result.current.data).toEqual(expectedResult);
-    expect(
-      fetchMock.callHistory.calls(
-        `end:/api/v1/database/${expectDbId}/schemas/?q=${rison.encode({
-          force: forceRefresh,
-        })}`,
-      ).length,
-    ).toBe(1);
-    expect(onSuccess).toHaveBeenCalledTimes(1);
-    act(() => {
-      result.current.refetch();
-    });
-    await waitFor(() =>
-      expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(2),
-    );
-    expect(
-      fetchMock.callHistory.calls(
-        `end:/api/v1/database/${expectDbId}/schemas/?q=${rison.encode({
-          force: true,
-        })}`,
-      ).length,
-    ).toBe(1);
-    expect(onSuccess).toHaveBeenCalledTimes(2);
-    expect(result.current.data).toEqual(expectedResult);
-  });
+  await waitFor(() =>
+    expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(4),
+  );
+  expect(fetchMock.callHistory.calls(schemaApiRoute)[2].url).toContain(
+    expectDbId,
+  );
+  await waitFor(() =>
+    expect(result.current.currentData).toEqual(expectedResult),
+  );
+});
 
-  test('returns cached data without api request', async () => {
-    const expectDbId = 'db1';
-    const schemaApiRoute = `glob:*/api/v1/database/${expectDbId}/schemas/*`;
-    fetchMock.get(schemaApiRoute, fakeApiResult);
-    const { result, rerender } = renderHook(
-      () =>
-        useSchemas({
-          dbId: expectDbId,
-        }),
-      {
-        wrapper: createWrapper({
-          useRedux: true,
-          store,
-        }),
-      },
-    );
-    await waitFor(() => expect(result.current.data).toEqual(expectedResult));
-    expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(1);
-    rerender();
-    await waitFor(() => expect(result.current.data).toEqual(expectedResult));
-    expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(1);
-  });
+test('useSchemas hook returns correct schema list by a catalog', async () => {
+  const dbId = '1';
+  const expectCatalog = 'catalog3';
+  const schemaApiRoute = `glob:*/api/v1/database/*/schemas/*`;
+  fetchMock.get(schemaApiRoute, ({ url }) =>
+    url.includes(`catalog:${expectCatalog}`) ? fakeApiResult3 : fakeApiResult2,
+  );
+  const onSuccess = jest.fn();
+  const { result, rerender } = renderHook(
+    ({ dbId, catalog }) =>
+      useSchemas({
+        dbId,
+        catalog,
+        onSuccess,
+      }),
+    {
+      initialProps: { dbId, catalog: expectCatalog },
+      wrapper: createWrapper({
+        useRedux: true,
+        store,
+      }),
+    },
+  );
 
-  test('returns refreshed data after expires', async () => {
-    const expectDbId = 'db1';
-    const schemaApiRoute = `glob:*/api/v1/database/*/schemas/*`;
-    fetchMock.get(schemaApiRoute, ({ url }) =>
-      url.includes(expectDbId) ? fakeApiResult : fakeApiResult2,
-    );
-    const onSuccess = jest.fn();
-    const { result, rerender } = renderHook(
-      ({ dbId }) =>
-        useSchemas({
-          dbId,
-          onSuccess,
-        }),
-      {
-        initialProps: { dbId: expectDbId },
-        wrapper: createWrapper({
-          useRedux: true,
-          store,
-        }),
-      },
-    );
+  await waitFor(() =>
+    expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(1),
+  );
+  expect(result.current.data).toEqual(expectedResult3);
+  expect(onSuccess).toHaveBeenCalledTimes(1);
 
-    await waitFor(() =>
-      expect(result.current.currentData).toEqual(expectedResult),
-    );
-    expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(1);
-    expect(onSuccess).toHaveBeenCalledTimes(1);
+  rerender({ dbId, catalog: 'catalog2' });
+  await waitFor(() =>
+    expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(2),
+  );
+  expect(result.current.data).toEqual(expectedResult2);
 
-    rerender({ dbId: 'db2' });
-    await waitFor(() =>
-      expect(result.current.currentData).toEqual(expectedResult2),
-    );
-    expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(2);
-    expect(onSuccess).toHaveBeenCalledTimes(2);
-
-    rerender({ dbId: expectDbId });
-    await waitFor(() =>
-      expect(result.current.currentData).toEqual(expectedResult),
-    );
-    expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(2);
-    expect(onSuccess).toHaveBeenCalledTimes(2);
-
-    // clean up cache
-    act(() => {
-      store.dispatch(api.util.invalidateTags(['Schemas']));
-    });
-
-    await waitFor(() =>
-      expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(4),
-    );
-    expect(fetchMock.callHistory.calls(schemaApiRoute)[2].url).toContain(
-      expectDbId,
-    );
-    await waitFor(() =>
-      expect(result.current.currentData).toEqual(expectedResult),
-    );
-  });
-
-  test('returns correct schema list by a catalog', async () => {
-    const dbId = '1';
-    const expectCatalog = 'catalog3';
-    const schemaApiRoute = `glob:*/api/v1/database/*/schemas/*`;
-    fetchMock.get(schemaApiRoute, ({ url }) =>
-      url.includes(`catalog:${expectCatalog}`)
-        ? fakeApiResult3
-        : fakeApiResult2,
-    );
-    const onSuccess = jest.fn();
-    const { result, rerender } = renderHook(
-      ({ dbId, catalog }) =>
-        useSchemas({
-          dbId,
-          catalog,
-          onSuccess,
-        }),
-      {
-        initialProps: { dbId, catalog: expectCatalog },
-        wrapper: createWrapper({
-          useRedux: true,
-          store,
-        }),
-      },
-    );
-
-    await waitFor(() =>
-      expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(1),
-    );
-    expect(result.current.data).toEqual(expectedResult3);
-    expect(onSuccess).toHaveBeenCalledTimes(1);
-
-    rerender({ dbId, catalog: 'catalog2' });
-    await waitFor(() =>
-      expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(2),
-    );
-    expect(result.current.data).toEqual(expectedResult2);
-
-    rerender({ dbId, catalog: expectCatalog });
-    expect(result.current.data).toEqual(expectedResult3);
-    expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(2);
-  });
+  rerender({ dbId, catalog: expectCatalog });
+  expect(result.current.data).toEqual(expectedResult3);
+  expect(fetchMock.callHistory.calls(schemaApiRoute).length).toBe(2);
 });

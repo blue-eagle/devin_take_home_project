@@ -169,172 +169,169 @@ const renderWithPermissions = async (
   return result;
 };
 
-// eslint-disable-next-line no-restricted-globals -- TODO: Migrate from describe blocks
-describe('DashboardList - Permission-based UI Tests', () => {
-  beforeEach(() => {
-    fetchMock.clearHistory().removeRoutes();
-    (
-      isFeatureEnabled as jest.MockedFunction<typeof isFeatureEnabled>
-    ).mockReset();
-  });
+beforeEach(() => {
+  fetchMock.clearHistory().removeRoutes();
+  (
+    isFeatureEnabled as jest.MockedFunction<typeof isFeatureEnabled>
+  ).mockReset();
+});
 
-  test('shows all UI elements for admin users with full permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN);
+test('DashboardList - Permission-based UI Tests shows all UI elements for admin users with full permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN);
 
-    await screen.findByTestId('dashboard-list-view');
+  await screen.findByTestId('dashboard-list-view');
 
-    // Verify admin controls are visible
+  // Verify admin controls are visible
+  expect(
+    screen.getByRole('button', { name: /dashboard/i }),
+  ).toBeInTheDocument();
+  expect(screen.getByTestId('import-button')).toBeInTheDocument();
+  expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
+
+  // Verify Actions column is visible
+  expect(screen.getByTitle('Actions')).toBeInTheDocument();
+
+  // Verify favorite stars are rendered
+  const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
+  expect(favoriteStars).toHaveLength(mockDashboards.length);
+});
+
+test('DashboardList - Permission-based UI Tests renders basic UI for anonymous users without permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.READ_ONLY, undefined);
+  await screen.findByTestId('dashboard-list-view');
+
+  // Verify basic structure renders
+  expect(screen.getByTestId('dashboard-list-view')).toBeInTheDocument();
+  expect(screen.getByText('Dashboards')).toBeInTheDocument();
+
+  // Verify view toggles are available (not permission-gated)
+  expect(screen.getByRole('img', { name: 'appstore' })).toBeInTheDocument();
+  expect(
+    screen.getByRole('img', { name: 'unordered-list' }),
+  ).toBeInTheDocument();
+
+  // Verify permission-gated elements are hidden
+  expect(
+    screen.queryByRole('button', { name: /dashboard/i }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
+});
+
+test('DashboardList - Permission-based UI Tests shows Actions column for users with admin permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN);
+  await screen.findByTestId('dashboard-list-view');
+
+  expect(screen.getByTitle('Actions')).toBeInTheDocument();
+
+  await waitFor(() => {
     expect(
-      screen.getByRole('button', { name: /dashboard/i }),
+      screen.getByText(mockDashboards[0].dashboard_title),
     ).toBeInTheDocument();
-    expect(screen.getByTestId('import-button')).toBeInTheDocument();
-    expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
-
-    // Verify Actions column is visible
-    expect(screen.getByTitle('Actions')).toBeInTheDocument();
-
-    // Verify favorite stars are rendered
-    const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
-    expect(favoriteStars).toHaveLength(mockDashboards.length);
   });
+});
 
-  test('renders basic UI for anonymous users without permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.READ_ONLY, undefined);
-    await screen.findByTestId('dashboard-list-view');
+test('DashboardList - Permission-based UI Tests hides Actions column for users with read-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.READ_ONLY);
+  await screen.findByTestId('dashboard-list-view');
 
-    // Verify basic structure renders
-    expect(screen.getByTestId('dashboard-list-view')).toBeInTheDocument();
-    expect(screen.getByText('Dashboards')).toBeInTheDocument();
+  expect(screen.queryByTitle('Actions')).not.toBeInTheDocument();
+  expect(screen.queryAllByLabelText('more')).toHaveLength(0);
+});
 
-    // Verify view toggles are available (not permission-gated)
-    expect(screen.getByRole('img', { name: 'appstore' })).toBeInTheDocument();
-    expect(
-      screen.getByRole('img', { name: 'unordered-list' }),
-    ).toBeInTheDocument();
+test('DashboardList - Permission-based UI Tests shows Actions column for users with export-only permissions', async () => {
+  // DashboardList shows Actions column when canExport is true
+  await renderWithPermissions(PERMISSIONS.EXPORT_ONLY);
+  await screen.findByTestId('dashboard-list-view');
 
-    // Verify permission-gated elements are hidden
-    expect(
-      screen.queryByRole('button', { name: /dashboard/i }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
-  });
+  expect(screen.getByTitle('Actions')).toBeInTheDocument();
+});
 
-  test('shows Actions column for users with admin permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN);
-    await screen.findByTestId('dashboard-list-view');
+test('DashboardList - Permission-based UI Tests shows Actions column for users with write-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
+  await screen.findByTestId('dashboard-list-view');
 
-    expect(screen.getByTitle('Actions')).toBeInTheDocument();
+  expect(screen.getByTitle('Actions')).toBeInTheDocument();
+});
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(mockDashboards[0].dashboard_title),
-      ).toBeInTheDocument();
-    });
-  });
+test('DashboardList - Permission-based UI Tests shows Tags column when TAGGING_SYSTEM feature flag is enabled', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN, 1, { tagging: true });
+  await screen.findByTestId('dashboard-list-view');
 
-  test('hides Actions column for users with read-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.READ_ONLY);
-    await screen.findByTestId('dashboard-list-view');
+  expect(screen.getByTitle('Tags')).toBeInTheDocument();
+});
 
-    expect(screen.queryByTitle('Actions')).not.toBeInTheDocument();
-    expect(screen.queryAllByLabelText('more')).toHaveLength(0);
-  });
+test('DashboardList - Permission-based UI Tests hides Tags column when TAGGING_SYSTEM feature flag is disabled', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN, 1, { tagging: false });
+  await screen.findByTestId('dashboard-list-view');
 
-  test('shows Actions column for users with export-only permissions', async () => {
-    // DashboardList shows Actions column when canExport is true
-    await renderWithPermissions(PERMISSIONS.EXPORT_ONLY);
-    await screen.findByTestId('dashboard-list-view');
+  expect(screen.queryByText('Tags')).not.toBeInTheDocument();
+});
 
-    expect(screen.getByTitle('Actions')).toBeInTheDocument();
-  });
+test('DashboardList - Permission-based UI Tests shows bulk select button for users with admin permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.ADMIN);
+  await screen.findByTestId('dashboard-list-view');
 
-  test('shows Actions column for users with write-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
-    await screen.findByTestId('dashboard-list-view');
+  expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
+});
 
-    expect(screen.getByTitle('Actions')).toBeInTheDocument();
-  });
+test('DashboardList - Permission-based UI Tests shows bulk select button for users with export-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.EXPORT_ONLY);
+  await screen.findByTestId('dashboard-list-view');
 
-  test('shows Tags column when TAGGING_SYSTEM feature flag is enabled', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN, 1, { tagging: true });
-    await screen.findByTestId('dashboard-list-view');
+  expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
+});
 
-    expect(screen.getByTitle('Tags')).toBeInTheDocument();
-  });
+test('DashboardList - Permission-based UI Tests shows bulk select button for users with write-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
+  await screen.findByTestId('dashboard-list-view');
 
-  test('hides Tags column when TAGGING_SYSTEM feature flag is disabled', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN, 1, { tagging: false });
-    await screen.findByTestId('dashboard-list-view');
+  expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
+});
 
-    expect(screen.queryByText('Tags')).not.toBeInTheDocument();
-  });
+test('DashboardList - Permission-based UI Tests hides bulk select button for users with read-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.READ_ONLY);
+  await screen.findByTestId('dashboard-list-view');
 
-  test('shows bulk select button for users with admin permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.ADMIN);
-    await screen.findByTestId('dashboard-list-view');
+  expect(screen.queryByTestId('bulk-select')).not.toBeInTheDocument();
+});
 
-    expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
-  });
+test('DashboardList - Permission-based UI Tests shows Create and Import buttons for users with write permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
+  await screen.findByTestId('dashboard-list-view');
 
-  test('shows bulk select button for users with export-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.EXPORT_ONLY);
-    await screen.findByTestId('dashboard-list-view');
+  expect(
+    screen.getByRole('button', { name: /dashboard/i }),
+  ).toBeInTheDocument();
+  expect(screen.getByTestId('import-button')).toBeInTheDocument();
+});
 
-    expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
-  });
+test('DashboardList - Permission-based UI Tests hides Create and Import buttons for users with read-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.READ_ONLY);
+  await screen.findByTestId('dashboard-list-view');
 
-  test('shows bulk select button for users with write-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
-    await screen.findByTestId('dashboard-list-view');
+  expect(
+    screen.queryByRole('button', { name: /dashboard/i }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
+});
 
-    expect(screen.getByTestId('bulk-select')).toBeInTheDocument();
-  });
+test('DashboardList - Permission-based UI Tests hides Create and Import buttons for users with export-only permissions', async () => {
+  await renderWithPermissions(PERMISSIONS.EXPORT_ONLY);
+  await screen.findByTestId('dashboard-list-view');
 
-  test('hides bulk select button for users with read-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.READ_ONLY);
-    await screen.findByTestId('dashboard-list-view');
+  expect(
+    screen.queryByRole('button', { name: /dashboard/i }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
+});
 
-    expect(screen.queryByTestId('bulk-select')).not.toBeInTheDocument();
-  });
+test('DashboardList - Permission-based UI Tests renders favorite stars even for anonymous user', async () => {
+  // Current behavior: Component renders favorites regardless of userId
+  // (matches ChartList behavior — antd hidden column + Cell guard
+  // do not prevent rendering in JSDOM)
+  await renderWithPermissions(PERMISSIONS.READ_ONLY, undefined);
+  await screen.findByTestId('dashboard-list-view');
 
-  test('shows Create and Import buttons for users with write permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.WRITE_ONLY);
-    await screen.findByTestId('dashboard-list-view');
-
-    expect(
-      screen.getByRole('button', { name: /dashboard/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('import-button')).toBeInTheDocument();
-  });
-
-  test('hides Create and Import buttons for users with read-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.READ_ONLY);
-    await screen.findByTestId('dashboard-list-view');
-
-    expect(
-      screen.queryByRole('button', { name: /dashboard/i }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
-  });
-
-  test('hides Create and Import buttons for users with export-only permissions', async () => {
-    await renderWithPermissions(PERMISSIONS.EXPORT_ONLY);
-    await screen.findByTestId('dashboard-list-view');
-
-    expect(
-      screen.queryByRole('button', { name: /dashboard/i }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('import-button')).not.toBeInTheDocument();
-  });
-
-  test('renders favorite stars even for anonymous user', async () => {
-    // Current behavior: Component renders favorites regardless of userId
-    // (matches ChartList behavior — antd hidden column + Cell guard
-    // do not prevent rendering in JSDOM)
-    await renderWithPermissions(PERMISSIONS.READ_ONLY, undefined);
-    await screen.findByTestId('dashboard-list-view');
-
-    const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
-    expect(favoriteStars).toHaveLength(mockDashboards.length);
-  });
+  const favoriteStars = screen.getAllByTestId('fave-unfave-icon');
+  expect(favoriteStars).toHaveLength(mockDashboards.length);
 });
