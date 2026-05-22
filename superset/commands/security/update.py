@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class UpdateRLSRuleCommand(BaseCommand):
-    def __init__(self, model_id: int, data: dict[str, Any]):
+    def __init__(self, model_id: int, data: dict[str, Any]) -> None:
         self._model_id = model_id
         self._properties = data.copy()
         self._tables = self._properties.get("tables", [])
@@ -40,7 +40,7 @@ class UpdateRLSRuleCommand(BaseCommand):
         self._model: Optional[RowLevelSecurityFilter] = None
 
     @transaction()
-    def run(self) -> Any:
+    def run(self) -> RowLevelSecurityFilter:
         self.validate()
         assert self._model
         return RLSDAO.update(self._model, self._properties)

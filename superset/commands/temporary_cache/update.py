@@ -31,7 +31,7 @@ class UpdateTemporaryCacheCommand(BaseCommand, ABC):
     def __init__(
         self,
         cmd_params: CommandParameters,
-    ):
+    ) -> None:
         self._parameters = cmd_params
 
     @transaction(on_error=partial(on_error, reraise=TemporaryCacheUpdateFailedError))

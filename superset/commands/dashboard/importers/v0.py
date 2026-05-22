@@ -325,7 +325,7 @@ class ImportDashboardsCommand(BaseCommand):
     # pylint: disable=unused-argument
     def __init__(
         self, contents: dict[str, str], database_id: Optional[int] = None, **kwargs: Any
-    ):
+    ) -> None:
         self.contents = contents
         self.database_id = database_id
 

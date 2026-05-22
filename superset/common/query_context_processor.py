@@ -72,7 +72,7 @@ class QueryContextProcessor:
     _query_context: QueryContext
     _qc_datasource: Explorable
 
-    def __init__(self, query_context: QueryContext):
+    def __init__(self, query_context: QueryContext) -> None:
         self._query_context = query_context
         self._qc_datasource = query_context.datasource
 

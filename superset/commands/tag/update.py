@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class UpdateTagCommand(UpdateMixin, BaseCommand):
-    def __init__(self, model_id: int, data: dict[str, Any]):
+    def __init__(self, model_id: int, data: dict[str, Any]) -> None:
         self._model_id = model_id
         self._properties = data.copy()
         self._model: Optional[Tag] = None

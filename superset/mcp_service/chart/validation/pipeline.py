@@ -53,7 +53,7 @@ class ValidationResult:
         request: GenerateChartRequest | None = None,
         error: ChartGenerationError | None = None,
         warnings: Dict[str, Any] | None = None,
-    ):
+    ) -> None:
         self.is_valid = is_valid
         self.request = request
         self.error = error

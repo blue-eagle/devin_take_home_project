@@ -47,7 +47,11 @@ class TaskPruneCommand(BaseCommand):
                                        up to this limit in this execution.
     """  # noqa: E501
 
-    def __init__(self, retention_period_days: int, max_rows_per_run: int | None = None):
+    def __init__(
+        self,
+        retention_period_days: int,
+        max_rows_per_run: int | None = None,
+    ) -> None:
         """
         :param retention_period_days: Number of days to keep in the tasks table
         :param max_rows_per_run: The maximum number of rows to delete in a single run.

@@ -68,7 +68,7 @@ class BaseStreamingCSVExportCommand(BaseCommand):
     - _get_row_limit(): Return optional row limit for the export
     """
 
-    def __init__(self, chunk_size: int = 1000):
+    def __init__(self, chunk_size: int = 1000) -> None:
         """
         Initialize the streaming export command.
 

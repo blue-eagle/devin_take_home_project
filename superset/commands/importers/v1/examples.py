@@ -113,7 +113,7 @@ class ImportExamplesCommand(ImportModelsCommand):
     }
     import_error = CommandException
 
-    def __init__(self, contents: dict[str, str], *args: Any, **kwargs: Any):
+    def __init__(self, contents: dict[str, str], *args: Any, **kwargs: Any) -> None:
         super().__init__(contents, *args, **kwargs)
         self.force_data = kwargs.get("force_data", False)
 

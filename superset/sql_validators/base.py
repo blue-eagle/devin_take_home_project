@@ -31,7 +31,7 @@ class SQLValidationAnnotation:  # pylint: disable=too-few-public-methods
         line_number: int | None,
         start_column: int | None,
         end_column: int | None,
-    ):
+    ) -> None:
         self.message = message
         self.line_number = line_number
         self.start_column = start_column

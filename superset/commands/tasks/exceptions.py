@@ -81,7 +81,7 @@ class TaskForbiddenError(ForbiddenError):
 class TaskPermissionDeniedError(ForbiddenError):
     """Task operation not permitted for current user."""
 
-    def __init__(self, message: str | None = None):
+    def __init__(self, message: str | None = None) -> None:
         super().__init__()
         if message:
             self.message = message

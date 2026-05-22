@@ -200,7 +200,7 @@ class AppRootMiddleware:
         self,
         wsgi_app: WSGIApplication,
         app_root: str,
-    ):
+    ) -> None:
         self.wsgi_app = wsgi_app
         self.app_root = app_root
 

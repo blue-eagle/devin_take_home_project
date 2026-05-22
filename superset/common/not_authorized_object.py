@@ -20,7 +20,7 @@ from superset.exceptions import SupersetException
 
 
 class NotAuthorizedObject:
-    def __init__(self, what_not_authorized: str):
+    def __init__(self, what_not_authorized: str) -> None:
         self._what_not_authorized = what_not_authorized
 
     def __getattr__(self, item: Any) -> None:

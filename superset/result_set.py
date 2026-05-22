@@ -137,7 +137,7 @@ class SupersetResultSet:
         data: DbapiResult,
         cursor_description: DbapiDescription,
         db_engine_spec: type[BaseEngineSpec],
-    ):
+    ) -> None:
         self.db_engine_spec = db_engine_spec
         data = data or []
         column_names: list[str] = []

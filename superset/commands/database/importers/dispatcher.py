@@ -38,7 +38,7 @@ class ImportDatabasesCommand(BaseCommand):
     until it finds one that matches.
     """
 
-    def __init__(self, contents: dict[str, str], *args: Any, **kwargs: Any):
+    def __init__(self, contents: dict[str, str], *args: Any, **kwargs: Any) -> None:
         self.contents = contents
         self.args = args
         self.kwargs = kwargs

@@ -50,7 +50,7 @@ stats_logger = app.config["STATS_LOGGER"]
 
 
 class CreateDatabaseCommand(BaseCommand):
-    def __init__(self, data: dict[str, Any]):
+    def __init__(self, data: dict[str, Any]) -> None:
         self._properties = data.copy()
 
     @transaction(on_error=partial(on_error, reraise=DatabaseCreateFailedError))

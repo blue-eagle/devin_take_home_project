@@ -253,7 +253,7 @@ class SupersetShillelaghAdapter(Adapter):
         uri: str,
         prefix: str | None = "superset",
         **kwargs: Any,
-    ):
+    ) -> None:
         if not feature_flag_manager.is_feature_enabled("ENABLE_SUPERSET_META_DB"):
             raise ProgrammingError("Superset meta database is disabled")
 

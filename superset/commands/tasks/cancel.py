@@ -62,7 +62,7 @@ class CancelTaskCommand(BaseCommand):
     we only fetch the task once, then validate permissions on the fetched data.
     """
 
-    def __init__(self, task_uuid: UUID, force: bool = False):
+    def __init__(self, task_uuid: UUID, force: bool = False) -> None:
         """
         Initialize the cancel command.
 

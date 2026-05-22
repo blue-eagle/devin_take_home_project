@@ -34,7 +34,7 @@ class ExportModelsCommand(BaseCommand):
     dao: type[BaseDAO[Model]] = BaseDAO
     not_found: type[CommandException] = CommandException
 
-    def __init__(self, model_ids: list[int], export_related: bool = True):
+    def __init__(self, model_ids: list[int], export_related: bool = True) -> None:
         self.model_ids = model_ids
         self.export_related = export_related
 

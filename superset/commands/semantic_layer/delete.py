@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 class DeleteSemanticLayerCommand(BaseCommand):
-    def __init__(self, uuid: str):
+    def __init__(self, uuid: str) -> None:
         self._uuid = uuid
         self._model: SemanticLayer | None = None
 
@@ -62,7 +62,7 @@ class DeleteSemanticLayerCommand(BaseCommand):
 
 
 class DeleteSemanticViewCommand(BaseCommand):
-    def __init__(self, pk: int):
+    def __init__(self, pk: int) -> None:
         self._pk = pk
         self._model: SemanticView | None = None
 
@@ -89,7 +89,7 @@ class DeleteSemanticViewCommand(BaseCommand):
 
 
 class BulkDeleteSemanticViewCommand(BaseCommand):
-    def __init__(self, model_ids: list[int]):
+    def __init__(self, model_ids: list[int]) -> None:
         self._model_ids = model_ids
         self._models: list[SemanticView] = []
 

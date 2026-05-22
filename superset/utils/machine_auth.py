@@ -47,7 +47,7 @@ class MachineAuthProvider:
             [WebDriver | BrowserContext, User], WebDriver | BrowserContext
         ]
         | None = None,
-    ):
+    ) -> None:
         # This is here in order to allow for the authenticate_webdriver
         # or authenticate_browser_context (if PLAYWRIGHT_REPORTS_AND_THUMBNAILS is
         # enabled) func to be overridden via config, as opposed to the entire

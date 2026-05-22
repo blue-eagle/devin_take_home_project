@@ -38,7 +38,7 @@ class OAuth2StoreTokenCommand(BaseCommand):
     Command to store OAuth2 tokens in the database.
     """
 
-    def __init__(self, parameters: OAuth2ProviderResponseSchema):
+    def __init__(self, parameters: OAuth2ProviderResponseSchema) -> None:
         self._parameters = parameters
         self._state: OAuth2State | None = None
         self._database: Database | None = None

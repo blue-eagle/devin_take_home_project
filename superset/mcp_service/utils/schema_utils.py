@@ -37,7 +37,9 @@ T = TypeVar("T")
 class JSONParseError(ValueError):
     """Raised when JSON parsing fails with helpful context."""
 
-    def __init__(self, value: Any, error: Exception, param_name: str = "parameter"):
+    def __init__(
+        self, value: Any, error: Exception, param_name: str = "parameter"
+    ) -> None:
         self.value = value
         self.original_error = error
         self.param_name = param_name

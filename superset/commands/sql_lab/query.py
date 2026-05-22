@@ -41,7 +41,7 @@ class QueryPruneCommand(BaseCommand):
                                      Records older than this period will be deleted.
     """  # noqa: E501
 
-    def __init__(self, retention_period_days: int):
+    def __init__(self, retention_period_days: int) -> None:
         """
         :param retention_period_days: Number of days to keep in the query table
         """

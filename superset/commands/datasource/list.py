@@ -21,7 +21,7 @@ from __future__ import annotations
 import logging
 from typing import Any, cast
 
-from sqlalchemy import union_all
+from sqlalchemy import Subquery, union_all
 
 from superset.commands.base import BaseCommand
 from superset.connectors.sqla.models import SqlaTable
@@ -121,7 +121,7 @@ class GetCombinedDatasourceListCommand(BaseCommand):
         sql_filter: bool | None,
         database_id: int | None,
         semantic_layer_uuid: str | None,
-    ) -> Any:
+    ) -> Subquery:
         ds_q = DatasourceDAO.build_dataset_query(name_filter, sql_filter, database_id)
         sv_q = DatasourceDAO.build_semantic_view_query(name_filter, semantic_layer_uuid)
 

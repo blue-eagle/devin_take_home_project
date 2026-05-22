@@ -51,7 +51,7 @@ class ImportModelsCommand(BaseCommand):
     import_error = CommandException
 
     # pylint: disable=unused-argument
-    def __init__(self, contents: dict[str, str], *args: Any, **kwargs: Any):
+    def __init__(self, contents: dict[str, str], *args: Any, **kwargs: Any) -> None:
         self.contents = contents
         self.passwords: dict[str, str] = kwargs.get("passwords") or {}
         self.ssh_tunnel_passwords: dict[str, str] = (

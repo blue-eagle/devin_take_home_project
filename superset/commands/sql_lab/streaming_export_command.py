@@ -45,7 +45,7 @@ class StreamingSqlResultExportCommand(BaseStreamingCSVExportCommand):
         self,
         client_id: str,
         chunk_size: int = 1000,
-    ):
+    ) -> None:
         """
         Initialize the SQL Lab streaming export command.
 

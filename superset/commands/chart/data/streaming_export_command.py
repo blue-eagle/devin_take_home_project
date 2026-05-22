@@ -40,7 +40,7 @@ class StreamingCSVExportCommand(BaseStreamingCSVExportCommand):
         self,
         query_context: QueryContext,
         chunk_size: int = 1000,
-    ):
+    ) -> None:
         """
         Initialize the chart streaming export command.
 

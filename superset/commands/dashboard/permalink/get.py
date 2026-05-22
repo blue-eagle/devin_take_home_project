@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 class GetDashboardPermalinkCommand(BaseDashboardPermalinkCommand):
-    def __init__(self, key: str):
+    def __init__(self, key: str) -> None:
         self.key = key
 
     def run(self) -> Optional[DashboardPermalinkValue]:

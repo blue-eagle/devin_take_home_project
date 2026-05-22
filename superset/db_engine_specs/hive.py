@@ -570,7 +570,7 @@ class HiveEngineSpec(PrestoEngineSpec):
         query: str,
         database: Database,
         async_: bool = False,
-    ):  # pylint: disable=arguments-differ
+    ) -> None:  # pylint: disable=arguments-differ
         kwargs = {"async": async_}
         cursor.execute(query, **kwargs)
 

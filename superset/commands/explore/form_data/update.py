@@ -42,7 +42,7 @@ class UpdateFormDataCommand(BaseCommand, ABC):
     def __init__(
         self,
         cmd_params: CommandParameters,
-    ):
+    ) -> None:
         self._cmd_params = cmd_params
 
     def run(self) -> Optional[str]:

@@ -46,7 +46,7 @@ class TablesDatabaseCommand(BaseCommand):
         catalog_name: str | None,
         schema_name: str | None,
         force: bool,
-    ):
+    ) -> None:
         self._db_id = db_id
         self._catalog_name = catalog_name
         self._schema_name = schema_name
