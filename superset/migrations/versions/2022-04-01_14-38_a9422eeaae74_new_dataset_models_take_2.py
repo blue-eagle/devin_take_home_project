@@ -872,7 +872,7 @@ def postprocess_columns(session: Session) -> None:  # noqa: C901
     print("   Assign table column relations...")
     insert_from_select(
         table_column_association_table,
-        select([NewColumn.table_id, NewColumn.id.label("column_id")])
+        select(NewColumn.table_id, NewColumn.id.label("column_id"))
         .select_from(NewColumn)
         .where(and_(NewColumn.is_physical, NewColumn.table_id.isnot(None))),
     )

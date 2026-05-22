@@ -2561,15 +2561,15 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
     ) -> Select:
         """Build validation query based on expression type. Raises on error."""
         if expression_type == SqlExpressionType.COLUMN:
-            return sa.select([sa.literal_column(expression).label("test_col")])
+            return sa.select(sa.literal_column(expression).label("test_col"))
         elif expression_type == SqlExpressionType.METRIC:
-            return sa.select([sa.literal_column(expression).label("test_metric")])
+            return sa.select(sa.literal_column(expression).label("test_metric"))
         elif expression_type == SqlExpressionType.WHERE:
-            return sa.select([sa.literal(1)]).where(sa.text(expression))
+            return sa.select(sa.literal(1)).where(sa.text(expression))
         elif expression_type == SqlExpressionType.HAVING:
             dummy_col = sa.literal("A").label("dummy")
             return (
-                sa.select([dummy_col])
+                sa.select(dummy_col)
                 .group_by(sa.text("dummy"))
                 .having(sa.text(expression))
             )
@@ -3507,7 +3507,7 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
                 )
             label = "rowcount"
             col = self.make_sqla_column_compatible(literal_column("COUNT(*)"), label)
-            qry = sa.select([col]).select_from(qry.alias("rowcount_qry"))
+            qry = sa.select(col).select_from(qry.alias("rowcount_qry"))
             labels_expected = [label]
 
         filter_columns = [flt.get("col") for flt in filter] if filter else []
