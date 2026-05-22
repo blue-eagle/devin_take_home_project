@@ -21,7 +21,6 @@ import { t } from '@apache-superset/core/translation';
 import type { editors } from '@apache-superset/core';
 import { logging } from '@apache-superset/core/utils';
 import { SupersetClient } from '@superset-ui/core';
-import { logging } from '@apache-superset/core/utils';
 import { styled } from '@apache-superset/core/theme';
 import { Button, Icons, Tooltip, Flex } from '@superset-ui/core/components';
 import { EditorHost } from 'src/core/editors';

@@ -37,7 +37,6 @@ import {
   SupersetClient,
   getClientErrorObject,
 } from '@superset-ui/core';
-import { logging } from '@apache-superset/core/utils';
 
 import withToasts from 'src/components/MessageToasts/withToasts';
 import {

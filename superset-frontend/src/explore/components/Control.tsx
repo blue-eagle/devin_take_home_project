@@ -25,7 +25,6 @@ import {
 import { JsonValue, QueryFormData, usePrevious } from '@superset-ui/core';
 import { logging } from '@apache-superset/core/utils';
 import { styled } from '@apache-superset/core/theme';
-import { logging } from '@apache-superset/core/utils';
 import { ErrorBoundary } from 'src/components';
 import { ExploreActions } from 'src/explore/actions/exploreActions';
 import controlMap from './controls';

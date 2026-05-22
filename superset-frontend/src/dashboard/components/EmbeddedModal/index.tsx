@@ -24,7 +24,6 @@ import {
   SupersetApiError,
   getExtensionsRegistry,
 } from '@superset-ui/core';
-import { logging } from '@apache-superset/core/utils';
 import { Alert } from '@apache-superset/core/components';
 import { styled, css } from '@apache-superset/core/theme';
 import {

@@ -18,8 +18,6 @@
  */
 import { logging } from '@apache-superset/core/utils';
 
-import { logging } from '@apache-superset/core/utils';
-
 /**
  * Interface for table columns dataset
  */
