@@ -23,7 +23,7 @@
  * E.g. import { Select } from '@superset-ui/core/components', probably in the future from '@superset-ui/components'
  */
 export * from './Input';
-export { AntdThemeProvider } from './AntdThemeProvider';
+export { AntdThemeProvider, antdTheme } from './AntdThemeProvider';
 export {
   ConfirmStatusChange,
   type ConfirmStatusChangeProps,
@@ -154,6 +154,9 @@ export { default as ProgressBar, type ProgressBarProps } from './ProgressBar';
 export { Pagination, type PaginationProps } from './Pagination';
 
 export { Skeleton, type SkeletonProps } from './Skeleton';
+export { Spin } from './Spin';
+export { Splitter, type SplitterProps } from './Splitter';
+export { Descriptions, type DescriptionsProps } from './Descriptions';
 export {
   default as Slider,
   type SliderSingleProps,
@@ -198,6 +201,11 @@ export * from './TelemetryPixel';
 export * from './UnsavedChangesModal';
 export * from './constants';
 export * from './Result';
+export {
+  TimePicker,
+  type TimePickerProps,
+  type TimeRangePickerProps,
+} from './TimePicker';
 export {
   ThemedAgGridReact,
   type ThemedAgGridReactProps,

@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { Splitter } from 'antd';
-export type { SplitterProps } from 'antd/es/splitter';
+export { Splitter, type SplitterProps } from '@superset-ui/core/components';

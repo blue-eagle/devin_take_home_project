@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { theme as antdThemeImport } from 'antd';
+import { antdTheme as antdThemeImport } from '@superset-ui/core/components';
 import {} from '@superset-ui/core';
 import {
   type AnyThemeConfig,
