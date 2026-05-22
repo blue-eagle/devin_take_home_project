@@ -28,6 +28,7 @@ import { useJsonValidation } from '@superset-ui/core/components/AsyncAceEditor';
 import { type TagType } from 'src/components';
 import rison from 'rison';
 import { t } from '@apache-superset/core/translation';
+import { logging } from '@apache-superset/core/utils';
 import {
   ensureIsArray,
   isFeatureEnabled,
@@ -417,7 +418,7 @@ const PropertiesModal = ({
         onHide();
         addSuccessToast(t('Dashboard properties updated'));
       } catch (error) {
-        console.error('Apply failed:', error);
+        logging.error('Apply failed:', error);
       } finally {
         setIsApplying(false);
       }

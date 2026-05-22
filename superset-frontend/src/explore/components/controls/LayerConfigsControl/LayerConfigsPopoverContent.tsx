@@ -18,6 +18,7 @@
  */
 import { t } from '@apache-superset/core/translation';
 import { JsonValue } from '@superset-ui/core';
+import { logging } from '@apache-superset/core/utils';
 import { css, styled, useTheme } from '@apache-superset/core/theme';
 // eslint-disable-next-line no-restricted-imports
 import { Button } from '@superset-ui/core/components/Button';
@@ -324,7 +325,7 @@ export const LayerConfigsPopoverContent: FC<
         });
         setGeoStylerData(gsData);
       } catch {
-        console.warn('Could not read geostyler data');
+        logging.warn('Could not read geostyler data');
         setGeoStylerData(undefined);
       }
     };

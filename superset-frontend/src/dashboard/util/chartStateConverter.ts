@@ -22,6 +22,7 @@ import type {
   BackendOwnState,
   JsonObject,
 } from '@superset-ui/core';
+import { logging } from '@apache-superset/core/utils';
 
 /**
  * Registry of chart-specific state converters.
@@ -54,7 +55,7 @@ class ChartStateConverterRegistry {
       return converter(chartState);
     } catch (error) {
       // Log error but don't throw - graceful degradation
-      console.warn(
+      logging.warn(
         `Error converting chart state for viz type "${vizType}":`,
         error,
       );

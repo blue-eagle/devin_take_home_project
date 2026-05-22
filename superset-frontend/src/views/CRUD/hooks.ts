@@ -19,6 +19,7 @@
 import rison from 'rison';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { t } from '@apache-superset/core/translation';
+import { logging } from '@apache-superset/core/utils';
 import {
   makeApi,
   SupersetClient,
@@ -892,7 +893,7 @@ export function useDatabaseValidation() {
           });
         }
 
-        console.error('Unexpected error during validation:', error);
+        logging.error('Unexpected error during validation:', error);
         setIsValidating(false);
         setHasValidated(true);
         return {};

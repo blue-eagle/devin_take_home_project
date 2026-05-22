@@ -17,6 +17,7 @@
  * under the License.
  */
 import { JsonObject } from '@superset-ui/core';
+import { logging } from '@apache-superset/core/utils';
 
 type TestWithIdType<T> = T extends string ? string : { 'data-test': string };
 
@@ -37,7 +38,7 @@ export const testWithId =
       return (resultIdOnly ? id : { 'data-test': id }) as TestWithIdType<T>;
     }
     if (!id && !prefix) {
-      console.warn('testWithId function has missed "prefix" and "id" params');
+      logging.warn('testWithId function has missed "prefix" and "id" params');
       return (resultIdOnly ? '' : { 'data-test': '' }) as TestWithIdType<T>;
     }
     const newId = `${prefix}__${id}`;

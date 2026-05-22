@@ -29,6 +29,7 @@ import {
   getClientErrorObject,
 } from '@superset-ui/core';
 import { t } from '@apache-superset/core/translation';
+import { logging } from '@apache-superset/core/utils';
 import { invert, mapKeys } from 'lodash';
 
 import { now } from '@superset-ui/core/utils/dates';
@@ -1131,8 +1132,7 @@ export function updateSavedQuery(
       })
       .catch(e => {
         const message = t('Your query could not be updated');
-        // eslint-disable-next-line no-console
-        console.error(message, e);
+        logging.error(message, e);
         dispatch(addDangerToast(message));
       })
       .then(() => {

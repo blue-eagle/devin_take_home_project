@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom';
 import { useQueryParams, BooleanParam } from 'use-query-params';
 import { isEmpty } from 'lodash';
 import { t } from '@apache-superset/core/translation';
+import { logging } from '@apache-superset/core/utils';
 import {
   SupersetClient,
   getExtensionsRegistry,
@@ -354,7 +355,7 @@ const RightMenu = ({
       window.localStorage.removeItem('redux');
       window.sessionStorage.removeItem('login_attempted');
     } catch (error) {
-      console.warn('Failed to clear storage on logout:', error);
+      logging.warn('Failed to clear storage on logout:', error);
     }
   };
 

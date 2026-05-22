@@ -18,6 +18,7 @@
  */
 
 import type { editors } from '@apache-superset/core';
+import { logging } from '@apache-superset/core/utils';
 import { Disposable } from '../models';
 
 type EditorLanguage = editors.EditorLanguage;
@@ -59,8 +60,7 @@ class EventEmitter<T> {
       try {
         listener(data);
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error in event listener:', error);
+        logging.error('Error in event listener:', error);
       }
     });
   }
@@ -125,8 +125,7 @@ class EditorProviders {
 
     // Check if provider with this ID already exists
     if (this.providers.has(id)) {
-      // eslint-disable-next-line no-console
-      console.warn(`Editor provider with id "${id}" is already registered.`);
+      logging.warn(`Editor provider with id "${id}" is already registered.`);
       return new Disposable(() => {});
     }
 

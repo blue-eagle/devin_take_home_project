@@ -18,6 +18,7 @@
  */
 import { useState, useCallback, ReactNode } from 'react';
 import { ConfirmModal } from '@superset-ui/core/components';
+import { logging } from '@apache-superset/core/utils';
 
 export interface ConfirmConfig {
   title: string;
@@ -51,9 +52,7 @@ export const useConfirmModal = () => {
       await config.onConfirm();
       setConfig(null);
     } catch (error) {
-      // Let the error propagate but keep modal open
-      // eslint-disable-next-line no-console
-      console.error('Confirm action failed:', error);
+      logging.error('Confirm action failed:', error);
     } finally {
       setLoading(false);
     }

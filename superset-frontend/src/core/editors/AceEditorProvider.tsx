@@ -25,6 +25,7 @@
  * extension provides a custom implementation.
  */
 
+import { logging } from '@apache-superset/core/utils';
 import {
   useRef,
   useEffect,
@@ -76,7 +77,7 @@ const getEditorComponent = (language: string) => {
     case 'javascript':
       return JSEditor;
     default:
-      console.warn(
+      logging.warn(
         `Unknown editor language "${language}", falling back to SQL editor`,
       );
       return FullSQLEditor;

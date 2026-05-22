@@ -19,6 +19,7 @@
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { t } from '@apache-superset/core/translation';
+import { logging } from '@apache-superset/core/utils';
 import { Loading } from '@superset-ui/core/components';
 import UploadDataModal from 'src/features/databases/UploadDataModel';
 import withToasts from 'src/components/MessageToasts/withToasts';
@@ -101,7 +102,7 @@ const FileHandler = ({ addDangerToast, addSuccessToast }: FileHandlerProps) => {
           setAllowedExtensions(extensions);
           setShowModal(true);
         } catch (error) {
-          console.error('Error handling file launch:', error);
+          logging.error('Error handling file launch:', error);
           addDangerToast(t('Failed to open file. Please try again.'));
           history.push('/superset/welcome/');
         }

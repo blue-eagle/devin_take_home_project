@@ -19,6 +19,7 @@
 import { useCallback, useState, useEffect, forwardRef } from 'react';
 import { t } from '@apache-superset/core/translation';
 import type { editors } from '@apache-superset/core';
+import { logging } from '@apache-superset/core/utils';
 import { SupersetClient } from '@superset-ui/core';
 import { styled } from '@apache-superset/core/theme';
 import { Button, Icons, Tooltip, Flex } from '@superset-ui/core/components';
@@ -164,7 +165,7 @@ const SQLEditorWithValidation = forwardRef<
           onValidationComplete?.(true);
         }
       } catch (error) {
-        console.error('Error validating expression:', error);
+        logging.error('Error validating expression:', error);
         const validationError = {
           message: t('Failed to validate expression. Please try again.'),
         };

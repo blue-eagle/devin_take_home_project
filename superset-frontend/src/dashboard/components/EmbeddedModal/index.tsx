@@ -18,6 +18,7 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { t } from '@apache-superset/core/translation';
+import { logging } from '@apache-superset/core/utils';
 import {
   makeApi,
   SupersetApiError,
@@ -88,7 +89,7 @@ export const DashboardEmbedControls = ({ dashboardId, onHide }: Props) => {
           addInfoToast(t('Changes saved.'));
         },
         err => {
-          console.error(err);
+          logging.error(err);
           addDangerToast(
             t(
               t('Sorry, something went wrong. The changes could not be saved.'),
@@ -117,7 +118,7 @@ export const DashboardEmbedControls = ({ dashboardId, onHide }: Props) => {
           onHide();
         },
         err => {
-          console.error(err);
+          logging.error(err);
           addDangerToast(
             t(
               'Sorry, something went wrong. Embedding could not be deactivated.',

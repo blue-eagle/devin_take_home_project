@@ -110,7 +110,7 @@ export const useDownloadScreenshot = (
                   fileName = parsed.parameters.filename;
                 }
               } catch (error) {
-                console.warn(
+                logging.warn(
                   'Failed to parse Content-Disposition header:',
                   error,
                 );
