@@ -16,7 +16,7 @@
 # under the License.
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import sqlalchemy as sa
 from superset_core.tasks.types import TaskStatus
@@ -70,7 +70,9 @@ class TaskPruneCommand(BaseCommand):
         from superset.models.tasks import Task
 
         select_stmt = sa.select(Task.id).where(
-            Task.ended_at < datetime.now() - timedelta(days=self.retention_period_days),
+            Task.ended_at
+            < datetime.now(tz=timezone.utc)
+            - timedelta(days=self.retention_period_days),
             Task.status.in_(
                 [
                     TaskStatus.SUCCESS.value,

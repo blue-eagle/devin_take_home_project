@@ -16,7 +16,7 @@
 # under the License.
 # pylint: disable=too-many-lines
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from typing import Any, cast, Optional
 from zipfile import is_zipfile, ZipFile
@@ -859,7 +859,7 @@ class ChartRestApi(BaseSupersetModelRestApi):
               $ref: '#/components/responses/500'
         """
         requested_ids = kwargs["rison"]
-        timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+        timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%S")
         root = f"chart_export_{timestamp}"
         filename = f"{root}.zip"
 

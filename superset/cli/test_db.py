@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import sys
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Callable
 
 import click
@@ -117,7 +117,7 @@ def test_datetime(console: Console, engine: Engine) -> None:
     md.create_all(engine)
     console.print("[green]Table created!")
 
-    now = datetime.now()
+    now = datetime.now(tz=timezone.utc)
 
     console.print("Inserting timestamp value...")
     insert_stmt = insert(table).values(ts=now)
@@ -138,7 +138,7 @@ def test_datetime(console: Console, engine: Engine) -> None:
     "raw_engine_kwargs",
     help="Connect args as JSON or YAML",
 )
-def test_db(sqlalchemy_uri: str, raw_engine_kwargs: str | None = None) -> None:
+def test_db(sqlalchemy_uri: str, raw_engine_kwargs: str | None = None) -> None:  # noqa: PT028
     """
     Run a series of tests against an analytical database.
 

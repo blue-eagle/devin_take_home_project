@@ -17,7 +17,7 @@
 # pylint: disable=too-many-lines
 import functools
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from typing import Any, Callable, cast
 from zipfile import is_zipfile, ZipFile
@@ -1235,7 +1235,7 @@ class DashboardRestApi(CustomTagsOptimizationMixin, BaseSupersetModelRestApi):
         """
         requested_ids = kwargs["rison"]
 
-        timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+        timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%S")
         root = f"dashboard_export_{timestamp}"
         filename = f"{root}.zip"
 

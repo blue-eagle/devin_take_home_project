@@ -14,7 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, LargeBinary, String
 from sqlalchemy.orm import relationship
@@ -42,4 +42,9 @@ class KeyValueEntry(CoreKeyValue, AuditMixinNullable, ImportExportMixin):
     changed_by = relationship(security_manager.user_model, foreign_keys=[changed_by_fk])
 
     def is_expired(self) -> bool:
-        return self.expires_on is not None and self.expires_on <= datetime.now()
+        if self.expires_on is None:
+            return False
+        expires_on = self.expires_on
+        if expires_on.tzinfo is None:
+            expires_on = expires_on.replace(tzinfo=timezone.utc)
+        return expires_on <= datetime.now(tz=timezone.utc)

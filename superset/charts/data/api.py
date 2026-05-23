@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import contextlib
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Callable, TYPE_CHECKING
 
 from flask import current_app as app, g, make_response, request, Response
@@ -717,7 +717,7 @@ class ChartDataRestApi(ChartRestApi):
 
         # Use filename from frontend if provided, otherwise generate one
         if not filename:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
             chart_name = "export"
 
             if form_data and form_data.get("slice_name"):

@@ -23,7 +23,7 @@ import textwrap
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, cast, Literal
 
 from flask import g, has_request_context, request
@@ -130,7 +130,7 @@ class AbstractEventLogger(ABC):
 
     def __enter__(self) -> None:
         # pylint: disable=W0201
-        self.start = datetime.now()
+        self.start = datetime.now(tz=timezone.utc)
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         # Log data w/ arguments being passed in
@@ -138,7 +138,7 @@ class AbstractEventLogger(ABC):
             action=self.action,
             object_ref=self.object_ref,
             log_to_statsd=self.log_to_statsd,
-            duration=datetime.now() - self.start,
+            duration=datetime.now(tz=timezone.utc) - self.start,
             **self.payload_override,
         )
 
@@ -263,10 +263,10 @@ class AbstractEventLogger(ABC):
         :param log_to_statsd: whether to update statsd counter for the action
         """
         payload_override = kwargs.copy()
-        start = datetime.now()
+        start = datetime.now(tz=timezone.utc)
         # yield a helper to add additional payload
         yield lambda **kwargs: payload_override.update(kwargs)
-        duration = datetime.now() - start
+        duration = datetime.now(tz=timezone.utc) - start
 
         # take the action from payload_override else take the function param action
         action_str = payload_override.pop("action", action)

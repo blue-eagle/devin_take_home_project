@@ -112,8 +112,12 @@ def get_oauth2_access_token(
     if token is None:
         return None
 
-    if token.access_token and datetime.now() < token.access_token_expiration:
-        return token.access_token
+    if token.access_token and token.access_token_expiration:
+        expiration = token.access_token_expiration
+        if expiration.tzinfo is None:
+            expiration = expiration.replace(tzinfo=timezone.utc)
+        if datetime.now(tz=timezone.utc) < expiration:
+            return token.access_token
 
     if token.refresh_token:
         return refresh_oauth2_token(config, database_id, user_id, db_engine_spec)
@@ -149,8 +153,12 @@ def refresh_oauth2_token(
         if token is None:
             return None
 
-        if token.access_token and datetime.now() < token.access_token_expiration:
-            return token.access_token
+        if token.access_token and token.access_token_expiration:
+            expiration = token.access_token_expiration
+            if expiration.tzinfo is None:
+                expiration = expiration.replace(tzinfo=timezone.utc)
+            if datetime.now(tz=timezone.utc) < expiration:
+                return token.access_token
 
         if not token.refresh_token:
             db.session.delete(token)
@@ -188,7 +196,7 @@ def refresh_oauth2_token(
             return None
 
         token.access_token = token_response["access_token"]
-        token.access_token_expiration = datetime.now() + timedelta(
+        token.access_token_expiration = datetime.now(tz=timezone.utc) + timedelta(
             seconds=token_response["expires_in"]
         )
         # Support single-use refresh tokens

@@ -66,7 +66,7 @@ Example usage:
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated, Any, Dict, List, Literal, TYPE_CHECKING
 
 import humanize
@@ -131,7 +131,9 @@ class DashboardError(BaseModel):
         """Create a standardized DashboardError with timestamp."""
         from datetime import datetime
 
-        return cls(error=error, error_type=error_type, timestamp=datetime.now())
+        return cls(
+            error=error, error_type=error_type, timestamp=datetime.now(tz=timezone.utc)
+        )
 
 
 def serialize_tag_object(tag: Any) -> TagInfo | None:
@@ -901,7 +903,9 @@ def _humanize_timestamp(dt: datetime | None) -> str | None:
     """Convert a datetime to a humanized string like '2 hours ago'."""
     if dt is None:
         return None
-    return humanize.naturaltime(datetime.now() - dt)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return humanize.naturaltime(datetime.now(tz=timezone.utc) - dt)
 
 
 def serialize_dashboard_object(dashboard: Any) -> DashboardInfo:

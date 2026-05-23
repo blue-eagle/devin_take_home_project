@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from typing import Any
 from zipfile import is_zipfile, ZipFile
@@ -283,7 +283,7 @@ class SavedQueryRestApi(BaseSupersetModelRestApi):
               $ref: '#/components/responses/500'
         """
         requested_ids = kwargs["rison"]
-        timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+        timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%S")
         root = f"saved_query_export_{timestamp}"
         filename = f"{root}.zip"
 

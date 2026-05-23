@@ -21,7 +21,7 @@ import inspect
 import logging
 import re
 from collections.abc import Hashable
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, cast, Optional, TYPE_CHECKING
 
 import sqlalchemy as sqla
@@ -234,7 +234,7 @@ class Query(
     @property
     def name(self) -> str:
         """Name property"""
-        ts = datetime.now().isoformat()
+        ts = datetime.now(tz=timezone.utc).isoformat()
         ts = ts.replace("-", "").replace(":", "").split(".")[0]
         tab = self.tab_name.replace(" ", "_").lower() if self.tab_name else "notab"
         tab = re.sub(r"\W+", "", tab)
@@ -511,7 +511,7 @@ class SavedQuery(
 
     @property
     def pop_tab_link(self) -> Markup:
-        return Markup(
+        return Markup(  # noqa: S704
             f"""
             <a href="/sqllab?savedQueryId={self.id}">
                 <i class="fa fa-link"></i>
@@ -532,11 +532,17 @@ class SavedQuery(
 
     @property
     def last_run_humanized(self) -> str:
-        return naturaltime(datetime.now() - self.changed_on)
+        changed_on = self.changed_on
+        if changed_on.tzinfo is None:
+            changed_on = changed_on.replace(tzinfo=timezone.utc)
+        return naturaltime(datetime.now(tz=timezone.utc) - changed_on)
 
     @property
     def _last_run_delta_humanized(self) -> str:
-        return naturaltime(datetime.now() - self.changed_on)
+        changed_on = self.changed_on
+        if changed_on.tzinfo is None:
+            changed_on = changed_on.replace(tzinfo=timezone.utc)
+        return naturaltime(datetime.now(tz=timezone.utc) - changed_on)
 
     @renders("changed_on")
     def last_run_delta_humanized(self) -> str:

@@ -19,7 +19,7 @@
 
 import base64
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import cast
 
 import pytest
@@ -87,7 +87,7 @@ def test_get_oauth2_access_token_base_refresh(mocker: MockerFixture) -> None:
 
     # check that token was updated
     assert token.access_token == "new-token"  # noqa: S105
-    assert token.access_token_expiration == datetime(2024, 1, 2, 1)
+    assert token.access_token_expiration == datetime(2024, 1, 2, 1, tzinfo=timezone.utc)
     db.session.add.assert_called_with(token)
 
 
@@ -222,7 +222,7 @@ def test_refresh_oauth2_token_updates_refresh_token(
         refresh_oauth2_token(DUMMY_OAUTH2_CONFIG, 1, 1, db_engine_spec)
 
     assert token.access_token == "new-access-token"  # noqa: S105
-    assert token.access_token_expiration == datetime(2024, 1, 1, 1)
+    assert token.access_token_expiration == datetime(2024, 1, 1, 1, tzinfo=timezone.utc)
     assert token.refresh_token == "new-refresh-token"  # noqa: S105
     db.session.add.assert_called_with(token)
 

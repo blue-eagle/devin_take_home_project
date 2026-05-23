@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import base64
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from io import BytesIO
 from typing import cast, TYPE_CHECKING, TypedDict
@@ -89,7 +89,7 @@ class ScreenshotCachePayload:
         timestamp: str = "",
     ):
         self._image = image
-        self._timestamp = timestamp or datetime.now().isoformat()
+        self._timestamp = timestamp or datetime.now(tz=timezone.utc).isoformat()
         self.status = StatusValues.UPDATED if image else status
 
     @classmethod
@@ -110,7 +110,7 @@ class ScreenshotCachePayload:
         }
 
     def update_timestamp(self) -> None:
-        self._timestamp = datetime.now().isoformat()
+        self._timestamp = datetime.now(tz=timezone.utc).isoformat()
 
     def pending(self) -> None:
         self.update_timestamp()
@@ -146,18 +146,20 @@ class ScreenshotCachePayload:
 
     def is_error_cache_ttl_expired(self) -> bool:
         error_cache_ttl = app.config["THUMBNAIL_ERROR_CACHE_TTL"]
-        return (
-            datetime.now() - datetime.fromisoformat(self.get_timestamp())
-        ).total_seconds() > error_cache_ttl
+        ts = datetime.fromisoformat(self.get_timestamp())
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        return (datetime.now(tz=timezone.utc) - ts).total_seconds() > error_cache_ttl
 
     def is_computing_stale(self) -> bool:
         """Check if a COMPUTING status is stale (task likely failed or stuck)."""
         # Use the same TTL as error cache - if computing takes longer than this,
         # it's likely stuck and should be retried
         computing_ttl = app.config["THUMBNAIL_ERROR_CACHE_TTL"]
-        return (
-            datetime.now() - datetime.fromisoformat(self.get_timestamp())
-        ).total_seconds() >= computing_ttl
+        ts = datetime.fromisoformat(self.get_timestamp())
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        return (datetime.now(tz=timezone.utc) - ts).total_seconds() >= computing_ttl
 
     def should_trigger_task(self, force: bool = False) -> bool:
         return (

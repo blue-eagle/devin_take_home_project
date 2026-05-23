@@ -26,7 +26,7 @@ import logging
 import re
 import uuid
 from collections.abc import Hashable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import (
     Any,
     Callable,
@@ -610,7 +610,7 @@ class AuditMixinNullable(AuditMixin):
 
     @renders("changed_on")
     def changed_on_(self) -> Markup:
-        return Markup(f'<span class="no-wrap">{self.changed_on}</span>')
+        return Markup(f'<span class="no-wrap">{self.changed_on}</span>')  # noqa: S704
 
     @renders("changed_on")
     def changed_on_delta_humanized(self) -> str:
@@ -631,7 +631,9 @@ class AuditMixinNullable(AuditMixin):
 
     def _format_time_humanized(self, timestamp: datetime) -> str:
         locale = str(get_locale())
-        time_diff = datetime.now() - timestamp
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=timezone.utc)
+        time_diff = datetime.now(tz=timezone.utc) - timestamp
         # Skip activation for 'en' locale as it's humanize's default locale
         if locale == "en":
             return humanize.naturaltime(time_diff)
@@ -654,7 +656,7 @@ class AuditMixinNullable(AuditMixin):
 
     @renders("changed_on")
     def modified(self) -> Markup:
-        return Markup(f'<span class="no-wrap">{self.changed_on_humanized}</span>')
+        return Markup(f'<span class="no-wrap">{self.changed_on_humanized}</span>')  # noqa: S704
 
 
 class QueryResult:  # pylint: disable=too-few-public-methods
@@ -1153,7 +1155,7 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
         This method is the unified entry point for query execution across all
         datasource types (Query, SqlaTable, etc.).
         """
-        qry_start_dttm = datetime.now()
+        qry_start_dttm = datetime.now(tz=timezone.utc)
         query_str_ext = self.get_query_str_extended(query_obj)
         sql = query_str_ext.sql
         status = QueryStatus.SUCCESS
@@ -1215,7 +1217,7 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
             rejected_filter_columns=query_str_ext.rejected_filter_columns,
             status=status,
             df=df,
-            duration=datetime.now() - qry_start_dttm,
+            duration=datetime.now(tz=timezone.utc) - qry_start_dttm,
             query=sql,
             errors=errors,
             error_message=error_message,

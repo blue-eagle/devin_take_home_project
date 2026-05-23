@@ -14,7 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from zipfile import is_zipfile, ZipFile
 
@@ -73,7 +73,7 @@ class ImportExportRestApi(BaseSupersetApi):
             500:
               $ref: '#/components/responses/500'
         """
-        timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+        timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%S")
         root = f"assets_export_{timestamp}"
         filename = f"{root}.zip"
 

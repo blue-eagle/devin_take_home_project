@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import partial
 from typing import Any, Optional
 
@@ -67,7 +67,7 @@ class UpdateChartCommand(UpdateMixin, BaseCommand):
             update_tags(ObjectType.chart, self._model.id, self._model.tags, tags)
 
         if self._properties.get("query_context_generation") is None:
-            self._properties["last_saved_at"] = datetime.now()
+            self._properties["last_saved_at"] = datetime.now(tz=timezone.utc)
             self._properties["last_saved_by"] = g.user
 
         return ChartDAO.update(self._model, self._properties)

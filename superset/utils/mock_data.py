@@ -21,7 +21,7 @@ import random
 import string
 import sys
 from collections.abc import Iterator
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from typing import Any, Callable, cast, Optional, TypedDict
 from uuid import uuid4
 
@@ -122,14 +122,17 @@ def get_type_generator(  # pylint: disable=too-many-return-statements,too-many-b
             sqlalchemy.sql.sqltypes.DateTime,
         ),
     ):
-        return lambda: datetime.fromordinal(MINIMUM_DATE.toordinal()) + timedelta(
-            seconds=random.randrange(days_range * 86400)  # noqa: S311
+        return lambda: (
+            datetime.fromordinal(MINIMUM_DATE.toordinal())
+            + timedelta(
+                seconds=random.randrange(days_range * 86400)  # noqa: S311
+            )
         )
 
     if isinstance(sqltype, sqlalchemy.sql.sqltypes.Numeric):
         # since decimal is used in some models to store time, return a value that
         # is a reasonable timestamp
-        return lambda: decimal.Decimal(datetime.now().timestamp() * 1000)
+        return lambda: decimal.Decimal(datetime.now(tz=timezone.utc).timestamp() * 1000)
 
     if isinstance(sqltype, sqlalchemy.sql.sqltypes.JSON):
         return lambda: {

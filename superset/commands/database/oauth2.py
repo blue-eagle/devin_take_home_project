@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import partial
 from typing import cast
 from uuid import UUID
@@ -85,7 +85,9 @@ class OAuth2StoreTokenCommand(BaseCommand):
             DatabaseUserOAuth2TokensDAO.delete([existing])
 
         # store tokens
-        expiration = datetime.now() + timedelta(seconds=token_response["expires_in"])
+        expiration = datetime.now(tz=timezone.utc) + timedelta(
+            seconds=token_response["expires_in"]
+        )
         return DatabaseUserOAuth2TokensDAO.create(
             attributes={
                 "user_id": self._state["user_id"],

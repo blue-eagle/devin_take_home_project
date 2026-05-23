@@ -61,7 +61,7 @@ import hashlib
 import logging
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, TYPE_CHECKING
 
 from flask import current_app as app, g, has_app_context
@@ -940,7 +940,7 @@ class SQLExecutor:
         handle = AsyncQueryHandleType(
             query_id=query_id,
             status=QueryStatus.PENDING,
-            started_at=datetime.now(),
+            started_at=datetime.now(tz=timezone.utc),
         )
 
         # Create bound closures for handle methods
@@ -979,7 +979,7 @@ class SQLExecutor:
         handle = AsyncQueryHandleType(
             query_id=None,
             status=QueryStatus.SUCCESS,
-            started_at=datetime.now(),
+            started_at=datetime.now(tz=timezone.utc),
         )
 
         # Create closures that return the cached result

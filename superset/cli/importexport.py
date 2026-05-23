@@ -16,7 +16,7 @@
 # under the License.
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 from zipfile import is_zipfile, ZipFile
@@ -76,7 +76,7 @@ def export_dashboards(dashboard_file: Optional[str] = None) -> None:
     g.user = security_manager.find_user(username="admin")
 
     dashboard_ids = [id_ for (id_,) in db.session.query(Dashboard.id).all()]
-    timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+    timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%S")
     root = f"dashboard_export_{timestamp}"
     dashboard_file = dashboard_file or f"{root}.zip"
 
@@ -109,7 +109,7 @@ def export_datasources(datasource_file: Optional[str] = None) -> None:
     g.user = security_manager.find_user(username="admin")
 
     dataset_ids = [id_ for (id_,) in db.session.query(SqlaTable.id).all()]
-    timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+    timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%S")
     root = f"dataset_export_{timestamp}"
     datasource_file = datasource_file or f"{root}.zip"
 
